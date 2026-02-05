@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Socket Test</title>
+  </head>
+  <body>
+    <button id="sendBtn">Go to Location</button>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      const socket = io();
+
+      socket.on("connect", () => {
+        console.log("[html] connected:", socket.id);
+      });
+
+      document.getElementById("sendBtn").addEventListener("click", () => {
+        socket.emit("hi", "hi");
+      });
+    </script>
+  </body>
+</html>
