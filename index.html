@@ -33,6 +33,7 @@
         margin-bottom: 12px;
         text-align: center;
         border: 1px solid #b3d9ff;
+        display: none;
       }
 
       .project-name {
@@ -55,15 +56,6 @@
         border: 1px solid #ccc;
       }
 
-      #projectInput {
-        width: 100%;
-        padding: 12px;
-        font-size: 16px;
-        border-radius: 8px;
-        border: 1px solid #ccc;
-        margin-bottom: 8px;
-      }
-
       #pairBtn {
         padding: 12px 16px;
         font-size: 16px;
@@ -82,6 +74,7 @@
       .display-selector {
         margin-top: 12px;
         margin-bottom: 12px;
+        display: none;
       }
 
       #displaySelect {
@@ -102,6 +95,7 @@
         font-weight: 500;
         color: #007bff;
         border: 1px solid #b3d9ff;
+        display: none;
       }
 
       #amenities {
@@ -160,21 +154,13 @@
         color: #721c24;
         border: 1px solid #f5c6cb;
       }
-
-      .project-form {
-        display: none;
-      }
     </style>
   </head>
 
   <body>
     <div class="app">
-      <div id="projectInfo" class="project-info" style="display: none;">
+      <div id="projectInfo" class="project-info">
         Project: <span id="projectNameDisplay" class="project-name"></span>
-      </div>
-
-      <div id="projectForm" class="project-form">
-        <input id="projectInput" placeholder="Enter project name" />
       </div>
 
       <div class="pairing">
@@ -184,13 +170,13 @@
 
       <div id="status" class="status disconnected">Not Connected</div>
 
-      <div class="display-selector" style="display: none;">
+      <div class="display-selector">
         <select id="displaySelect">
           <option value="">Select a display to control...</option>
         </select>
       </div>
 
-      <div id="currentDisplay" class="current-display" style="display: none;">
+      <div id="currentDisplay" class="current-display">
         Controlling: <span id="displayName"></span>
       </div>
 
@@ -207,15 +193,11 @@
 
       const params = new URLSearchParams(window.location.search);
       const codeFromUrl = params.get("code");
-      const projectFromUrl = params.get("project");
       
       if (codeFromUrl) {
         document.getElementById("codeInput").value = codeFromUrl;
-      }
-      
-      if (projectFromUrl) {
-        document.getElementById("projectInput").value = projectFromUrl;
-        document.getElementById("projectForm").style.display = "block";
+        // When code is in URL, we don't know the project yet
+        // The server will figure it out when we pair
       }
 
       socket.on("connect", () => {
@@ -231,20 +213,8 @@
         const code = document.getElementById("codeInput").value.trim();
         if (!code) return;
         
-        // Get project name from input or use default
-        let project = document.getElementById("projectInput").value.trim();
-        if (!project) {
-          // If no project specified, ask for it
-          project = prompt("Please enter the project name:");
-          if (!project) {
-            alert("Project name is required to connect");
-            return;
-          }
-          document.getElementById("projectInput").value = project;
-          document.getElementById("projectForm").style.display = "block";
-        }
-        
-        socket.emit("pair_remote", { code, projectName: project });
+        // Send only the code - server will find which project it belongs to
+        socket.emit("pair_remote", { code });
       });
 
       socket.on("pair_success", ({ code, projectName: projName, displays, currentDisplay }) => {
@@ -272,20 +242,14 @@
       });
 
       socket.on("display_list_update", ({ displays }) => {
-        // Only update if the display list is for our current project
-        if (displays.length > 0 && displays[0].projectName === projectName) {
+        // Only update if we have a project and the display list is for our project
+        if (projectName && displays.length > 0 && displays[0].projectName === projectName) {
           availableDisplays = displays;
           updateDisplaySelector(displays, pairedCode);
         }
       });
 
       socket.on("display_state", ({ state, currentDisplay, currentDisplayCode, projectName: projName }) => {
-        // Only accept state updates for our current project
-        if (projName !== projectName) {
-          console.warn(`Received state update from different project: ${projName}, current: ${projectName}`);
-          return;
-        }
-        
         remoteUiState = state;
         if (currentDisplay) {
           document.getElementById("displayName").textContent = currentDisplay;
@@ -323,10 +287,8 @@
         const select = document.getElementById("displaySelect");
         select.innerHTML = '<option value="">Select a display to control...</option>';
         
-        // Filter displays for current project only
-        const projectDisplays = displays.filter(d => d.projectName === projectName);
-        
-        projectDisplays.forEach(display => {
+        // Filter displays for current project only (already filtered by server)
+        displays.forEach(display => {
           const option = document.createElement("option");
           option.value = display.code;
           option.textContent = `${display.displayName} ${display.isOccupied ? '(Occupied)' : '(Available)'}`;
@@ -336,15 +298,6 @@
           }
           select.appendChild(option);
         });
-        
-        // If no displays in current project (shouldn't happen)
-        if (projectDisplays.length === 0) {
-          const option = document.createElement("option");
-          option.value = "";
-          option.textContent = "No displays available in this project";
-          option.disabled = true;
-          select.appendChild(option);
-        }
       }
 
       document.getElementById("displaySelect").addEventListener("change", (e) => {

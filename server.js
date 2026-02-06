@@ -43,7 +43,7 @@ io.on("connection", (socket) => {
     // Register display
     projectMap.set(code, {
       socketId: socket.id,
-      remoteSocketId: null, // No remote connected yet
+      remoteSocketId: null,
       projectName,
       displayName,
       code,
@@ -54,7 +54,7 @@ io.on("connection", (socket) => {
     socket.join(`project:${projectName}`);
     console.log(`registered display: ${displayName} (${code}) for project: ${projectName}`);
 
-    // Send list of all displays for THIS PROJECT ONLY to all displays in this project
+    // Send list of all displays for THIS PROJECT ONLY
     const displays = Array.from(projectMap.values()).map(d => ({
       code: d.code,
       displayName: d.displayName,
@@ -66,40 +66,26 @@ io.on("connection", (socket) => {
     socket.emit("registered_display", { code, projectName });
   });
 
-  // Remote attempts to pair with a code
-  socket.on("pair_remote", ({ code, projectName }) => {
-    // First check if the display exists in the specified project
-    if (!projectDisplays.has(projectName)) {
-      socket.emit("pair_error", { message: "Project not found" });
-      return;
+  // Remote attempts to pair with a code (no project name needed)
+  socket.on("pair_remote", ({ code }) => {
+    // Find which project this display code belongs to
+    let targetDisplay = null;
+    let targetProject = null;
+    let targetProjectMap = null;
+
+    for (const [projectName, projectMap] of projectDisplays.entries()) {
+      if (projectMap.has(code)) {
+        targetDisplay = projectMap.get(code);
+        targetProject = projectName;
+        targetProjectMap = projectMap;
+        break;
+      }
     }
 
-    const projectMap = projectDisplays.get(projectName);
-    
-    if (!projectMap.has(code)) {
-      // Display not found in this project, check if code exists in any project
-      let codeExistsElsewhere = false;
-      let foundProject = null;
-      
-      for (const [projName, projMap] of projectDisplays.entries()) {
-        if (projMap.has(code)) {
-          codeExistsElsewhere = true;
-          foundProject = projName;
-          break;
-        }
-      }
-      
-      if (codeExistsElsewhere) {
-        socket.emit("pair_error", { 
-          message: `Display code belongs to project "${foundProject}", not "${projectName}"` 
-        });
-      } else {
-        socket.emit("pair_error", { message: "Invalid display code" });
-      }
+    if (!targetDisplay) {
+      socket.emit("pair_error", { message: "Invalid display code" });
       return;
     }
-
-    const targetDisplay = projectMap.get(code);
 
     // Check if display is already occupied
     if (targetDisplay.remoteSocketId) {
@@ -114,7 +100,7 @@ io.on("connection", (socket) => {
       if (oldProjectMap && oldProjectMap.has(currentPair.code)) {
         oldProjectMap.get(currentPair.code).remoteSocketId = null;
         
-        // Update display list for OLD PROJECT ONLY
+        // Update display list for OLD PROJECT
         const oldDisplays = Array.from(oldProjectMap.values()).map(d => ({
           code: d.code,
           displayName: d.displayName,
@@ -127,13 +113,13 @@ io.on("connection", (socket) => {
 
     // Establish new connection
     targetDisplay.remoteSocketId = socket.id;
-    remoteConnections.set(socket.id, { code, projectName });
+    remoteConnections.set(socket.id, { code, projectName: targetProject });
 
     socket.join(`pair:${code}`);
-    socket.join(`project:${projectName}`);
+    socket.join(`project:${targetProject}`);
     
     // Get all displays for THIS PROJECT ONLY
-    const displays = Array.from(projectMap.values()).map(d => ({
+    const displays = Array.from(targetProjectMap.values()).map(d => ({
       code: d.code,
       displayName: d.displayName,
       isOccupied: !!d.remoteSocketId,
@@ -142,17 +128,17 @@ io.on("connection", (socket) => {
 
     socket.emit("pair_success", { 
       code, 
-      projectName,
+      projectName: targetProject,
       displays,
       currentDisplay: targetDisplay.displayName
     });
 
     io.to(`pair:${code}`).emit("paired", { code });
     
-    // Update display list for ALL IN THIS PROJECT ONLY
-    io.to(`project:${projectName}`).emit("display_list_update", { displays });
+    // Update display list for ALL IN THIS PROJECT
+    io.to(`project:${targetProject}`).emit("display_list_update", { displays });
     
-    console.log(`remote ${socket.id} paired to: ${code} (${targetDisplay.displayName}) in project: ${projectName}`);
+    console.log(`remote ${socket.id} paired to: ${code} (${targetDisplay.displayName}) in project: ${targetProject}`);
   });
 
   // Remote sends command to display
@@ -187,17 +173,12 @@ io.on("connection", (socket) => {
       return;
     }
 
-    // Ensure remote is switching within the same project
-    if (remoteData.projectName !== projectName) {
-      socket.emit("switch_error", { 
-        message: `Cannot switch to display in different project. Current project: ${remoteData.projectName}` 
-      });
-      return;
-    }
-
-    const projectMap = projectDisplays.get(projectName);
+    // Get project from remote's current connection
+    const currentProjectName = remoteData.projectName;
+    const projectMap = projectDisplays.get(currentProjectName);
+    
     if (!projectMap || !projectMap.has(newCode)) {
-      socket.emit("switch_error", { message: "Invalid display code" });
+      socket.emit("switch_error", { message: "Invalid display code or not in same project" });
       return;
     }
 
@@ -223,7 +204,7 @@ io.on("connection", (socket) => {
     socket.join(`pair:${newCode}`);
     
     // Update remote connection
-    remoteConnections.set(socket.id, { code: newCode, projectName });
+    remoteConnections.set(socket.id, { code: newCode, projectName: currentProjectName });
 
     // Get updated display list for THIS PROJECT ONLY
     const displays = Array.from(projectMap.values()).map(d => ({
@@ -246,32 +227,14 @@ io.on("connection", (socket) => {
         state: newDisplay.state,
         currentDisplay: newDisplay.displayName,
         currentDisplayCode: newCode,
-        projectName
+        projectName: currentProjectName
       });
     }
 
-    // Update display list for ALL IN THIS PROJECT ONLY
-    io.to(`project:${projectName}`).emit("display_list_update", { displays });
+    // Update display list for ALL IN THIS PROJECT
+    io.to(`project:${currentProjectName}`).emit("display_list_update", { displays });
 
-    console.log(`remote ${socket.id} switched to: ${newCode} (${newDisplay.displayName}) in project: ${projectName}`);
-  });
-
-  // Get list of available displays for a project (for debugging or admin)
-  socket.on("get_displays", ({ projectName }) => {
-    if (!projectDisplays.has(projectName)) {
-      socket.emit("displays_list", { displays: [] });
-      return;
-    }
-    
-    const projectMap = projectDisplays.get(projectName);
-    const displays = Array.from(projectMap.values()).map(d => ({
-      code: d.code,
-      displayName: d.displayName,
-      isOccupied: !!d.remoteSocketId,
-      projectName: d.projectName
-    }));
-    
-    socket.emit("displays_list", { displays });
+    console.log(`remote ${socket.id} switched to: ${newCode} (${newDisplay.displayName}) in project: ${currentProjectName}`);
   });
 
   socket.on("disconnect", () => {
