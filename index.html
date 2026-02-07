@@ -225,8 +225,11 @@ function renderSection() {
   if (activeSection === "amenities") {
     content.innerHTML = `<div class="section-title">Amenities</div><div id="amenities"></div>`;
     renderAmenities();
-  } else {
-    content.innerHTML = `<div class="empty">No data available</div>`;
+  } 
+
+  if (activeSection === "homes") {
+    content.innerHTML = `<div class="section-title">Homes Search</div><div id="homeSearch"></div>`;
+    renderHomeSearch();
   }
 }
 
@@ -317,14 +320,14 @@ function renderAmenities() {
   if (!container) return;
 
   container.innerHTML = "";
-  const list = remoteUiState?.amenities || [];
+  const amenityList = remoteUiState?.amenities || [];
 
-  if (!list.length) {
+  if (!amenityList.length) {
     container.innerHTML = '<div class="empty">No amenities found</div>';
     return;
   }
 
-  list.forEach(amenity => {
+  amenityList.forEach(amenity => {
     const btn = document.createElement("button");
     btn.className = "amenity-btn";
     btn.textContent = amenity.amenity_name || `Amenity ${amenity.id}`;
@@ -338,6 +341,37 @@ function renderAmenities() {
     container.appendChild(btn);
   });
 }
+
+// Home search -FirstLevelFilter
+function renderHomeSearch() {
+  const container = document.getElementById("homeSearch");
+  if (!container) return;
+
+  container.innerHTML = "";
+  const filters = remoteUiState?.firstLevelFilter?.selectedBuildings || [];
+  console.log("Rendering home search filters:", filters);
+  if (!filters.length) {
+    container.innerHTML = '<div class="empty">No search filters found</div>';
+    return;
+  }
+
+  filters.forEach(filter => {
+    const btn = document.createElement("button");
+    btn.className = "amenity-btn";
+    btn.textContent = filter.building_name || `Building ${filter.id}`;
+    btn.onclick = () => {
+      socket.emit("remote_command", {
+        code: pairedCode,
+        command: "home_search_filter",
+        payload: { id: filter.id }
+      });
+    };
+    container.appendChild(btn);
+  });
+}
+
+
+
 
 renderSection();
 </script>
