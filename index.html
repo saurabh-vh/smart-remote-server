@@ -197,7 +197,6 @@ html, body {
 
   </div>
 </div>
-
 <script src="/socket.io/socket.io.js"></script>
 <script>
 const socket = io();
@@ -225,7 +224,7 @@ function renderSection() {
   if (activeSection === "amenities") {
     content.innerHTML = `<div class="section-title">Amenities</div><div id="amenities"></div>`;
     renderAmenities();
-  } 
+  }
 
   if (activeSection === "homes") {
     content.innerHTML = `<div class="section-title">Homes Search</div><div id="homeSearch"></div>`;
@@ -257,16 +256,36 @@ function getEnteredCode() {
 }
 
 function setCodeInputs(code) {
+  inputs.forEach(i => i.value = "");
   code.split("").forEach((c, i) => {
     if (inputs[i]) inputs[i].value = c;
   });
 }
 
+function clearCodeInputs() {
+  inputs.forEach(i => i.value = "");
+  inputs[0].focus();
+}
+
+/* Prevent pairing if display is busy */
+function isDisplayBusy(code) {
+  const d = availableDisplays.find(x => x.code === code);
+  if (!d) return false;
+  return d.isOccupied && code !== pairedCode;
+}
+
 function checkAndPair() {
   const code = getEnteredCode();
-  if (code.length === 4) {
-    socket.emit("pair_remote", { code });
+  if (code.length !== 4) return;
+
+  // block busy
+  if (isDisplayBusy(code)) {
+    alert("Display is currently in use");
+    clearCodeInputs();
+    return;
   }
+
+  socket.emit("pair_remote", { code });
 }
 
 /* Auto from URL */
@@ -278,6 +297,8 @@ if (codeFromUrl && codeFromUrl.length === 4) {
 }
 
 /* Socket */
+
+// Pair success
 socket.on("pair_success", ({ code, projectName: projName, displays }) => {
   pairedCode = code;
   projectName = projName;
@@ -289,12 +310,40 @@ socket.on("pair_success", ({ code, projectName: projName, displays }) => {
   updateDisplaySelector(displays, code);
 });
 
-socket.on("display_state", ({ state }) => {
-  remoteUiState = state;
-  if (activeSection === "amenities") renderAmenities();
+// Switch success
+socket.on("switch_success", ({ code, displays }) => {
+  pairedCode = code;
+  availableDisplays = displays;
+  remoteUiState = null;
+
+  updateDisplaySelector(displays, code);
+  renderSection();
 });
 
-/* Display switch */
+// Display state
+socket.on("display_state", ({ state }) => {
+  remoteUiState = state;
+  renderSection();
+});
+
+// Display list update
+socket.on("display_list_update", ({ displays }) => {
+  availableDisplays = displays;
+  updateDisplaySelector(displays, pairedCode);
+});
+
+// Pair error (busy / invalid)
+socket.on("pair_error", ({ message }) => {
+  alert(message);
+  clearCodeInputs();
+});
+
+socket.on("switch_error", ({ message }) => {
+  alert(message);
+  updateDisplaySelector(availableDisplays, pairedCode);
+});
+
+/* Display dropdown */
 function updateDisplaySelector(displays, currentCode) {
   const select = document.getElementById("displaySelect");
   select.innerHTML = "";
@@ -303,6 +352,12 @@ function updateDisplaySelector(displays, currentCode) {
     const opt = document.createElement("option");
     opt.value = display.code;
     opt.textContent = display.displayName;
+
+    // Disable if busy and not current
+    if (display.isOccupied && display.code !== currentCode) {
+      opt.disabled = true;
+    }
+
     if (display.code === currentCode) opt.selected = true;
     select.appendChild(opt);
   });
@@ -311,7 +366,15 @@ function updateDisplaySelector(displays, currentCode) {
 document.getElementById("displaySelect").onchange = (e) => {
   const newCode = e.target.value;
   if (!newCode || newCode === pairedCode) return;
-  socket.emit("switch_display", { newCode, projectName });
+
+  // block busy
+  if (isDisplayBusy(newCode)) {
+    alert("Display is currently in use");
+    updateDisplaySelector(availableDisplays, pairedCode);
+    return;
+  }
+
+  socket.emit("switch_display", { newCode });
 };
 
 /* Amenities */
@@ -342,14 +405,14 @@ function renderAmenities() {
   });
 }
 
-// Home search -FirstLevelFilter
+/* Home Search */
 function renderHomeSearch() {
   const container = document.getElementById("homeSearch");
   if (!container) return;
 
   container.innerHTML = "";
   const filters = remoteUiState?.firstLevelFilter?.selectedBuildings || [];
-  console.log("Rendering home search filters:", filters);
+
   if (!filters.length) {
     container.innerHTML = '<div class="empty">No search filters found</div>';
     return;
@@ -370,10 +433,5 @@ function renderHomeSearch() {
   });
 }
 
-
-
-
 renderSection();
 </script>
-</body>
-</html>
