@@ -1,345 +1,345 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>Smart Remote</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+<head>
+<meta charset="utf-8" />
+<title>Smart Remote</title>
 
-    <style>
-      * {
-        box-sizing: border-box;
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-      }
+<!-- No zoom -->
+<meta name="viewport"
+content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
 
-      body {
-        margin: 0;
-        padding: 16px;
-        background: #f5f5f5;
-      }
+<style>
+* { box-sizing: border-box; font-family: system-ui, sans-serif; }
 
-      .app {
-        max-width: 420px;
-        margin: 0 auto;
-        background: #fff;
-        border-radius: 12px;
-        padding: 16px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-      }
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;        /* no page scroll */
+  background: #0b0b0b;
+  color: #fff;
+  touch-action: manipulation;
+}
 
-      .project-info {
-        background: #e8f4ff;
-        border-radius: 8px;
-        padding: 12px;
-        margin-bottom: 12px;
-        text-align: center;
-        border: 1px solid #b3d9ff;
-        display: none;
-      }
+/* App */
+.app {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
 
-      .project-name {
-        font-weight: 600;
-        color: #007bff;
-        font-size: 16px;
-      }
+/* Top Bar */
+.topbar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  border-bottom: 1px solid #2a2a2a;
+}
 
-      .pairing {
-        display: flex;
-        gap: 8px;
-        margin-bottom: 12px;
-      }
+.project-status {
+  color: #3ad16f;
+  font-size: 14px;
+}
 
-      #codeInput {
-        flex: 1;
-        padding: 12px;
-        font-size: 16px;
-        border-radius: 8px;
-        border: 1px solid #ccc;
-      }
+.screen-select {
+  background: #111;
+  border: 1px solid #444;
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 6px;
+}
 
-      #pairBtn {
-        padding: 12px 16px;
-        font-size: 16px;
-        border-radius: 8px;
-        border: none;
-        background: #007bff;
-        color: #fff;
-        cursor: pointer;
-        white-space: nowrap;
-      }
+/* Editable code */
+.remote-code {
+  display: flex;
+  gap: 6px;
+}
 
-      #pairBtn:active {
-        opacity: 0.85;
-      }
+.code-input {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #666;
+  border-radius: 6px;
+  text-align: center;
+  background: #111;
+  color: #fff;
+  font-size: 16px;
+}
 
-      .display-selector {
-        margin-top: 12px;
-        margin-bottom: 12px;
-        display: none;
-      }
+/* Main Layout */
+.main {
+  flex: 1;
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  overflow: hidden; /* prevents page scroll */
+}
 
-      #displaySelect {
-        width: 100%;
-        padding: 12px;
-        font-size: 16px;
-        border-radius: 8px;
-        border: 1px solid #ccc;
-        background: #fff;
-      }
+/* Sidebar */
+.sidebar {
+  width: 180px;
+  border: 1px solid #333;
+  border-radius: 14px;
+  padding: 8px;
+  overflow: hidden;
+}
 
-      .current-display {
-        padding: 12px;
-        background: #e8f4ff;
-        border-radius: 8px;
-        margin-bottom: 12px;
-        text-align: center;
-        font-weight: 500;
-        color: #007bff;
-        border: 1px solid #b3d9ff;
-        display: none;
-      }
+.menu-item {
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 6px;
+  cursor: pointer;
+}
 
-      #amenities {
-        margin-top: 12px;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        max-height: 60vh;
-        overflow-y: auto;
-        padding: 8px;
-        -webkit-overflow-scrolling: touch;
-      }
+.menu-item.active {
+  background: #0f3d1f;
+  border: 1px solid #2bd46a;
+}
 
-      .amenity-btn {
-        display: block;
-        width: 100%;
-        text-align: left;
-        padding: 14px 12px;
-        margin-bottom: 8px;
-        font-size: 16px;
-        border-radius: 8px;
-        border: 1px solid #ddd;
-        background: #f9f9f9;
-        cursor: pointer;
-      }
+.menu-item:hover {
+  background: #1a1a1a;
+}
 
-      .amenity-btn:last-child {
-        margin-bottom: 0;
-      }
+/* Center Content (only scrollable area) */
+.content {
+  flex: 1;
+  border: 1px solid #333;
+  border-radius: 14px;
+  padding: 12px;
+  overflow-y: auto; /* only this scrolls */
+  -webkit-overflow-scrolling: touch;
+}
 
-      .amenity-btn:active {
-        background: #eaeaea;
-      }
+/* Touchpad panel */
+.touchpad-panel {
+  width: 220px;
+  border: 1px solid #333;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #888;
+  font-size: 18px;
+  flex-shrink: 0;
+}
 
-      .empty {
-        text-align: center;
-        color: #777;
-        padding: 16px;
-      }
+/* Amenities */
+.section-title {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
 
-      .status {
-        text-align: center;
-        padding: 8px;
-        margin-bottom: 12px;
-        border-radius: 8px;
-        font-size: 14px;
-      }
+.amenity-btn {
+  width: 100%;
+  text-align: left;
+  padding: 14px;
+  margin-bottom: 10px;
+  background: #111;
+  border: 1px solid #555;
+  border-radius: 10px;
+  color: #fff;
+  cursor: pointer;
+}
 
-      .status.connected {
-        background: #d4edda;
-        color: #155724;
-        border: 1px solid #c3e6cb;
-      }
+.amenity-btn:hover {
+  background: #1a1a1a;
+}
 
-      .status.disconnected {
-        background: #f8d7da;
-        color: #721c24;
-        border: 1px solid #f5c6cb;
-      }
-    </style>
-  </head>
+.empty {
+  text-align: center;
+  color: #888;
+  margin-top: 40px;
+}
+</style>
+</head>
 
-  <body>
-    <div class="app">
-      <div id="projectInfo" class="project-info">
-        Project: <span id="projectNameDisplay" class="project-name"></span>
-      </div>
+<body>
+<div class="app">
 
-      <div class="pairing">
-        <input id="codeInput" placeholder="Enter display code" />
-        <button id="pairBtn">Pair</button>
-      </div>
-
-      <div id="status" class="status disconnected">Not Connected</div>
-
-      <div class="display-selector">
-        <select id="displaySelect">
-          <option value="">Select a display to control...</option>
-        </select>
-      </div>
-
-      <div id="currentDisplay" class="current-display">
-        Controlling: <span id="displayName"></span>
-      </div>
-
-      <div id="amenities"></div>
+  <!-- Top Bar -->
+  <div class="topbar">
+    <div class="project-status" id="projectStatus">
+      Not connected
     </div>
 
-    <script src="/socket.io/socket.io.js"></script>
-    <script>
-      const socket = io();
-      let pairedCode = null;
-      let projectName = null;
-      let remoteUiState = null;
-      let availableDisplays = [];
+    <select id="displaySelect" class="screen-select"></select>
 
-      const params = new URLSearchParams(window.location.search);
-      const codeFromUrl = params.get("code");
-      
-      if (codeFromUrl) {
-        document.getElementById("codeInput").value = codeFromUrl;
-        // When code is in URL, we don't know the project yet
-        // The server will figure it out when we pair
-      }
+    <div class="remote-code" id="remoteCodeInputs">
+      <input class="code-input" maxlength="1">
+      <input class="code-input" maxlength="1">
+      <input class="code-input" maxlength="1">
+      <input class="code-input" maxlength="1">
+    </div>
+  </div>
 
-      socket.on("connect", () => {
-        console.log("[remote] connected:", socket.id);
-        updateStatus(true);
+  <!-- Main -->
+  <div class="main">
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="menu-item active" data-section="amenities">Amenities</div>
+      <div class="menu-item" data-section="homes">Homes Search</div>
+      <div class="menu-item" data-section="location">Location</div>
+    </div>
+
+    <!-- Center -->
+    <div class="content">
+      <div id="contentArea"></div>
+    </div>
+
+    <!-- Right -->
+    <div class="touchpad-panel">
+      Touchpad
+    </div>
+
+  </div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const socket = io();
+
+let pairedCode = null;
+let projectName = null;
+let remoteUiState = null;
+let availableDisplays = [];
+let activeSection = "amenities";
+
+/* Sidebar */
+document.querySelectorAll(".menu-item").forEach(item => {
+  item.onclick = () => {
+    document.querySelectorAll(".menu-item").forEach(i => i.classList.remove("active"));
+    item.classList.add("active");
+    activeSection = item.dataset.section;
+    renderSection();
+  };
+});
+
+function renderSection() {
+  const content = document.getElementById("contentArea");
+  content.innerHTML = "";
+
+  if (activeSection === "amenities") {
+    content.innerHTML = `<div class="section-title">Amenities</div><div id="amenities"></div>`;
+    renderAmenities();
+  } else {
+    content.innerHTML = `<div class="empty">No data available</div>`;
+  }
+}
+
+/* Code Inputs */
+const inputs = document.querySelectorAll(".code-input");
+
+inputs.forEach((input, index) => {
+  input.addEventListener("input", () => {
+    input.value = input.value.replace(/[^0-9]/g, "");
+    if (input.value && index < inputs.length - 1) {
+      inputs[index + 1].focus();
+    }
+    checkAndPair();
+  });
+
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Backspace" && !input.value && index > 0) {
+      inputs[index - 1].focus();
+    }
+  });
+});
+
+function getEnteredCode() {
+  return Array.from(inputs).map(i => i.value).join("");
+}
+
+function setCodeInputs(code) {
+  code.split("").forEach((c, i) => {
+    if (inputs[i]) inputs[i].value = c;
+  });
+}
+
+function checkAndPair() {
+  const code = getEnteredCode();
+  if (code.length === 4) {
+    socket.emit("pair_remote", { code });
+  }
+}
+
+/* Auto from URL */
+const params = new URLSearchParams(window.location.search);
+const codeFromUrl = params.get("code");
+if (codeFromUrl && codeFromUrl.length === 4) {
+  setCodeInputs(codeFromUrl);
+  socket.emit("pair_remote", { code: codeFromUrl });
+}
+
+/* Socket */
+socket.on("pair_success", ({ code, projectName: projName, displays }) => {
+  pairedCode = code;
+  projectName = projName;
+  availableDisplays = displays;
+
+  document.getElementById("projectStatus").textContent =
+    "Connected to " + projName;
+
+  updateDisplaySelector(displays, code);
+});
+
+socket.on("display_state", ({ state }) => {
+  remoteUiState = state;
+  if (activeSection === "amenities") renderAmenities();
+});
+
+/* Display switch */
+function updateDisplaySelector(displays, currentCode) {
+  const select = document.getElementById("displaySelect");
+  select.innerHTML = "";
+
+  displays.forEach(display => {
+    const opt = document.createElement("option");
+    opt.value = display.code;
+    opt.textContent = display.displayName;
+    if (display.code === currentCode) opt.selected = true;
+    select.appendChild(opt);
+  });
+}
+
+document.getElementById("displaySelect").onchange = (e) => {
+  const newCode = e.target.value;
+  if (!newCode || newCode === pairedCode) return;
+  socket.emit("switch_display", { newCode, projectName });
+};
+
+/* Amenities */
+function renderAmenities() {
+  const container = document.getElementById("amenities");
+  if (!container) return;
+
+  container.innerHTML = "";
+  const list = remoteUiState?.amenities || [];
+
+  if (!list.length) {
+    container.innerHTML = '<div class="empty">No amenities found</div>';
+    return;
+  }
+
+  list.forEach(amenity => {
+    const btn = document.createElement("button");
+    btn.className = "amenity-btn";
+    btn.textContent = amenity.amenity_name || `Amenity ${amenity.id}`;
+    btn.onclick = () => {
+      socket.emit("remote_command", {
+        code: pairedCode,
+        command: "amenity_select",
+        payload: { id: amenity.id }
       });
+    };
+    container.appendChild(btn);
+  });
+}
 
-      socket.on("disconnect", () => {
-        updateStatus(false);
-      });
-
-      document.getElementById("pairBtn").addEventListener("click", () => {
-        const code = document.getElementById("codeInput").value.trim();
-        if (!code) return;
-        
-        // Send only the code - server will find which project it belongs to
-        socket.emit("pair_remote", { code });
-      });
-
-      socket.on("pair_success", ({ code, projectName: projName, displays, currentDisplay }) => {
-        pairedCode = code;
-        projectName = projName;
-        availableDisplays = displays;
-        
-        console.log("[remote] paired with:", code, "project:", projName);
-        
-        document.getElementById("status").textContent = `Connected to project: ${projName}`;
-        document.getElementById("status").className = "status connected";
-        
-        // Update project info
-        document.getElementById("projectNameDisplay").textContent = projName;
-        document.getElementById("projectInfo").style.display = "block";
-        
-        updateDisplaySelector(displays, code);
-        document.getElementById("displayName").textContent = currentDisplay;
-        document.getElementById("currentDisplay").style.display = "block";
-        document.querySelector(".display-selector").style.display = "block";
-      });
-
-      socket.on("pair_error", (data) => {
-        alert(data.message);
-      });
-
-      socket.on("display_list_update", ({ displays }) => {
-        // Only update if we have a project and the display list is for our project
-        if (projectName && displays.length > 0 && displays[0].projectName === projectName) {
-          availableDisplays = displays;
-          updateDisplaySelector(displays, pairedCode);
-        }
-      });
-
-      socket.on("display_state", ({ state, currentDisplay, currentDisplayCode, projectName: projName }) => {
-        remoteUiState = state;
-        if (currentDisplay) {
-          document.getElementById("displayName").textContent = currentDisplay;
-        }
-        if (currentDisplayCode && currentDisplayCode !== pairedCode) {
-          pairedCode = currentDisplayCode;
-        }
-        renderAmenities();
-      });
-
-      socket.on("switch_success", ({ code, displayName, displays }) => {
-        pairedCode = code;
-        availableDisplays = displays;
-        document.getElementById("displayName").textContent = displayName;
-        updateDisplaySelector(displays, code);
-        alert(`Switched to ${displayName}`);
-      });
-
-      socket.on("switch_error", (data) => {
-        alert(data.message);
-      });
-
-      function updateStatus(connected) {
-        const statusEl = document.getElementById("status");
-        if (connected) {
-          statusEl.textContent = "Connected to Server";
-          statusEl.className = "status connected";
-        } else {
-          statusEl.textContent = "Disconnected from Server";
-          statusEl.className = "status disconnected";
-        }
-      }
-
-      function updateDisplaySelector(displays, currentCode) {
-        const select = document.getElementById("displaySelect");
-        select.innerHTML = '<option value="">Select a display to control...</option>';
-        
-        // Filter displays for current project only (already filtered by server)
-        displays.forEach(display => {
-          const option = document.createElement("option");
-          option.value = display.code;
-          option.textContent = `${display.displayName} ${display.isOccupied ? '(Occupied)' : '(Available)'}`;
-          option.disabled = display.isOccupied && display.code !== currentCode;
-          if (display.code === currentCode) {
-            option.selected = true;
-          }
-          select.appendChild(option);
-        });
-      }
-
-      document.getElementById("displaySelect").addEventListener("change", (e) => {
-        const newCode = e.target.value;
-        if (!newCode || newCode === pairedCode) return;
-        
-        if (!projectName) {
-          alert("Not connected to a project");
-          return;
-        }
-        
-        socket.emit("switch_display", { newCode, projectName });
-      });
-
-      function renderAmenities() {
-        const container = document.getElementById("amenities");
-        container.innerHTML = "";
-
-        const list = remoteUiState?.amenities || [];
-        if (!Array.isArray(list) || list.length === 0) {
-          container.innerHTML = '<div class="empty">No amenities found</div>';
-          return;
-        }
-
-        list.forEach((amenity) => {
-          const btn = document.createElement("button");
-          btn.className = "amenity-btn";
-          btn.textContent = amenity.amenity_name || `Amenity ${amenity.id}`;
-          btn.onclick = () => {
-            if (!pairedCode || !projectName) return;
-            socket.emit("remote_command", {
-              code: pairedCode,
-              command: "amenity_select",
-              payload: { id: amenity.id },
-            });
-          };
-          container.appendChild(btn);
-        });
-      }
-
-      // Auto-focus code input
-      document.getElementById("codeInput").focus();
-    </script>
-  </body>
+renderSection();
+</script>
+</body>
 </html>
