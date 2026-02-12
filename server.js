@@ -80,6 +80,27 @@ io.on("connection", (socket) => {
       socket.emit("registered_display", { code, projectName });
     },
   );
+  // Display sends second-level selection update
+  socket.on("second_level_update", ({ selectedUnits = [] }) => {
+    for (const [projectName, projectMap] of projectDisplays.entries()) {
+      for (const [code, display] of projectMap.entries()) {
+        if (display.socketId === socket.id) {
+          // optional: cache latest second-level payload on display object
+          display.secondLevelState = { selectedUnits };
+
+          if (display.remoteSocketId) {
+            io.to(display.remoteSocketId).emit("second_level_update", {
+              selectedUnits,
+              currentDisplay: display.displayName,
+              currentDisplayCode: code,
+              projectName,
+            });
+          }
+          return;
+        }
+      }
+    }
+  });
 
   // Remote attempts to pair with a code (no project name needed)
   socket.on("pair_remote", ({ code }) => {

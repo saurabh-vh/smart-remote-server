@@ -132,6 +132,68 @@
         background: #f2f2f7;
       }
 
+      .units-back {
+        font-weight: 600;
+      }
+
+      .unit-row {
+        padding: 12px 16px;
+        background: #fff;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .unit-left {
+        min-width: 62px;
+        font-size: 16px;
+        line-height: 1.25;
+        font-weight: 600;
+        color: #1c1c1c;
+        text-align: center;
+      }
+
+      .unit-middle {
+        flex: 1;
+        min-width: 0;
+        text-align: center;
+        color: #2a2a2a;
+        font-size: 16px;
+        line-height: 1.2;
+      }
+
+      .unit-middle-line {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .unit-divider {
+        width: 100%;
+        height: 10px;
+        margin: 4px 0;
+        display: block;
+      }
+
+      .unit-direction,
+      .unit-area {
+        font-size: 14px;
+        color: #5f6368;
+      }
+
+      .unit-badge {
+        min-width: 76px;
+        text-align: center;
+        color: #fff;
+        border: 1px solid rgba(0, 0, 0, 0.15);
+        border-radius: 8px;
+        padding: 6px 10px;
+        font-size: 16px;
+        line-height: 1.2;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+
       .empty {
         text-align: center;
         margin-top: 40px;
@@ -249,6 +311,7 @@
       let pairedCode = null;
       let projectName = null;
       let remoteUiState = null;
+      let selectedUnits = [];
       let availableDisplays = [];
       let activeSection = "amenities";
 
@@ -349,6 +412,11 @@
         remoteUiState = state;
         renderSection();
       });
+      socket.on("second_level_update", ({ selectedUnits: units = [] }) => {
+        console.log("[remote] second_level_update:", units);
+        selectedUnits = units;
+        if (isHomeSection()) renderSection();
+      });
 
       socket.on("display_list_update", ({ displays }) => {
         availableDisplays = displays;
@@ -414,11 +482,15 @@
           renderAmenities();
         }
 
-        if (activeSection === "homes") {
+        if (isHomeSection()) {
           content.innerHTML = `<div class="section-title">Homes Search</div>
            <div class="section-card" id="homeSearch"></div>`;
           renderHomeSearch();
         }
+      }
+
+      function isHomeSection() {
+        return activeSection === "homes" || activeSection === "home";
       }
 
       function renderAmenities() {
@@ -447,6 +519,72 @@
 
       function renderHomeSearch() {
         const container = document.getElementById("homeSearch");
+        const selectedUnitsList = selectedUnits || [];
+
+        if (selectedUnitsList.length) {
+          const backRow = document.createElement("div");
+          backRow.className = "list-row units-back";
+          backRow.textContent = "\u2190 Back";
+          backRow.onclick = () => {
+            selectedUnits = [];
+            renderSection();
+          };
+          container.appendChild(backRow);
+
+          selectedUnitsList.forEach((u) => {
+            const row = document.createElement("div");
+            row.className = "list-row unit-row";
+
+            const left = document.createElement("div");
+            left.className = "unit-left";
+            left.textContent = u.unique_unit_number || u.unit_id || u.id || "-";
+
+            const middle = document.createElement("div");
+            middle.className = "unit-middle";
+
+            const areaLine = document.createElement("div");
+            areaLine.className = "unit-middle-line unit-area";
+            const areaLabel = u.area_definition
+              ? `${u.area_definition} Area`
+              : "Area";
+            const areaValue = u.area_of_unit ?? "-";
+            const areaUnit = u.display_of_area_unit || "";
+            areaLine.textContent = `${areaLabel}: ${areaValue} ${areaUnit}`;
+
+            const divider = document.createElementNS(
+              "http://www.w3.org/2000/svg",
+              "svg"
+            );
+            divider.setAttribute("class", "unit-divider");
+            divider.setAttribute("viewBox", "0 0 240 10");
+            divider.setAttribute("preserveAspectRatio", "none");
+            divider.innerHTML = `
+              <line x1="24" y1="5" x2="216" y2="5" stroke="#d7dbe1" stroke-width="1.5" />
+              
+            `;
+
+            const directionLine = document.createElement("div");
+            directionLine.className = "unit-middle-line unit-direction";
+            directionLine.textContent = `Direction: ${u.unit_direction || "-"}`;
+
+            middle.appendChild(areaLine);
+            middle.appendChild(divider);
+            middle.appendChild(directionLine);
+
+            const badge = document.createElement("div");
+            badge.className = "unit-badge";
+            const typeLabel = (u.unit_type || "Unit").split("-")[0].trim();
+            badge.textContent = typeLabel;
+            badge.style.backgroundColor = u.color_code || "#8a5a00";
+
+            row.appendChild(left);
+            row.appendChild(middle);
+            row.appendChild(badge);
+            container.appendChild(row);
+          });
+          return;
+        }
+
         const filters =
           remoteUiState?.firstLevelFilter?.selectedBuildings || [];
 
