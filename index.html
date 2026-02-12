@@ -136,6 +136,39 @@
         font-weight: 600;
       }
 
+      .units-toolbar {
+        position: sticky;
+        top: 0;
+        z-index: 3;
+        background: #fff;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .units-search {
+        flex: 1;
+        min-width: 0;
+        border: 1px solid #d9dee5;
+        border-radius: 8px;
+        padding: 8px 10px;
+        font-size: 14px;
+        outline: none;
+      }
+
+      .units-search:focus {
+        border-color: #9fb6d8;
+      }
+
+      .units-filter {
+        width: 130px;
+        border: 1px solid #d9dee5;
+        border-radius: 8px;
+        padding: 8px 10px;
+        font-size: 14px;
+        background: #fff;
+      }
+
       .unit-row {
         padding: 12px 16px;
         background: #fff;
@@ -312,6 +345,8 @@
       let projectName = null;
       let remoteUiState = null;
       let selectedUnits = [];
+      let homeUnitSearchQuery = "";
+      let homeUnitTypeFilter = "";
       let availableDisplays = [];
       let activeSection = "amenities";
 
@@ -415,6 +450,8 @@
       socket.on("second_level_update", ({ selectedUnits: units = [] }) => {
         console.log("[remote] second_level_update:", units);
         selectedUnits = units;
+        homeUnitSearchQuery = "";
+        homeUnitTypeFilter = "";
         if (isHomeSection()) renderSection();
       });
 
@@ -522,16 +559,78 @@
         const selectedUnitsList = selectedUnits || [];
 
         if (selectedUnitsList.length) {
-          const backRow = document.createElement("div");
-          backRow.className = "list-row units-back";
-          backRow.textContent = "\u2190 Back";
-          backRow.onclick = () => {
+          const toolbar = document.createElement("div");
+          toolbar.className = "list-row units-toolbar";
+
+          const backBtn = document.createElement("div");
+          backBtn.className = "units-back";
+          backBtn.textContent = "\u2190 Back";
+          backBtn.onclick = () => {
             selectedUnits = [];
+            homeUnitSearchQuery = "";
+            homeUnitTypeFilter = "";
             renderSection();
           };
-          container.appendChild(backRow);
 
-          selectedUnitsList.forEach((u) => {
+          const searchInput = document.createElement("input");
+          searchInput.className = "units-search";
+          searchInput.type = "text";
+          searchInput.placeholder = "Search unit no.";
+          searchInput.value = homeUnitSearchQuery;
+
+          const typeFilter = document.createElement("select");
+          typeFilter.className = "units-filter";
+          const allOpt = document.createElement("option");
+          allOpt.value = "";
+          allOpt.textContent = "All types";
+          typeFilter.appendChild(allOpt);
+
+          const types = [
+            ...new Set(
+              selectedUnitsList
+                .map((u) => getUnitTypeLabel(u.unit_type))
+                .filter(Boolean)
+            ),
+          ];
+          types.forEach((t) => {
+            const opt = document.createElement("option");
+            opt.value = t;
+            opt.textContent = t;
+            typeFilter.appendChild(opt);
+          });
+          typeFilter.value = homeUnitTypeFilter;
+
+          toolbar.appendChild(backBtn);
+          toolbar.appendChild(searchInput);
+          toolbar.appendChild(typeFilter);
+          container.appendChild(toolbar);
+
+          const listWrap = document.createElement("div");
+          container.appendChild(listWrap);
+
+          const renderFilteredUnits = () => {
+            const q = (homeUnitSearchQuery || "").trim().toLowerCase();
+            const t = (homeUnitTypeFilter || "").trim().toLowerCase();
+
+            const filtered = selectedUnitsList.filter((u) => {
+              const unitNo = String(u.unique_unit_number || "").toLowerCase();
+              const typeLabel = getUnitTypeLabel(u.unit_type).toLowerCase();
+              const matchNo = !q || unitNo.includes(q);
+              const matchType = !t || typeLabel === t;
+              return matchNo && matchType;
+            });
+
+            listWrap.innerHTML = "";
+
+            if (!filtered.length) {
+              const empty = document.createElement("div");
+              empty.className = "empty";
+              empty.textContent = "No units found";
+              listWrap.appendChild(empty);
+              return;
+            }
+
+            filtered.forEach((u) => {
             const row = document.createElement("div");
             row.className = "list-row unit-row";
 
@@ -573,15 +672,28 @@
 
             const badge = document.createElement("div");
             badge.className = "unit-badge";
-            const typeLabel = (u.unit_type || "Unit").split("-")[0].trim();
+            const typeLabel = getUnitTypeLabel(u.unit_type) || "Unit";
             badge.textContent = typeLabel;
             badge.style.backgroundColor = u.color_code || "#8a5a00";
 
             row.appendChild(left);
             row.appendChild(middle);
             row.appendChild(badge);
-            container.appendChild(row);
+            listWrap.appendChild(row);
           });
+          };
+
+          searchInput.addEventListener("input", (e) => {
+            homeUnitSearchQuery = e.target.value || "";
+            renderFilteredUnits();
+          });
+
+          typeFilter.addEventListener("change", (e) => {
+            homeUnitTypeFilter = e.target.value || "";
+            renderFilteredUnits();
+          });
+
+          renderFilteredUnits();
           return;
         }
 
@@ -607,6 +719,10 @@
           };
           container.appendChild(row);
         });
+      }
+
+      function getUnitTypeLabel(unitType) {
+        return (unitType || "").split("-")[0].trim();
       }
 
       renderSection();
