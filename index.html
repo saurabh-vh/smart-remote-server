@@ -633,6 +633,13 @@
             filtered.forEach((u) => {
             const row = document.createElement("div");
             row.className = "list-row unit-row";
+            row.onclick = () => {
+              socket.emit("remote_command", {
+                code: pairedCode,
+                command: "go_to_unit",
+                payload: { unit_id: u.unit_id , unit_number: u.unique_unit_number },
+              });
+            };
 
             const left = document.createElement("div");
             left.className = "unit-left";

@@ -16,15 +16,15 @@ const io = socketIo(server, {
 // Registry: projectName -> { code: { socketId, remoteSocketId, projectName, displayName } }
 const projectDisplays = new Map(); // projectName -> Map(code -> displayData)
 const remoteConnections = new Map(); // remoteSocketId -> { code, projectName }
-setInterval(() => {
-  fetch("https://smart-remote-server.onrender.com")
-    .then(() => {
-      console.log("pinged server to prevent sleep");
-    })
-    .catch(() => {
-      console.log("failed to ping server");
-    });
-}, 10000);
+// setInterval(() => {
+//   fetch("https://smart-remote-server.onrender.com")
+//     .then(() => {
+//       console.log("pinged server to prevent sleep");
+//     })
+//     .catch(() => {
+//       console.log("failed to ping server");
+//     });
+// }, 10000);
 io.on("connection", (socket) => {
   console.log("client connected:", socket.id);
 
