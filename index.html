@@ -321,8 +321,8 @@
         <!-- Sidebar -->
         <div class="sidebar">
           <div class="sidebar-header">Remote</div>
-          <div class="menu-item active" data-section="amenities">Amenities</div>
-          <div class="menu-item" data-section="homes">Homes Search</div>
+          <div class="menu-item active" data-section="homes">Homes Search</div>
+          <div class="menu-item" data-section="amenities">Amenities</div>
           <div class="menu-item" data-section="location">Location</div>
         </div>
 
@@ -348,7 +348,7 @@
       let homeUnitSearchQuery = "";
       let homeUnitTypeFilter = "";
       let availableDisplays = [];
-      let activeSection = "amenities";
+      let activeSection = "homes";
 
       /* =========================
        URL Auto Connect
@@ -379,6 +379,13 @@
           activeSection = item.dataset.section;
           renderSection();
 
+          if(activeSection === "homes"){
+            socket.emit("remote_command",{
+              code:pairedCode,
+              command:"request_homes"
+            })
+          };
+          
           if (activeSection === "location") {
             socket.emit("remote_command", {
               code: pairedCode,
