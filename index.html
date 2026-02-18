@@ -379,6 +379,14 @@
           activeSection = item.dataset.section;
           renderSection();
 
+          // Reset home second-level state
+          if (activeSection === "homes") {
+            selectedUnits = [];
+            homeUnitSearchQuery = "";
+            homeUnitTypeFilter = "";
+          }
+          renderSection();
+
           // When "Homes" section is selected
           // → Request homes data from display
           if (activeSection === "homes") {
