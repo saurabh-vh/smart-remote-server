@@ -378,6 +378,13 @@
             .forEach((i) => i.classList.remove("active"));
           item.classList.add("active");
           activeSection = item.dataset.section;
+          
+          // Reset home second-level state
+          if (activeSection === "homes") {
+            selectedUnits = [];
+            homeUnitSearchQuery = "";
+            homeUnitTypeFilter = "";
+          }
           renderSection();
 
           // When "Homes" section is selected
