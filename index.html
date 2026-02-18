@@ -379,13 +379,26 @@
           activeSection = item.dataset.section;
           renderSection();
 
-          if(activeSection === "homes"){
-            socket.emit("remote_command",{
-              code:pairedCode,
-              command:"request_homes"
-            })
-          };
-          
+          // When "Homes" section is selected
+          // → Request homes data from display
+          if (activeSection === "homes") {
+            socket.emit("remote_command", {
+              code: pairedCode,
+              command: "request_homes",
+            });
+          }
+
+          // When "Amenities" section is selected
+          // → Request homes data from display
+          if (activeSection === "amenities") {
+            socket.emit("remote_command", {
+              code: pairedCode,
+              command: "request_homes",
+            });
+          }
+
+          // When "Location" section is selected
+          // → Request location data from display
           if (activeSection === "location") {
             socket.emit("remote_command", {
               code: pairedCode,
@@ -600,7 +613,7 @@
             ...new Set(
               selectedUnitsList
                 .map((u) => getUnitTypeLabel(u.unit_type))
-                .filter(Boolean)
+                .filter(Boolean),
             ),
           ];
           types.forEach((t) => {
@@ -642,63 +655,67 @@
             }
 
             filtered.forEach((u) => {
-            const row = document.createElement("div");
-            row.className = "list-row unit-row";
-            row.onclick = () => {
-              socket.emit("remote_command", {
-                code: pairedCode,
-                command: "go_to_unit",
-                payload: { unit_id: u.unit_id , unit_number: u.unique_unit_number },
-              });
-            };
+              const row = document.createElement("div");
+              row.className = "list-row unit-row";
+              row.onclick = () => {
+                socket.emit("remote_command", {
+                  code: pairedCode,
+                  command: "go_to_unit",
+                  payload: {
+                    unit_id: u.unit_id,
+                    unit_number: u.unique_unit_number,
+                  },
+                });
+              };
 
-            const left = document.createElement("div");
-            left.className = "unit-left";
-            left.textContent = u.unique_unit_number || u.unit_id || u.id || "-";
+              const left = document.createElement("div");
+              left.className = "unit-left";
+              left.textContent =
+                u.unique_unit_number || u.unit_id || u.id || "-";
 
-            const middle = document.createElement("div");
-            middle.className = "unit-middle";
+              const middle = document.createElement("div");
+              middle.className = "unit-middle";
 
-            const areaLine = document.createElement("div");
-            areaLine.className = "unit-middle-line unit-area";
-            const areaLabel = u.area_definition
-              ? `${u.area_definition} Area`
-              : "Area";
-            const areaValue = u.area_of_unit ?? "-";
-            const areaUnit = u.display_of_area_unit || "";
-            areaLine.textContent = `${areaLabel}: ${areaValue} ${areaUnit}`;
+              const areaLine = document.createElement("div");
+              areaLine.className = "unit-middle-line unit-area";
+              const areaLabel = u.area_definition
+                ? `${u.area_definition} Area`
+                : "Area";
+              const areaValue = u.area_of_unit ?? "-";
+              const areaUnit = u.display_of_area_unit || "";
+              areaLine.textContent = `${areaLabel}: ${areaValue} ${areaUnit}`;
 
-            const divider = document.createElementNS(
-              "http://www.w3.org/2000/svg",
-              "svg"
-            );
-            divider.setAttribute("class", "unit-divider");
-            divider.setAttribute("viewBox", "0 0 240 10");
-            divider.setAttribute("preserveAspectRatio", "none");
-            divider.innerHTML = `
+              const divider = document.createElementNS(
+                "http://www.w3.org/2000/svg",
+                "svg",
+              );
+              divider.setAttribute("class", "unit-divider");
+              divider.setAttribute("viewBox", "0 0 240 10");
+              divider.setAttribute("preserveAspectRatio", "none");
+              divider.innerHTML = `
               <line x1="24" y1="5" x2="216" y2="5" stroke="#d7dbe1" stroke-width="1.5" />
               
             `;
 
-            const directionLine = document.createElement("div");
-            directionLine.className = "unit-middle-line unit-direction";
-            directionLine.textContent = `Direction: ${u.unit_direction || "-"}`;
+              const directionLine = document.createElement("div");
+              directionLine.className = "unit-middle-line unit-direction";
+              directionLine.textContent = `Direction: ${u.unit_direction || "-"}`;
 
-            middle.appendChild(areaLine);
-            middle.appendChild(divider);
-            middle.appendChild(directionLine);
+              middle.appendChild(areaLine);
+              middle.appendChild(divider);
+              middle.appendChild(directionLine);
 
-            const badge = document.createElement("div");
-            badge.className = "unit-badge";
-            const typeLabel = getUnitTypeLabel(u.unit_type) || "Unit";
-            badge.textContent = typeLabel;
-            badge.style.backgroundColor = u.color_code || "#8a5a00";
+              const badge = document.createElement("div");
+              badge.className = "unit-badge";
+              const typeLabel = getUnitTypeLabel(u.unit_type) || "Unit";
+              badge.textContent = typeLabel;
+              badge.style.backgroundColor = u.color_code || "#8a5a00";
 
-            row.appendChild(left);
-            row.appendChild(middle);
-            row.appendChild(badge);
-            listWrap.appendChild(row);
-          });
+              row.appendChild(left);
+              row.appendChild(middle);
+              row.appendChild(badge);
+              listWrap.appendChild(row);
+            });
           };
 
           searchInput.addEventListener("input", (e) => {
