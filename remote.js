@@ -12,6 +12,8 @@ let availableDisplays = [];
 const uiState = {
   section: "homes", // homes | amenities | location
   stack: [], // navigation stack
+  searchQuery: "", // For filtering units
+  typeFilter: "", // For filtering by unit type
   data: {
     homes: {
       buildings: [],
@@ -70,12 +72,20 @@ function checkAndPair() {
   ========================= */
 function navigate(level, id, extra = {}) {
   uiState.stack.push({ level, id, ...extra });
+  // Reset search filters when navigating to a new building
+  if (level === "building") {
+    uiState.searchQuery = "";
+    uiState.typeFilter = "";
+  }
   render();
 }
 
 // goBack
 function goBack() {
   uiState.stack.pop();
+  // Reset search filters when going back
+  uiState.searchQuery = "";
+  uiState.typeFilter = "";
   render();
 }
 
@@ -83,6 +93,8 @@ function goBack() {
 function resetSection(section) {
   uiState.section = section;
   uiState.stack = [];
+  uiState.searchQuery = "";
+  uiState.typeFilter = "";
   render();
 }
 
@@ -202,8 +214,16 @@ function render() {
 function getActive(level) {
   return uiState.stack.findLast((item) => item.level === level)?.id || null;
 }
+
 /* =========================
-     HOMES (STACK BASED)
+     UTILITY FUNCTIONS
+  ========================= */
+function getUnitTypeLabel(unitType) {
+  return (unitType || "").split("-")[0].trim();
+}
+
+/* =========================
+     HOMES (STACK BASED WITH FILTERING)
   ========================= */
 function renderHomes() {
   const content = document.getElementById("contentArea");
@@ -218,7 +238,7 @@ function renderHomes() {
   if (!current) {
     renderBuildings(view);
   } else if (current.level === "building") {
-    renderUnits(view);
+    renderUnitsWithFilters(view);
   }
 }
 
@@ -254,47 +274,161 @@ function renderBuildings(container) {
   });
 }
 
-function renderUnits(container) {
+function renderUnitsWithFilters(container) {
   const units = uiState.data.homes.units;
   const activeUnitId = getActive("unit");
 
-  const back = document.createElement("div");
-  back.className = "list-row units-back";
-  back.textContent = "← Back";
-  back.onclick = goBack;
-  container.appendChild(back);
+  // Create toolbar with back button and filters
+  const toolbar = document.createElement("div");
+  toolbar.className = "list-row units-toolbar";
 
-  if (!units.length) {
-    container.innerHTML += `<div class="empty">No units found</div>`;
-    return;
-  }
+  const backBtn = document.createElement("div");
+  backBtn.className = "units-back";
+  backBtn.textContent = "\u2190";
+  backBtn.onclick = goBack;
 
-  units.forEach((u) => {
-    const row = document.createElement("div");
-    row.className = "list-row unit-row";
+  const searchInput = document.createElement("input");
+  searchInput.className = "units-search";
+  searchInput.type = "text";
+  searchInput.placeholder = "Search unit no.";
+  searchInput.value = uiState.searchQuery || "";
 
-    if (u.unit_id === activeUnitId) {
-      row.classList.add("active");
+  const typeFilter = document.createElement("select");
+  typeFilter.className = "units-filter";
+  
+  const allOpt = document.createElement("option");
+  allOpt.value = "";
+  allOpt.textContent = "All types";
+  typeFilter.appendChild(allOpt);
+
+  // Get unique unit types
+  const types = [
+    ...new Set(
+      units
+        .map((u) => getUnitTypeLabel(u.unit_type))
+        .filter(Boolean),
+    ),
+  ];
+  
+  types.forEach((t) => {
+    const opt = document.createElement("option");
+    opt.value = t;
+    opt.textContent = t;
+    if (t === uiState.typeFilter) opt.selected = true;
+    typeFilter.appendChild(opt);
+  });
+
+  toolbar.appendChild(backBtn);
+  toolbar.appendChild(searchInput);
+  toolbar.appendChild(typeFilter);
+  container.appendChild(toolbar);
+
+  // Create container for filtered units
+  const listWrap = document.createElement("div");
+  container.appendChild(listWrap);
+
+  // Filter and render units function
+  const renderFilteredUnits = () => {
+    const q = (uiState.searchQuery || "").trim().toLowerCase();
+    const t = (uiState.typeFilter || "").trim().toLowerCase();
+
+    const filtered = units.filter((u) => {
+      const unitNo = String(u.unique_unit_number || "").toLowerCase();
+      const typeLabel = getUnitTypeLabel(u.unit_type).toLowerCase();
+      const matchNo = !q || unitNo.includes(q);
+      const matchType = !t || typeLabel === t;
+      return matchNo && matchType;
+    });
+
+    listWrap.innerHTML = "";
+
+    if (!filtered.length) {
+      const empty = document.createElement("div");
+      empty.className = "empty";
+      empty.textContent = "No units found";
+      listWrap.appendChild(empty);
+      return;
     }
 
-    row.textContent = u.unique_unit_number || u.unit_id;
+    filtered.forEach((u) => {
+      const row = document.createElement("div");
+      row.className = "list-row unit-row";
 
-    row.onclick = () => {
-      // 🔥 push unit level into stack
-      navigate("unit", u.unit_id);
+      if (u.unit_id === activeUnitId) {
+        row.classList.add("active");
+      }
 
-      socket.emit("remote_command", {
-        code: pairedCode,
-        command: "go_to_unit",
-        payload: {
-          unit_id: u.unit_id,
-          unit_number: u.unique_unit_number,
-        },
-      });
-    };
+      row.onclick = () => {
+        navigate("unit", u.unit_id);
+        socket.emit("remote_command", {
+          code: pairedCode,
+          command: "go_to_unit",
+          payload: {
+            unit_id: u.unit_id,
+            unit_number: u.unique_unit_number,
+          },
+        });
+      };
 
-    container.appendChild(row);
+      const left = document.createElement("div");
+      left.className = "unit-left";
+      left.textContent = u.unique_unit_number || u.unit_id || u.id || "-";
+
+      const middle = document.createElement("div");
+      middle.className = "unit-middle";
+
+      const areaLine = document.createElement("div");
+      areaLine.className = "unit-middle-line unit-area";
+      const areaLabel = u.area_definition ? `${u.area_definition} Area` : "Area";
+      const areaValue = u.area_of_unit ?? "-";
+      const areaUnit = u.display_of_area_unit || "";
+      areaLine.textContent = `${areaLabel}: ${areaValue} ${areaUnit}`;
+
+      const divider = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "svg",
+      );
+      divider.setAttribute("class", "unit-divider");
+      divider.setAttribute("viewBox", "0 0 240 10");
+      divider.setAttribute("preserveAspectRatio", "none");
+      divider.innerHTML = `
+        <line x1="24" y1="5" x2="216" y2="5" stroke="#d7dbe1" stroke-width="1.5" />
+      `;
+
+      const directionLine = document.createElement("div");
+      directionLine.className = "unit-middle-line unit-direction";
+      directionLine.textContent = `Direction: ${u.unit_direction || "-"}`;
+
+      middle.appendChild(areaLine);
+      middle.appendChild(divider);
+      middle.appendChild(directionLine);
+
+      const badge = document.createElement("div");
+      badge.className = "unit-badge";
+      const typeLabel = getUnitTypeLabel(u.unit_type) || "Unit";
+      badge.textContent = typeLabel;
+      badge.style.backgroundColor = u.color_code || "#8a5a00";
+
+      row.appendChild(left);
+      row.appendChild(middle);
+      row.appendChild(badge);
+      listWrap.appendChild(row);
+    });
+  };
+
+  // Event listeners for filters
+  searchInput.addEventListener("input", (e) => {
+    uiState.searchQuery = e.target.value || "";
+    renderFilteredUnits();
   });
+
+  typeFilter.addEventListener("change", (e) => {
+    uiState.typeFilter = e.target.value || "";
+    renderFilteredUnits();
+  });
+
+  // Initial render
+  renderFilteredUnits();
 }
 
 /* =========================
@@ -339,4 +473,6 @@ function renderAmenities() {
     container.appendChild(row);
   });
 }
+
+// Initial render
 render();
