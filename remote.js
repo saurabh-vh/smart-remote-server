@@ -1,346 +1,342 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const socket = io();
-  const appEl = document.getElementById("app");
+const socket = io();
+const appEl = document.getElementById("app");
 
-  /* =========================
-     GLOBAL STATE
+let pairedCode = null;
+let projectName = null;
+let remoteUiState = null;
+let availableDisplays = [];
+
+/* =========================
+     SINGLE SOURCE OF TRUTH
   ========================= */
-  let pairedCode = null;
-  let projectName = null;
-  let remoteUiState = null;
+const uiState = {
+  section: "homes", // homes | amenities | location
+  stack: [], // navigation stack
+  data: {
+    homes: {
+      buildings: [],
+      units: [],
+    },
+    amenities: {},
+    location: {},
+  },
+};
 
-  let activeSection = "homes";
-
-  // Homes state
-  let selectedUnits = [];
-  let activeHomeBuildingId = null;
-  let activeBuildingFlatId = null;
-  let homeUnitSearchQuery = "";
-  let homeUnitTypeFilter = "";
-
-  // Amenities
-  let activeAmenityId = null;
-
-  /* =========================
+/* =========================
      URL AUTO CONNECT
   ========================= */
-  const params = new URLSearchParams(window.location.search);
-  const codeFromUrl = params.get("code");
+const params = new URLSearchParams(window.location.search);
+const codeFromUrl = params.get("code");
 
-  const codeInputs = document.querySelectorAll(".code-input");
-
-  if (codeFromUrl && codeFromUrl.length === 4) {
-    codeFromUrl.split("").forEach((c, i) => {
-      if (codeInputs[i]) codeInputs[i].value = c;
-    });
-    socket.emit("pair_remote", { code: codeFromUrl });
-  }
-
-  /* =========================
-     CODE INPUT HANDLING
-  ========================= */
-  codeInputs.forEach((input, index) => {
-    input.addEventListener("input", () => {
-      input.value = input.value.replace(/[^0-9]/g, "");
-      if (input.value && index < codeInputs.length - 1) {
-        codeInputs[index + 1].focus();
-      }
-      tryPair();
-    });
-
-    input.addEventListener("keydown", (e) => {
-      if (e.key === "Backspace" && !input.value && index > 0) {
-        codeInputs[index - 1].focus();
-      }
-    });
+if (codeFromUrl && codeFromUrl.length === 4) {
+  document.querySelectorAll(".code-input").forEach((i, idx) => {
+    i.value = codeFromUrl[idx] || "";
   });
+  socket.emit("pair_remote", { code: codeFromUrl });
+}
 
-  function tryPair() {
-    const code = Array.from(codeInputs).map((i) => i.value).join("");
-    if (code.length === 4) {
-      socket.emit("pair_remote", { code });
+/* =========================
+     CODE INPUTS
+  ========================= */
+const inputs = document.querySelectorAll(".code-input");
+
+inputs.forEach((input, index) => {
+  input.addEventListener("input", () => {
+    input.value = input.value.replace(/[^0-9]/g, "");
+    if (input.value && index < inputs.length - 1) {
+      inputs[index + 1].focus();
     }
-  }
-
-  function clearCodeInputs() {
-    codeInputs.forEach((i) => (i.value = ""));
-    codeInputs[0].focus();
-  }
-
-  /* =========================
-     MENU NAVIGATION
-  ========================= */
-  document.querySelectorAll(".menu-item").forEach((item) => {
-    item.onclick = () => {
-      document
-        .querySelectorAll(".menu-item")
-        .forEach((i) => i.classList.remove("active"));
-
-      item.classList.add("active");
-      activeSection = item.dataset.section;
-
-      // Reset per section
-      if (activeSection === "homes") {
-        selectedUnits = [];
-        activeHomeBuildingId = null;
-        activeBuildingFlatId = null;
-        homeUnitSearchQuery = "";
-        homeUnitTypeFilter = "";
-      }
-
-      if (activeSection === "amenities") {
-        activeAmenityId = null;
-      }
-
-      renderSection();
-
-      if (activeSection === "homes" || activeSection === "amenities") {
-        socket.emit("remote_command", {
-          code: pairedCode,
-          command: "request_homes",
-        });
-      }
-
-      if (activeSection === "location") {
-        socket.emit("remote_command", {
-          code: pairedCode,
-          command: "request_location",
-        });
-      }
-    };
+    checkAndPair();
   });
 
-  /* =========================
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Backspace" && !input.value && index > 0) {
+      inputs[index - 1].focus();
+    }
+  });
+});
+
+function checkAndPair() {
+  const code = Array.from(inputs)
+    .map((i) => i.value)
+    .join("");
+  if (code.length === 4) {
+    socket.emit("pair_remote", { code });
+  }
+}
+
+/* =========================
+     NAVIGATION HELPERS
+  ========================= */
+function navigate(level, id, extra = {}) {
+  uiState.stack.push({ level, id, ...extra });
+  render();
+}
+
+// goBack
+function goBack() {
+  uiState.stack.pop();
+  render();
+}
+
+// resetSection
+function resetSection(section) {
+  uiState.section = section;
+  uiState.stack = [];
+  render();
+}
+
+/* =========================
+     MENU CLICK
+  ========================= */
+document.querySelectorAll(".menu-item").forEach((item) => {
+  item.onclick = () => {
+    document
+      .querySelectorAll(".menu-item")
+      .forEach((i) => i.classList.remove("active"));
+    item.classList.add("active");
+
+    resetSection(item.dataset.section);
+
+    if (uiState.section === "homes" || uiState.section === "amenities") {
+      socket.emit("remote_command", {
+        code: pairedCode,
+        command: "request_homes",
+      });
+    }
+
+    if (uiState.section === "location") {
+      socket.emit("remote_command", {
+        code: pairedCode,
+        command: "request_location",
+      });
+    }
+  };
+});
+
+/* =========================
      SOCKET EVENTS
   ========================= */
-  socket.on("pair_success", ({ code, projectName: proj, displays }) => {
-    pairedCode = code;
-    projectName = proj;
+socket.on("pair_success", ({ code, projectName: projName, displays }) => {
+  pairedCode = code;
+  projectName = projName;
+  availableDisplays = displays;
 
-    document.getElementById("projectStatus").textContent =
-      "Connected to " + proj;
+  document.getElementById("projectStatus").textContent =
+    "Connected to " + projName;
 
-    appEl.classList.add("connected");
-    updateDisplaySelector(displays, code);
-  });
+  appEl.classList.add("connected");
+  updateDisplaySelector(displays, code);
+});
 
-  socket.on("pair_error", ({ message }) => {
-    alert(message);
-    clearCodeInputs();
-    appEl.classList.remove("connected");
-  });
+socket.on("display_state", ({ state }) => {
+  remoteUiState = state;
+  uiState.data.homes.buildings =
+    state?.firstLevelFilter?.selectedBuildings || [];
+  render();
+});
 
-  socket.on("display_state", ({ state }) => {
-    remoteUiState = state;
-    renderSection();
-  });
+socket.on("second_level_update", ({ selectedUnits = [] }) => {
+  uiState.data.homes.units = selectedUnits;
+  render();
+});
 
-  socket.on("second_level_update", ({ selectedUnits: units = [] }) => {
-    selectedUnits = units;
-    homeUnitSearchQuery = "";
-    homeUnitTypeFilter = "";
-    activeBuildingFlatId = null;
-    if (activeSection === "homes") renderSection();
-  });
+socket.on("display_list_update", ({ displays }) => {
+  availableDisplays = displays;
+  updateDisplaySelector(displays, pairedCode);
+});
 
-  socket.on("switch_success", ({ code, displayName, displays }) => {
-    pairedCode = code;
-    document.getElementById("projectStatus").textContent =
-      "Connected to " + projectName + " - " + displayName;
-    updateDisplaySelector(displays, code);
-  });
+socket.on("pair_error", ({ message }) => {
+  alert(message);
+  inputs.forEach((i) => (i.value = ""));
+  appEl.classList.remove("connected");
+});
 
-  socket.on("display_list_update", ({ displays }) => {
-    updateDisplaySelector(displays, pairedCode);
-  });
-
-  /* =========================
-     DISPLAY SELECT
+/* =========================
+     DISPLAY SELECTOR
   ========================= */
-  const displaySelect = document.getElementById("displaySelect");
+function updateDisplaySelector(displays, currentCode) {
+  const select = document.getElementById("displaySelect");
+  select.innerHTML = "";
 
-  function updateDisplaySelector(displays, currentCode) {
-    displaySelect.innerHTML = "";
-    displays.forEach((d) => {
-      const opt = document.createElement("option");
-      opt.value = d.code;
-      opt.textContent = d.displayName;
-      if (d.code === currentCode) opt.selected = true;
-      displaySelect.appendChild(opt);
-    });
+  displays.forEach((display) => {
+    const opt = document.createElement("option");
+    opt.value = display.code;
+    opt.textContent = display.displayName;
+    if (display.code === currentCode) opt.selected = true;
+    select.appendChild(opt);
+  });
+}
+
+document.getElementById("displaySelect").addEventListener("change", (e) => {
+  const newCode = e.target.value;
+  if (!newCode || newCode === pairedCode) return;
+
+  socket.emit("switch_display", {
+    newCode,
+    projectName,
+  });
+});
+
+socket.on("switch_success", ({ code, displayName, displays }) => {
+  pairedCode = code;
+  availableDisplays = displays;
+
+  document.getElementById("projectStatus").textContent =
+    "Connected to " + projectName + " - " + displayName;
+
+  updateDisplaySelector(displays, code);
+});
+
+/* =========================
+     RENDER CONTROLLER
+  ========================= */
+function render() {
+  const content = document.getElementById("contentArea");
+  content.innerHTML = "";
+
+  if (uiState.section === "homes") renderHomes();
+  if (uiState.section === "amenities") renderAmenities();
+}
+
+function getActive(level) {
+  return uiState.stack.findLast((item) => item.level === level)?.id || null;
+}
+/* =========================
+     HOMES (STACK BASED)
+  ========================= */
+function renderHomes() {
+  const content = document.getElementById("contentArea");
+  content.innerHTML = `
+      <div class="section-title">Homes Search</div>
+      <div class="section-card" id="homesView"></div>
+    `;
+
+  const view = document.getElementById("homesView");
+  const current = uiState.stack[uiState.stack.length - 1];
+
+  if (!current) {
+    renderBuildings(view);
+  } else if (current.level === "building") {
+    renderUnits(view);
+  }
+}
+
+function renderBuildings(container) {
+  const buildings = uiState.data.homes.buildings;
+  const activeBuildingId = getActive("building");
+
+  if (!buildings.length) {
+    container.innerHTML = `<div class="empty">No buildings found</div>`;
+    return;
   }
 
-  displaySelect.addEventListener("change", (e) => {
-    const newCode = e.target.value;
-    if (!newCode || newCode === pairedCode) return;
+  buildings.forEach((b) => {
+    const row = document.createElement("div");
+    row.className = "list-row";
 
-    socket.emit("switch_display", {
-      newCode,
-      projectName,
-    });
+    if (b.id === activeBuildingId) {
+      row.classList.add("active");
+    }
+
+    row.textContent = b.building_name || `Building ${b.id}`;
+
+    row.onclick = () => {
+      navigate("building", b.id);
+      socket.emit("remote_command", {
+        code: pairedCode,
+        command: "home_search_filter",
+        payload: { id: b.id },
+      });
+    };
+
+    container.appendChild(row);
   });
+}
 
-  /* =========================
-     SECTION RENDER
-  ========================= */
-  function renderSection() {
-    const content = document.getElementById("contentArea");
-    content.innerHTML = "";
+function renderUnits(container) {
+  const units = uiState.data.homes.units;
+  const activeUnitId = getActive("unit");
 
-    if (activeSection === "homes") {
-      content.innerHTML = `
-        <div class="section-title">Homes Search</div>
-        <div class="section-card" id="homeSearch"></div>
-      `;
-      renderHomeSearch();
-      return;
-    }
+  const back = document.createElement("div");
+  back.className = "list-row units-back";
+  back.textContent = "← Back";
+  back.onclick = goBack;
+  container.appendChild(back);
 
-    if (activeSection === "amenities") {
-      content.innerHTML = `
-        <div class="section-title">Amenities</div>
-        <div class="section-card" id="amenities"></div>
-      `;
-      renderAmenities();
-      return;
-    }
-
-    if (activeSection === "location") {
-      content.innerHTML = `
-        <div class="section-title">Location</div>
-        <div class="section-card">
-          <div class="empty">Location opened on display</div>
-        </div>
-      `;
-    }
+  if (!units.length) {
+    container.innerHTML += `<div class="empty">No units found</div>`;
+    return;
   }
 
-  /* =========================
+  units.forEach((u) => {
+    const row = document.createElement("div");
+    row.className = "list-row unit-row";
+
+    if (u.unit_id === activeUnitId) {
+      row.classList.add("active");
+    }
+
+    row.textContent = u.unique_unit_number || u.unit_id;
+
+    row.onclick = () => {
+      // 🔥 push unit level into stack
+      navigate("unit", u.unit_id);
+
+      socket.emit("remote_command", {
+        code: pairedCode,
+        command: "go_to_unit",
+        payload: {
+          unit_id: u.unit_id,
+          unit_number: u.unique_unit_number,
+        },
+      });
+    };
+
+    container.appendChild(row);
+  });
+}
+
+/* =========================
      AMENITIES
   ========================= */
-  function renderAmenities() {
-    const container = document.getElementById("amenities");
-    container.innerHTML = "";
+function renderAmenities() {
+  const content = document.getElementById("contentArea");
+  content.innerHTML = `
+    <div class="section-title">Amenities</div>
+    <div class="section-card" id="amenitiesView"></div>
+  `;
 
-    const list = remoteUiState?.amenities || [];
+  const container = document.getElementById("amenitiesView");
+  const list = remoteUiState?.amenities || [];
+  const activeAmenityId = getActive("amenity");
 
-    if (!list.length) {
-      container.innerHTML = `<div class="empty">No amenities found</div>`;
-      return;
-    }
-
-    list.forEach((a) => {
-      const row = document.createElement("div");
-      row.className = "list-row";
-      if (a.id === activeAmenityId) row.classList.add("active");
-
-      row.textContent = a.amenity_name || `Amenity ${a.id}`;
-
-      row.onclick = () => {
-        activeAmenityId = a.id;
-        renderAmenities();
-        socket.emit("remote_command", {
-          code: pairedCode,
-          command: "amenity_select",
-          payload: { id: a.id },
-        });
-      };
-
-      container.appendChild(row);
-    });
+  if (!list.length) {
+    container.innerHTML = `<div class="empty">No amenities found</div>`;
+    return;
   }
 
-  /* =========================
-     HOMES
-  ========================= */
-  function renderHomeSearch() {
-    const container = document.getElementById("homeSearch");
-    container.innerHTML = "";
+  list.forEach((a) => {
+    const row = document.createElement("div");
+    row.className = "list-row";
 
-    // SECOND LEVEL (UNITS)
-    if (selectedUnits.length) {
-      const toolbar = document.createElement("div");
-      toolbar.className = "list-row units-toolbar";
+    if (a.id === activeAmenityId) {
+      row.classList.add("active");
+    }
 
-      const backBtn = document.createElement("div");
-      backBtn.className = "units-back";
-      backBtn.textContent = "←";
-      backBtn.onclick = () => {
-        selectedUnits = [];
-        activeBuildingFlatId = null;
-        socket.emit("remote_command", {
-          code: pairedCode,
-          command: "home_search_back",
-        });
-        renderSection();
-      };
+    row.textContent = a.amenity_name;
 
-      toolbar.appendChild(backBtn);
-      container.appendChild(toolbar);
+    row.onclick = () => {
+      navigate("amenity", a.id);
 
-      selectedUnits.forEach((u) => {
-        const row = document.createElement("div");
-        row.className = "list-row unit-row";
-
-        if (u.unit_id === activeBuildingFlatId) {
-          row.classList.add("active");
-        }
-
-        row.onclick = () => {
-          activeBuildingFlatId = u.unit_id;
-          renderHomeSearch();
-          socket.emit("remote_command", {
-            code: pairedCode,
-            command: "go_to_unit",
-            payload: {
-              unit_id: u.unit_id,
-              unit_number: u.unique_unit_number,
-            },
-          });
-        };
-
-        const left = document.createElement("div");
-        left.className = "unit-left";
-        left.textContent = u.unique_unit_number || "-";
-
-        row.appendChild(left);
-        container.appendChild(row);
+      socket.emit("remote_command", {
+        code: pairedCode,
+        command: "amenity_select",
+        payload: { id: a.id },
       });
+    };
 
-      return;
-    }
-
-    // FIRST LEVEL (BUILDINGS)
-    const buildings =
-      remoteUiState?.firstLevelFilter?.selectedBuildings || [];
-
-    if (!buildings.length) {
-      container.innerHTML = `<div class="empty">No buildings found</div>`;
-      return;
-    }
-
-    buildings.forEach((b) => {
-      const row = document.createElement("div");
-      row.className = "list-row";
-      if (b.id === activeHomeBuildingId) row.classList.add("active");
-
-      row.textContent = b.building_name || `Building ${b.id}`;
-
-      row.onclick = () => {
-        activeHomeBuildingId = b.id;
-        activeBuildingFlatId = null;
-        renderHomeSearch();
-
-        socket.emit("remote_command", {
-          code: pairedCode,
-          command: "home_search_filter",
-          payload: { id: b.id },
-        });
-      };
-
-      container.appendChild(row);
-    });
-  }
-
-  renderSection();
-});
+    container.appendChild(row);
+  });
+}
+render();
