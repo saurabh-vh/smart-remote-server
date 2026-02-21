@@ -82,10 +82,19 @@ function navigate(level, id, extra = {}) {
 
 // goBack
 function goBack() {
+  // Remove the current level (e.g. building / unit) from UI navigation stack
   uiState.stack.pop();
-  // Reset search filters when going back
+
+  // Reset unit-level filters when navigating back
   uiState.searchQuery = "";
   uiState.typeFilter = "";
+
+  // Notify remote display to go back / clear home search filter
+  // This keeps website UI and remote display in sync
+  socket.emit("remote_command", {
+    code: pairedCode,
+    command: "home_search_back",
+  });
   render();
 }
 
@@ -295,7 +304,7 @@ function renderUnitsWithFilters(container) {
 
   const typeFilter = document.createElement("select");
   typeFilter.className = "units-filter";
-  
+
   const allOpt = document.createElement("option");
   allOpt.value = "";
   allOpt.textContent = "All types";
@@ -303,13 +312,9 @@ function renderUnitsWithFilters(container) {
 
   // Get unique unit types
   const types = [
-    ...new Set(
-      units
-        .map((u) => getUnitTypeLabel(u.unit_type))
-        .filter(Boolean),
-    ),
+    ...new Set(units.map((u) => getUnitTypeLabel(u.unit_type)).filter(Boolean)),
   ];
-  
+
   types.forEach((t) => {
     const opt = document.createElement("option");
     opt.value = t;
@@ -354,12 +359,24 @@ function renderUnitsWithFilters(container) {
       const row = document.createElement("div");
       row.className = "list-row unit-row";
 
+      // Check if this unit is the active one
       if (u.unit_id === activeUnitId) {
         row.classList.add("active");
       }
 
       row.onclick = () => {
-        navigate("unit", u.unit_id);
+        // Remove active class from all unit rows
+        document
+          .querySelectorAll(".unit-row")
+          .forEach((r) => r.classList.remove("active"));
+
+        // Add active class to this row
+        row.classList.add("active");
+
+        // Navigate to unit level (add to stack)
+        // navigate("unit", u.unit_id);
+
+        // Emit socket event
         socket.emit("remote_command", {
           code: pairedCode,
           command: "go_to_unit",
@@ -379,7 +396,9 @@ function renderUnitsWithFilters(container) {
 
       const areaLine = document.createElement("div");
       areaLine.className = "unit-middle-line unit-area";
-      const areaLabel = u.area_definition ? `${u.area_definition} Area` : "Area";
+      const areaLabel = u.area_definition
+        ? `${u.area_definition} Area`
+        : "Area";
       const areaValue = u.area_of_unit ?? "-";
       const areaUnit = u.display_of_area_unit || "";
       areaLine.textContent = `${areaLabel}: ${areaValue} ${areaUnit}`;
@@ -448,7 +467,7 @@ function renderAmenities() {
   const list = remoteUiState?.amenities || [];
   const activeAmenityId = getActive("amenity");
 
-  console.log("Amenities list:", list);
+  // console.log("Amenities list:", list);
 
   if (!list.length) {
     container.innerHTML = `<div class="empty">No amenities found</div>`;
@@ -456,12 +475,13 @@ function renderAmenities() {
   }
 
   // Placeholder image
-  const placeholderImage = "https://images.unsplash.com/photo-1574362848149-11496d93a7c7?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80";
+  const placeholderImage =
+    "https://images.unsplash.com/photo-1574362848149-11496d93a7c7?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80";
 
   list.forEach((a) => {
     const card = document.createElement("div");
     card.className = "amenity-card";
-    
+
     if (a.id === activeAmenityId) {
       card.classList.add("active");
     }
@@ -475,16 +495,14 @@ function renderAmenities() {
     `;
 
     card.onclick = () => {
-      // Sab cards se active class hatao
-      document.querySelectorAll('.amenity-card').forEach(c => c.classList.remove('active'));
-      
-      // Is card ko active karo
-      card.classList.add('active');
-      
-      // Navigate karo
+      document
+        .querySelectorAll(".amenity-card")
+        .forEach((c) => c.classList.remove("active"));
+
+      card.classList.add("active");
+
       navigate("amenity", a.id);
-      
-      // Server ko bhejo
+
       socket.emit("remote_command", {
         code: pairedCode,
         command: "amenity_select",
