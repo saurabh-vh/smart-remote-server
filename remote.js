@@ -434,35 +434,57 @@ function renderUnitsWithFilters(container) {
 /* =========================
      AMENITIES
   ========================= */
+/* =========================
+     AMENITIES
+  ========================= */
 function renderAmenities() {
   const content = document.getElementById("contentArea");
   content.innerHTML = `
     <div class="section-title">Amenities</div>
-    <div class="section-card" id="amenitiesView"></div>
+    <div class="amenities-grid" id="amenitiesView"></div>
   `;
 
   const container = document.getElementById("amenitiesView");
   const list = remoteUiState?.amenities || [];
   const activeAmenityId = getActive("amenity");
 
+  console.log("Amenities list:", list);
+
   if (!list.length) {
     container.innerHTML = `<div class="empty">No amenities found</div>`;
     return;
   }
 
-  list.forEach((a) => {
-    const row = document.createElement("div");
-    row.className = "list-row";
+  // Placeholder image
+  const placeholderImage = "https://images.unsplash.com/photo-1574362848149-11496d93a7c7?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80";
 
+  list.forEach((a) => {
+    const card = document.createElement("div");
+    card.className = "amenity-card";
+    
     if (a.id === activeAmenityId) {
-      row.classList.add("active");
+      card.classList.add("active");
     }
 
-    row.textContent = a.amenity_name;
+    const amenityName = a.amenity_name || "";
 
-    row.onclick = () => {
+    card.innerHTML = `
+      <div class="amenity-image" style="background-image: url('${placeholderImage}')"></div>
+      <div class="amenity-overlay"></div>
+      <div class="amenity-name">${amenityName}</div>
+    `;
+
+    card.onclick = () => {
+      // Sab cards se active class hatao
+      document.querySelectorAll('.amenity-card').forEach(c => c.classList.remove('active'));
+      
+      // Is card ko active karo
+      card.classList.add('active');
+      
+      // Navigate karo
       navigate("amenity", a.id);
-
+      
+      // Server ko bhejo
       socket.emit("remote_command", {
         code: pairedCode,
         command: "amenity_select",
@@ -470,7 +492,7 @@ function renderAmenities() {
       });
     };
 
-    container.appendChild(row);
+    container.appendChild(card);
   });
 }
 

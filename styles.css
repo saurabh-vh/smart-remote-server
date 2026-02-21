@@ -301,12 +301,74 @@
           pointer-events: none;
       }
 
-      /* Responsive */
-      @media (max-width: 900px) {
-          .touchpad-panel {
-              display: none;
-          }
+     /* =========================
+         AMENITIES GRID STYLES 
+      ========================= */
+      .amenities-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+          gap: 16px;
+          padding: 4px;
       }
+
+      .amenity-card {
+          position: relative;
+          background: #fff;
+          border-radius: 16px;
+          overflow: hidden;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+          cursor: pointer;
+          border: 2px solid transparent;
+          height: 15vh;
+          min-height: 120px;
+      }
+
+      .amenity-card.active {
+          border: 4px solid #007aff !important; 
+      }
+
+      .amenity-image {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-size: cover;
+          background-position: center;
+          background-repeat: no-repeat;
+          filter: blur(1.5px) brightness(0.9);
+          transform: scale(1.1);
+      }
+
+      /* Dark overlay for better text readability */
+      .amenity-overlay {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(to top,
+                  rgba(0, 0, 0, 0.8) 0%,
+                  rgba(0, 0, 0, 0.4) 30%,
+                  rgba(0, 0, 0, 0.1) 60%);
+          z-index: 1;
+      }
+
+      .amenity-name {
+          position: absolute;
+          bottom: 16px;
+          left: 16px;
+          right: 16px;
+          color: white;
+          font-size: 18px;
+          font-weight: 600;
+          text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+          z-index: 2;
+          line-height: 1.3;
+          word-break: break-word;
+      }
+
+      
 
 
       /* =========================
