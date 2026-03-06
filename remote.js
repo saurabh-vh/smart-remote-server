@@ -514,5 +514,111 @@ function renderAmenities() {
   });
 }
 
+// Zoom IN / OUT Drag Slider
+const handle = document.querySelector(".zoomHandle");
+const slider = document.querySelector(".zoomSlider");
+
+let zoomDragging = false;
+
+function startDrag(e) {
+  zoomDragging = true;
+}
+
+function stopDrag() {
+  zoomDragging = false;
+}
+
+function moveDrag(e) {
+  if (!zoomDragging) return;
+
+  const rect = slider.getBoundingClientRect();
+
+  let clientY;
+
+  if (e.touches) {
+    clientY = e.touches[0].clientY;
+  } else {
+    clientY = e.clientY;
+  }
+
+  let y = clientY - rect.top;
+
+  const min = 20;
+  const max = rect.height - 20;
+
+  y = Math.max(min, Math.min(max, y));
+
+  handle.style.top = `${y}px`;
+
+  const zoomValue = 1 - (y / rect.height);
+
+  socket.emit("remote_command", {
+    command: "zoom",
+    payload: {
+      zoom: zoomValue,
+    },
+  });
+}
+
+/* Mouse events */
+handle.addEventListener("mousedown", startDrag);
+document.addEventListener("mouseup", stopDrag);
+document.addEventListener("mousemove", moveDrag);
+
+/* Touch events (TABLET FIX) */
+handle.addEventListener("touchstart", startDrag);
+document.addEventListener("touchend", stopDrag);
+document.addEventListener("touchmove", moveDrag);
+
+// Joystick Control
+const joystick = document.querySelector(".joystick");
+const stick = document.querySelector(".joystick-inner");
+
+let joystickDragging = false;
+let centerX = 0;
+let centerY = 0;
+
+joystick.addEventListener("touchstart", (e) => {
+  joystickDragging = true;
+
+  const rect = joystick.getBoundingClientRect();
+  centerX = rect.width / 2;
+  centerY = rect.height / 2;
+});
+
+joystick.addEventListener("touchend", () => {
+  joystickDragging = false;
+
+  stick.style.transform = "translate(-50%, -50%)";
+
+  socket.emit("remote_command", {
+    command: "move_stop",
+  });
+});
+
+joystick.addEventListener("touchmove", (e) => {
+  if (!joystickDragging) return;
+
+  const rect = joystick.getBoundingClientRect();
+
+  const x = e.touches[0].clientX - rect.left - centerX;
+  const y = e.touches[0].clientY - rect.top - centerY;
+
+  const max = 35;
+
+  const limitedX = Math.max(-max, Math.min(max, x));
+  const limitedY = Math.max(-max, Math.min(max, y));
+
+  stick.style.transform = `translate(calc(-50% + ${limitedX}px), calc(-50% + ${limitedY}px))`;
+
+  socket.emit("remote_command", {
+    command: "move",
+    payload: {
+      x: limitedX,
+      y: limitedY,
+    },
+  });
+});
+
 // Initial render
 render();

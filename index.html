@@ -48,6 +48,35 @@
           <div id="contentArea"></div>
         </div>
 
+        <!-- joystick -->
+        <div class="joystick-panel">
+          <div class="joystick">
+            <div class="joystick-inner">
+              <div class="drag-text">DRAG TO MOVE</div>
+            </div>
+
+            <div class="arrow up"></div>
+            <div class="arrow down"></div>
+            <div class="arrow left"></div>
+            <div class="arrow right"></div>
+          </div>
+        </div>
+
+        <!-- zoomControl -->
+        <div class="zoomSlider">
+          <div class="zoom-label max">MAX</div>
+
+          <div class="zoomTrack"></div>
+
+          <div class="zoomHandle">
+            <div class="grip"></div>
+            <div class="grip"></div>
+            <div class="grip"></div>
+          </div>
+
+          <div class="zoom-label min">MIN</div>
+        </div>
+
         <!-- Touchpad -->
         <!-- <div class="touchpad-panel">Touchpad</div> -->
       </div>
@@ -55,6 +84,5 @@
 
     <script src="/socket.io/socket.io.js"></script>
     <script src="/remote.js"></script>
-   
   </body>
 </html>
