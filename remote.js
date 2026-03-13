@@ -82,8 +82,16 @@ function navigate(level, id, extra = {}) {
 
 // goBack
 function goBack() {
-  // Remove the current level (e.g. building / unit) from UI navigation stack
-  uiState.stack.pop();
+  const current = uiState.stack[uiState.stack.length - 1];
+
+  if (current?.level === "building") {
+    // Pop building, but keep its id as "selectedBuilding"
+    // so getActive() can still highlight it on the buildings list
+    uiState.stack.pop();
+    uiState.stack.push({ level: "selectedBuilding", id: current.id });
+  } else {
+    uiState.stack.pop();
+  }
 
   // Reset unit-level filters when navigating back
   uiState.searchQuery = "";
@@ -244,7 +252,8 @@ function renderHomes() {
   const view = document.getElementById("homesView");
   const current = uiState.stack[uiState.stack.length - 1];
 
-  if (!current) {
+  // "selectedBuilding" = came back from units, still show buildings list
+  if (!current || current.level === "selectedBuilding") {
     renderBuildings(view);
   } else if (current.level === "building") {
     renderUnitsWithFilters(view);
@@ -253,7 +262,9 @@ function renderHomes() {
 
 function renderBuildings(container) {
   const buildings = uiState.data.homes.buildings;
-  const activeBuildingId = getActive("building");
+  // "selectedBuilding" preserves highlight after goBack()
+  const activeBuildingId =
+    getActive("building") || getActive("selectedBuilding");
 
   if (!buildings.length) {
     container.innerHTML = `<div class="empty">No buildings found</div>`;
@@ -550,7 +561,7 @@ function moveDrag(e) {
 
   handle.style.top = `${y}px`;
 
-  const zoomValue = 1 - (y / rect.height);
+  const zoomValue = 1 - y / rect.height;
 
   socket.emit("remote_command", {
     command: "zoom",
