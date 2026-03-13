@@ -589,4 +589,9 @@ body {
   .content {
     padding: 16px;
   }
+  /* Renceter view button css  */
+  .recenter-view {
+    padding: 1.3vh 2vh;
+    left: 45vw;
+  }
 }
