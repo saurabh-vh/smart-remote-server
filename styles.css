@@ -171,7 +171,7 @@ body {
 
 .units-filter {
   width: 130px;
-  height: 5vh;
+  height: 4vh;
   border: 1px solid #d9dee5;
   border-radius: 8px;
   padding: 8px 10px;
@@ -375,8 +375,8 @@ body {
   position: fixed;
   left: 5vw;
   bottom: 10vh;
-  width: 160px;
-  height: 160px;
+  width: 10vw;
+  height: 10vw;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -385,8 +385,8 @@ body {
 
 /* Joystick base */
 .joystick {
-  width: 150px;
-  height: 150px;
+  width: 8vw;
+  height: 8vw;
   background: white;
   border-radius: 50%;
   position: relative;
@@ -395,8 +395,8 @@ body {
 
 /* Draggable stick */
 .joystick-inner {
-  width: 80px;
-  height: 80px;
+  width: 4vw;
+  height: 4vw;
   background: #cfcfcf;
   border-radius: 50%;
   position: absolute;
@@ -478,8 +478,7 @@ body {
   font-size: 12px;
   color: #434242;
   font-weight: 600;
-  user-select: none;
-  pointer-events: none;
+  cursor: pointer;
 }
 
 /* zoomSlider */
@@ -592,7 +591,7 @@ body {
 
   /* Joystick panel */
   .joystick-panel {
-    width: 32vw;
+    width: 30vw;
     height: 30vw;
     left: 3vw;
     bottom: 6vh;
@@ -600,16 +599,26 @@ body {
 
   /* Joystick base */
   .joystick {
-    width: 20vw;
-    height: 20vw;
+    width: 30vw;
+    height: 30vw;
   }
 
   /* Draggable stick */
   .joystick-inner {
-    width: 10vw;
-    height: 10vw;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 15vw;
+    height: 15vw;
   }
-
+  /* Drag Text  */
+  .drag-text {
+    font-size: 7px;
+    color: #555;
+    font-weight: 400;
+    user-select: none;
+    pointer-events: none;
+  }
   /* Arrows */
   .up {
     top: 1vw;
