@@ -589,9 +589,65 @@ body {
   .content {
     padding: 16px;
   }
+
+  /* Joystick panel */
+  .joystick-panel {
+    width: 32vw;
+    height: 30vw;
+    left: 3vw;
+    bottom: 6vh;
+  }
+
+  /* Joystick base */
+  .joystick {
+    width: 20vw;
+    height: 20vw;
+  }
+
+  /* Draggable stick */
+  .joystick-inner {
+    width: 10vw;
+    height: 10vw;
+  }
+
+  /* Arrows */
+  .up {
+    top: 1vw;
+  }
+  .down {
+    bottom: 1vw;
+  }
+  .left {
+    left: 1vw;
+  }
+  .right {
+    right: 1vw;
+  }
+
   /* Renceter view button css  */
   .recenter-view {
     padding: 1.3vh 2vh;
-    left: 45vw;
+    left: 38vw;
+  }
+
+  /* Zoom slider */
+  .zoomSlider {
+    right: 4vw;
+    bottom: 6vh;
+    width: 9vw;
+    height: 18vh;
+    border-radius: 5vw;
+  }
+
+  .zoomHandle {
+    width: 13vw;
+    height: 7vw;
+    border-radius: 4vw;
+  }
+
+  .grip {
+    width: 5vw;
+    height: 0.5vw;
+    margin: 0.4vw 0;
   }
 }
