@@ -525,7 +525,7 @@ function renderAmenities() {
   });
 }
 
-// Zoom IN / OUT Drag Slider
+// ******************************************** Zoom IN / OUT Drag Slider (START) **********************************************
 const handle = document.querySelector(".zoomHandle");
 const slider = document.querySelector(".zoomSlider");
 
@@ -580,8 +580,9 @@ document.addEventListener("mousemove", moveDrag);
 handle.addEventListener("touchstart", startDrag);
 document.addEventListener("touchend", stopDrag);
 document.addEventListener("touchmove", moveDrag);
+// ******************************************** Zoom IN / OUT Drag Slider (END) **********************************************
 
-// Joystick Control
+// ************************************************** Joystick Control (START) **************************************************
 const joystick = document.querySelector(".joystick");
 const stick = document.querySelector(".joystick-inner");
 
@@ -589,31 +590,51 @@ let joystickDragging = false;
 let centerX = 0;
 let centerY = 0;
 
-joystick.addEventListener("touchstart", (e) => {
+function getDirection(x, y) {
+  const threshold = 10;
+  let vertical = "";
+  let horizontal = "";
+
+  if (y < -threshold) vertical = "w";
+  if (y > threshold) vertical = "s";
+
+  if (x < -threshold) horizontal = "a";
+  if (x > threshold) horizontal = "d";
+
+  return vertical + horizontal;
+}
+
+function startJoystick(e) {
   joystickDragging = true;
 
   const rect = joystick.getBoundingClientRect();
   centerX = rect.width / 2;
   centerY = rect.height / 2;
-});
+}
 
-joystick.addEventListener("touchend", () => {
-  joystickDragging = false;
+let lastSend = 0;
 
-  stick.style.transform = "translate(-50%, -50%)";
+function sendDirection(direction) {
+  const now = Date.now();
+
+  if (now - lastSend < 50) return;
+
+  lastSend = now;
 
   socket.emit("remote_command", {
-    command: "move_stop",
+    code: pairedCode,
+    command: "move",
+    payload: { key: direction },
   });
-});
+}
 
-joystick.addEventListener("touchmove", (e) => {
+function moveJoystick(clientX, clientY) {
   if (!joystickDragging) return;
 
   const rect = joystick.getBoundingClientRect();
 
-  const x = e.touches[0].clientX - rect.left - centerX;
-  const y = e.touches[0].clientY - rect.top - centerY;
+  const x = clientX - rect.left - centerX;
+  const y = clientY - rect.top - centerY;
 
   const max = 35;
 
@@ -622,13 +643,43 @@ joystick.addEventListener("touchmove", (e) => {
 
   stick.style.transform = `translate(calc(-50% + ${limitedX}px), calc(-50% + ${limitedY}px))`;
 
+  const direction = getDirection(limitedX, limitedY);
+  if (!direction) return;
+
+  console.log("Joystick direction:", direction);
+  sendDirection(direction);
+}
+
+/* TOUCH */
+joystick.addEventListener("touchstart", startJoystick);
+
+function stopJoystick() {
+  if (!joystickDragging) return;
+  joystickDragging = false;
+
+  stick.style.transform = "translate(-50%, -50%)";
+
+  console.log("Joystick stopped");
+
   socket.emit("remote_command", {
-    command: "move",
-    payload: {
-      x: limitedX,
-      y: limitedY,
-    },
+    code: pairedCode,
+    command: "move_stop",
   });
+}
+
+document.addEventListener("touchend", stopJoystick);
+
+document.addEventListener("touchmove", (e) => {
+  moveJoystick(e.touches[0].clientX, e.touches[0].clientY);
+});
+
+/* MOUSE */
+joystick.addEventListener("mousedown", startJoystick);
+
+document.addEventListener("mouseup", stopJoystick);
+
+document.addEventListener("mousemove", (e) => {
+  moveJoystick(e.clientX, e.clientY);
 });
 
 // Initial render
