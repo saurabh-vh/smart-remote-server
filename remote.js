@@ -664,6 +664,7 @@ function stopJoystick() {
   socket.emit("remote_command", {
     code: pairedCode,
     command: "move_stop",
+    payload: { key: "stop" },
   });
 }
 
