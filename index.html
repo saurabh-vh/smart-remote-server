@@ -46,11 +46,14 @@
         <div id="contentArea"></div>
       </div>
 
+      <!-- For Right Side Joystick Space -->
+      <div class="sidebar-right"></div>
+
       <!-- joystick -->
       <div class="joystick-panel">
         <div class="joystick">
           <div class="joystick-inner">
-            <div class="drag-text">DRAG TO MOVE</div>
+            <div class="drag-text">MOVE</div>
           </div>
 
           <div class="arrow up"></div>
@@ -61,27 +64,18 @@
       </div>
 
       <!-- Recenter View -->
-      <div class="recenter-view">
-        RECENTER VIEW
-      </div>
-
-      <!-- zoomControl -->
-      <div class="zoomSlider">
-        <div class="zoom-label max">MAX</div>
-
-        <div class="zoomTrack"></div>
-
-        <div class="zoomHandle">
-          <div class="grip"></div>
-          <div class="grip"></div>
-          <div class="grip"></div>
+      <div class="recenter-view-parent">
+        <div class="recenter-view">
+          RECENTER VIEW
         </div>
-
-        <div class="zoom-label min">MIN</div>
       </div>
 
-      <!-- Touchpad -->
-      <!-- <div class="touchpad-panel">Touchpad</div> -->
+      <!-- Look Joystick -->
+      <div class="look-joystick" id="lookJoystick">
+        <div class="look-inner" id="lookInner">
+          <div class="drag-text-right">PAN</div>
+        </div>
+      </div>
     </div>
   </div>
 
