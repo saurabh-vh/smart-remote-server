@@ -82,8 +82,16 @@ function navigate(level, id, extra = {}) {
 
 // goBack
 function goBack() {
-  // Remove the current level (e.g. building / unit) from UI navigation stack
-  uiState.stack.pop();
+  const current = uiState.stack[uiState.stack.length - 1];
+
+  if (current?.level === "building") {
+    // Pop building, but keep its id as "selectedBuilding"
+    // so getActive() can still highlight it on the buildings list
+    uiState.stack.pop();
+    uiState.stack.push({ level: "selectedBuilding", id: current.id });
+  } else {
+    uiState.stack.pop();
+  }
 
   // Reset unit-level filters when navigating back
   uiState.searchQuery = "";
@@ -237,14 +245,14 @@ function getUnitTypeLabel(unitType) {
 function renderHomes() {
   const content = document.getElementById("contentArea");
   content.innerHTML = `
-      <div class="section-title">Homes Search</div>
       <div class="section-card" id="homesView"></div>
     `;
 
   const view = document.getElementById("homesView");
   const current = uiState.stack[uiState.stack.length - 1];
 
-  if (!current) {
+  // "selectedBuilding" = came back from units, still show buildings list
+  if (!current || current.level === "selectedBuilding") {
     renderBuildings(view);
   } else if (current.level === "building") {
     renderUnitsWithFilters(view);
@@ -253,7 +261,9 @@ function renderHomes() {
 
 function renderBuildings(container) {
   const buildings = uiState.data.homes.buildings;
-  const activeBuildingId = getActive("building");
+  // "selectedBuilding" preserves highlight after goBack()
+  const activeBuildingId =
+    getActive("building") || getActive("selectedBuilding");
 
   if (!buildings.length) {
     container.innerHTML = `<div class="empty">No buildings found</div>`;
@@ -514,63 +524,7 @@ function renderAmenities() {
   });
 }
 
-// Zoom IN / OUT Drag Slider
-const handle = document.querySelector(".zoomHandle");
-const slider = document.querySelector(".zoomSlider");
-
-let zoomDragging = false;
-
-function startDrag(e) {
-  zoomDragging = true;
-}
-
-function stopDrag() {
-  zoomDragging = false;
-}
-
-function moveDrag(e) {
-  if (!zoomDragging) return;
-
-  const rect = slider.getBoundingClientRect();
-
-  let clientY;
-
-  if (e.touches) {
-    clientY = e.touches[0].clientY;
-  } else {
-    clientY = e.clientY;
-  }
-
-  let y = clientY - rect.top;
-
-  const min = 20;
-  const max = rect.height - 20;
-
-  y = Math.max(min, Math.min(max, y));
-
-  handle.style.top = `${y}px`;
-
-  const zoomValue = 1 - (y / rect.height);
-
-  socket.emit("remote_command", {
-    command: "zoom",
-    payload: {
-      zoom: zoomValue,
-    },
-  });
-}
-
-/* Mouse events */
-handle.addEventListener("mousedown", startDrag);
-document.addEventListener("mouseup", stopDrag);
-document.addEventListener("mousemove", moveDrag);
-
-/* Touch events (TABLET FIX) */
-handle.addEventListener("touchstart", startDrag);
-document.addEventListener("touchend", stopDrag);
-document.addEventListener("touchmove", moveDrag);
-
-// Joystick Control
+// ************************************************** Joystick Control (START) **************************************************
 const joystick = document.querySelector(".joystick");
 const stick = document.querySelector(".joystick-inner");
 
@@ -578,31 +532,51 @@ let joystickDragging = false;
 let centerX = 0;
 let centerY = 0;
 
-joystick.addEventListener("touchstart", (e) => {
+function getDirection(x, y) {
+  const threshold = 10;
+  let vertical = "";
+  let horizontal = "";
+
+  if (y < -threshold) vertical = "w";
+  if (y > threshold) vertical = "s";
+
+  if (x < -threshold) horizontal = "a";
+  if (x > threshold) horizontal = "d";
+
+  return vertical + horizontal;
+}
+
+function startJoystick(e) {
   joystickDragging = true;
 
   const rect = joystick.getBoundingClientRect();
   centerX = rect.width / 2;
   centerY = rect.height / 2;
-});
+}
 
-joystick.addEventListener("touchend", () => {
-  joystickDragging = false;
+let lastSend = 0;
 
-  stick.style.transform = "translate(-50%, -50%)";
+function sendDirection(direction) {
+  const now = Date.now();
+
+  if (now - lastSend < 50) return;
+
+  lastSend = now;
 
   socket.emit("remote_command", {
-    command: "move_stop",
+    code: pairedCode,
+    command: "move",
+    payload: { key: direction },
   });
-});
+}
 
-joystick.addEventListener("touchmove", (e) => {
+function moveJoystick(clientX, clientY) {
   if (!joystickDragging) return;
 
   const rect = joystick.getBoundingClientRect();
 
-  const x = e.touches[0].clientX - rect.left - centerX;
-  const y = e.touches[0].clientY - rect.top - centerY;
+  const x = clientX - rect.left - centerX;
+  const y = clientY - rect.top - centerY;
 
   const max = 35;
 
@@ -611,14 +585,176 @@ joystick.addEventListener("touchmove", (e) => {
 
   stick.style.transform = `translate(calc(-50% + ${limitedX}px), calc(-50% + ${limitedY}px))`;
 
+  const direction = getDirection(limitedX, limitedY);
+  if (!direction) return;
+
+  // console.log("Joystick direction:", direction);
+  sendDirection(direction);
+}
+
+/* TOUCH */
+let leftTouchId = null;
+
+joystick.addEventListener("touchstart", (e) => {
+  if (leftTouchId !== null) return;
+
+  const touch = e.changedTouches[0];
+  leftTouchId = touch.identifier;
+
+  startJoystick(touch);
+});
+
+document.addEventListener("touchmove", (e) => {
+  if (leftTouchId === null) return;
+
+  for (let touch of e.touches) {
+    if (touch.identifier === leftTouchId) {
+      moveJoystick(touch.clientX, touch.clientY);
+      break;
+    }
+  }
+});
+
+document.addEventListener("touchend", (e) => {
+  for (let touch of e.changedTouches) {
+    if (touch.identifier === leftTouchId) {
+      leftTouchId = null;
+      stopJoystick();
+    }
+  }
+});
+
+function stopJoystick() {
+  if (!joystickDragging) return;
+  joystickDragging = false;
+
+  stick.style.transform = "translate(-50%, -50%)";
+
+  // console.log("Joystick stopped");
+
   socket.emit("remote_command", {
-    command: "move",
-    payload: {
-      x: limitedX,
-      y: limitedY,
-    },
+    code: pairedCode,
+    command: "move_stop",
+    payload: { key: "stop" },
+  });
+}
+
+/* MOUSE */
+joystick.addEventListener("mousedown", startJoystick);
+
+document.addEventListener("mouseup", stopJoystick);
+
+document.addEventListener("mousemove", (e) => {
+  moveJoystick(e.clientX, e.clientY);
+});
+// ******************************************** Joystick Control (END) **********************************************
+
+// ******************************************** Joystick Look Drag (START) **********************************************
+const lookJoystick = document.getElementById("lookJoystick");
+const lookInner = document.getElementById("lookInner");
+
+let draggingLook = false;
+let rightTouchId = null;
+
+lookJoystick.addEventListener("touchstart", (e) => {
+  if (rightTouchId !== null) return;
+
+  const touch = e.changedTouches[0];
+  rightTouchId = touch.identifier;
+
+  draggingLook = true;
+  rsStartX = touch.clientX;
+  rsStartY = touch.clientY;
+});
+
+document.addEventListener("touchmove", (e) => {
+  if (!draggingLook) return;
+
+  for (let touch of e.touches) {
+    if (touch.identifier === rightTouchId) {
+      rsTouchX = touch.clientX - rsStartX;
+      rsTouchY = rsStartY - touch.clientY;
+
+      const max = 40;
+
+      rsTouchX = Math.max(-max, Math.min(max, rsTouchX));
+      rsTouchY = Math.max(-max, Math.min(max, rsTouchY));
+
+      lookInner.style.transform = `translate(calc(-50% + ${rsTouchX}px), calc(-50% - ${rsTouchY}px))`;
+
+      socket.emit("remote_command", {
+        code: pairedCode,
+        command: "camera_look",
+        payload: { x: rsTouchX, y: rsTouchY },
+      });
+
+      break;
+    }
+  }
+});
+
+document.addEventListener("touchend", (e) => {
+  for (let touch of e.changedTouches) {
+    if (touch.identifier === rightTouchId) {
+      rightTouchId = null;
+      draggingLook = false;
+
+      rsTouchX = 0;
+      rsTouchY = 0;
+
+      lookInner.style.transform = "translate(-50%, -50%)";
+
+      socket.emit("remote_command", {
+        code: pairedCode,
+        command: "camera_look",
+        payload: { x: 0, y: 0 },
+      });
+    }
+  }
+});
+lookJoystick.addEventListener("pointerdown", (e) => {
+  draggingLook = true;
+  rsStartX = e.clientX;
+  rsStartY = e.clientY;
+});
+
+window.addEventListener("pointermove", (e) => {
+  if (!draggingLook) return;
+
+  rsTouchX = e.clientX - rsStartX;
+  rsTouchY = rsStartY - e.clientY;
+
+  const max = 40;
+
+  rsTouchX = Math.max(-max, Math.min(max, rsTouchX));
+  rsTouchY = Math.max(-max, Math.min(max, rsTouchY));
+
+  lookInner.style.transform = `translate(calc(-50% + ${rsTouchX}px), calc(-50% - ${rsTouchY}px))`;
+
+  socket.emit("remote_command", {
+    code: pairedCode,
+    command: "camera_look",
+    payload: { x: rsTouchX, y: rsTouchY },
   });
 });
+
+window.addEventListener("pointerup", () => {
+  if (!draggingLook) return;
+
+  draggingLook = false;
+
+  rsTouchX = 0;
+  rsTouchY = 0;
+
+  lookInner.style.transform = "translate(-50%, -50%)";
+
+  socket.emit("remote_command", {
+    code: pairedCode,
+    command: "camera_look",
+    payload: { x: 0, y: 0 },
+  });
+});
+// ******************************************** Joystick Look Drag (END) **********************************************
 
 // Initial render
 render();
