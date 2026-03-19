@@ -1,88 +1,86 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>Smart Remote</title>
 
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
-    />
-    <!-- Global styles for Smart Remote UI (layout, sidebar, iPad-style components) -->
-    <link rel="stylesheet" href="styles.css" />
-  </head>
+<head>
+  <meta charset="utf-8" />
+  <title>Smart Remote</title>
 
-  <body>
-    <div class="app" id="app">
-      <!-- Pair Overlay -->
-      <div class="pair-overlay">
-        <div class="pair-box">
-          <div>Enter connection code</div>
-          <div class="remote-code" id="remoteCodeInputs">
-            <input class="code-input" maxlength="1" />
-            <input class="code-input" maxlength="1" />
-            <input class="code-input" maxlength="1" />
-            <input class="code-input" maxlength="1" />
-          </div>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <!-- Global styles for Smart Remote UI (layout, sidebar, iPad-style components) -->
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+  <div class="app" id="app">
+    <!-- Pair Overlay -->
+    <div class="pair-overlay">
+      <div class="pair-box">
+        <div>Enter connection code</div>
+        <div class="remote-code" id="remoteCodeInputs">
+          <input class="code-input" maxlength="1" />
+          <input class="code-input" maxlength="1" />
+          <input class="code-input" maxlength="1" />
+          <input class="code-input" maxlength="1" />
         </div>
-      </div>
-
-      <!-- Top -->
-      <div class="topbar">
-        <div class="project-status" id="projectStatus">Not connected</div>
-        <select id="displaySelect" class="screen-select"></select>
-      </div>
-
-      <!-- Main -->
-      <div class="main">
-        <!-- Sidebar -->
-        <div class="sidebar">
-          <div class="sidebar-header">Remote</div>
-          <div class="menu-item active" data-section="homes">Homes Search</div>
-          <div class="menu-item" data-section="amenities">Amenities</div>
-          <div class="menu-item" data-section="location">Location</div>
-        </div>
-
-        <!-- Content -->
-        <div class="content">
-          <div id="contentArea"></div>
-        </div>
-
-        <!-- joystick -->
-        <div class="joystick-panel">
-          <div class="joystick">
-            <div class="joystick-inner">
-              <div class="drag-text">DRAG TO MOVE</div>
-            </div>
-
-            <div class="arrow up"></div>
-            <div class="arrow down"></div>
-            <div class="arrow left"></div>
-            <div class="arrow right"></div>
-          </div>
-        </div>
-
-        <!-- zoomControl -->
-        <div class="zoomSlider">
-          <div class="zoom-label max">MAX</div>
-
-          <div class="zoomTrack"></div>
-
-          <div class="zoomHandle">
-            <div class="grip"></div>
-            <div class="grip"></div>
-            <div class="grip"></div>
-          </div>
-
-          <div class="zoom-label min">MIN</div>
-        </div>
-
-        <!-- Touchpad -->
-        <!-- <div class="touchpad-panel">Touchpad</div> -->
       </div>
     </div>
 
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="/remote.js"></script>
-  </body>
+    <!-- Top -->
+    <div class="topbar">
+      <div class="project-status" id="projectStatus">Not connected</div>
+      <select id="displaySelect" class="screen-select"></select>
+    </div>
+
+    <!-- Main -->
+    <div class="main">
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <div class="sidebar-header">Remote</div>
+        <div class="menu-item active" data-section="homes">Homes Search</div>
+        <div class="menu-item" data-section="amenities">Amenities</div>
+        <div class="menu-item" data-section="location">Location</div>
+      </div>
+
+      <!-- Content -->
+      <div class="content">
+        <div id="contentArea"></div>
+      </div>
+
+      <!-- For Right Side Joystick Space -->
+      <div class="sidebar-right"></div>
+
+      <!-- joystick -->
+      <div class="joystick-panel">
+        <div class="joystick">
+          <div class="joystick-inner">
+            <div class="drag-text">MOVE</div>
+          </div>
+
+          <div class="arrow up"></div>
+          <div class="arrow down"></div>
+          <div class="arrow left"></div>
+          <div class="arrow right"></div>
+        </div>
+      </div>
+
+      <!-- Recenter View -->
+      <div class="recenter-view-parent">
+        <div class="recenter-view">
+          RECENTER VIEW
+        </div>
+      </div>
+
+      <!-- Look Joystick -->
+      <div class="look-joystick" id="lookJoystick">
+        <div class="look-inner" id="lookInner">
+          <div class="drag-text-right">PAN</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/remote.js"></script>
+</body>
+
 </html>
