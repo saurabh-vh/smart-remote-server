@@ -515,19 +515,22 @@ function sendDirection(limitedX, limitedY) {
   lastSend = now;
 
   if (currentMode === "map") {
+    const payload = {
+      type: "joystick",
+      action: "move",
+      x: parseFloat((limitedX / 35).toFixed(2)),
+      y: parseFloat((-limitedY / 35).toFixed(2)),
+    };
+    console.log("Joystick map payload:", payload);
     socket.emit("remote_command", {
       code: pairedCode,
       command: "joystick_move",
-      payload: {
-        type: "joystick",
-        action: "move",
-        x: parseFloat((limitedX / 35).toFixed(2)),
-        y: parseFloat((-limitedY / 35).toFixed(2)),
-      },
+      payload,
     });
   } else {
     const direction = getDirection(limitedX, limitedY);
     if (!direction) return;
+    console.log("Walk direction:", direction);
     socket.emit("remote_command", {
       code: pairedCode,
       command: "move",
@@ -629,7 +632,9 @@ function updateRubber(clientY) {
     (Math.abs(rubberOffsetY) / RUBBER_MAX).toFixed(2),
   );
   if (strength < 0.05) return;
-
+  console.log(
+    `[Zoom] direction: ${rubberOffsetY < 0 ? "in" : "out"}, strength: ${strength}`,
+  );
   socket.emit("remote_command", {
     code: pairedCode,
     command: "zoom",
