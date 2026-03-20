@@ -640,7 +640,7 @@ function updateRubber(clientY) {
     command: "zoom",
     payload: {
       type: "zoom",
-      action: "move",
+      action: "start",
       direction: rubberOffsetY < 0 ? 1 : -1,
       strength,
     },
