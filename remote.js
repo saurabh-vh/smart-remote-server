@@ -190,7 +190,7 @@ socket.on("display_state", ({ state }) => {
     state?.firstLevelFilter?.selectedBuildings || [];
 
   uiState.data.takeMeTo = state?.takeMeTo || [];
-  console.log("uiState.data.takeMeTo", uiState.data.takeMeTo);
+  // console.log("uiState.data.takeMeTo", uiState.data.takeMeTo);
   render();
 });
 
