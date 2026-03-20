@@ -423,6 +423,7 @@ body {
   color: #555;
   font-weight: 600;
   user-select: none;
+  -webkit-user-select: none;
   pointer-events: none;
 }
 
@@ -478,14 +479,13 @@ body {
   display: flex;
   justify-content: center;
   bottom: 10vh;
-
 }
 .recenter-view {
   border-radius: 10vh;
   z-index: 5;
   left: 50vw;
-  
-  padding: 1vw 1.5vw;
+
+  padding: 1.8vw 2vw;
   background: white;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
 
@@ -493,6 +493,8 @@ body {
   color: #434242;
   font-weight: 600;
   cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 /* Joystick floating bottom Right */
@@ -509,13 +511,13 @@ body {
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
   touch-action: none;
   user-select: none;
-  z-index: 5;             
+  z-index: 5;
 }
 
 .look-inner {
   position: absolute;
   width: 6vw;
-  height: 6vw;            
+  height: 6vw;
   border-radius: 50%;
   background: white;
   left: 50%;
@@ -530,6 +532,51 @@ body {
 .drag-text-right {
   font-size: 0.6vw;
   color: #555;
+  font-weight: 600;
+  user-select: none;
+  -webkit-user-select: none;
+  pointer-events: none;
+}
+
+/* Rubber Band Zoom */
+.rubber-band {
+  position: fixed;
+  right: 5vw;
+  bottom: 10vh;
+  width: 8vw;
+  height: 24vw;
+  border-radius: 6vw;
+  background: rgba(0, 0, 0, 0.35);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rubber-inner {
+  position: absolute;
+  width: 8vw;
+  height: 8vw;
+  border-radius: 50%;
+  background: white;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  transition: transform 0.05s linear;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rubber-label {
+  position: absolute;
+  bottom: 1.5vw;
+  font-size: 0.6vw;
+  color: rgba(255, 255, 255, 0.7);
   font-weight: 600;
   user-select: none;
   pointer-events: none;
@@ -605,9 +652,10 @@ body {
     color: #555;
     font-weight: 400;
     user-select: none;
+    -webkit-user-select: none;
     pointer-events: none;
   }
-  
+
   /* Arrows */
   .up {
     top: 1vw;
@@ -665,6 +713,23 @@ body {
     color: #555;
     font-weight: 400;
     user-select: none;
+    -webkit-user-select: none;
     pointer-events: none;
+  }
+
+  .rubber-band {
+    width: 28vw;
+    height: 50vw;
+    border-radius: 14vw;
+    right: 3vw;
+    bottom: 6vh;
+  }
+  .rubber-inner {
+    width: 18vw;
+    height: 18vw;
+  }
+  .rubber-label {
+    font-size: 1.5vw;
+    bottom: 3vw;
   }
 }
