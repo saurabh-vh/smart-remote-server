@@ -16,6 +16,7 @@ const uiState = {
   typeFilter: "", // Current unit type filter
   data: {
     homes: { buildings: [], units: [] }, // Homes data from display
+    takeMeTo: [],
     amenities: {}, // Amenities data from display
     location: {}, // Location data from display
   },
@@ -108,6 +109,7 @@ function goBack() {
     uiState.stack.pop();
   }
 
+  uiState.data.takeMeTo = [];
   uiState.searchQuery = "";
   uiState.typeFilter = "";
 
@@ -120,6 +122,11 @@ function goBack() {
   const top = uiState.stack[uiState.stack.length - 1];
   if (!top || top.level === "selectedBuilding") {
     setMode("map");
+  }
+
+  // Unit level se wapas — walk mode rehga
+  if (top?.level === "building") {
+    setMode("walk");
   }
 
   render();
@@ -181,6 +188,9 @@ socket.on("display_state", ({ state }) => {
   remoteUiState = state;
   uiState.data.homes.buildings =
     state?.firstLevelFilter?.selectedBuildings || [];
+
+  uiState.data.takeMeTo = state?.takeMeTo || [];
+  console.log("uiState.data.takeMeTo", uiState.data.takeMeTo);
   render();
 });
 
@@ -259,7 +269,7 @@ function getUnitTypeLabel(unitType) {
 /* =========================
      HOMES
   ========================= */
-// Decide whether to show buildings list or units list
+// Decide whether to show buildings list or units list or takeMeTo
 function renderHomes() {
   const content = document.getElementById("contentArea");
   content.innerHTML = `<div class="section-card" id="homesView"></div>`;
@@ -269,6 +279,8 @@ function renderHomes() {
     renderBuildings(view);
   } else if (current.level === "building") {
     renderUnitsWithFilters(view);
+  } else if (current.level === "unit") {
+    renderTakeMeTo(view);
   }
 }
 
@@ -372,6 +384,9 @@ function renderUnitsWithFilters(container) {
           .forEach((r) => r.classList.remove("active"));
         row.classList.add("active");
         setMode("walk");
+
+        navigate("unit", u.unit_id, { unitNumber: u.unique_unit_number });
+
         socket.emit("remote_command", {
           code: pairedCode,
           command: "go_to_unit",
@@ -429,6 +444,91 @@ function renderUnitsWithFilters(container) {
   });
 
   renderFilteredUnits();
+}
+// Render take me to rooms list
+function renderTakeMeTo(container) {
+  const rooms = uiState.data.takeMeTo;
+  const activeRoom = getActive("room");
+
+  // Toolbar with back button
+  const toolbar = document.createElement("div");
+  toolbar.className = "list-row units-toolbar";
+
+  const backBtn = document.createElement("div");
+  backBtn.className = "units-back";
+  backBtn.textContent = "\u2190";
+  backBtn.onclick = goBack;
+  toolbar.appendChild(backBtn);
+
+  const title = document.createElement("div");
+  title.style.fontWeight = "600";
+  title.style.fontSize = "16px";
+  title.style.padding = "0 8px";
+  title.textContent = "Take Me To";
+  // ← Selected unit number stack se lo
+  const activeUnit = uiState.stack.findLast((s) => s.level === "unit");
+  const unitNumber = activeUnit?.unitNumber || "Unit";
+  title.textContent = unitNumber;
+  toolbar.appendChild(title);
+
+  container.appendChild(toolbar);
+
+  if (!rooms.length) {
+    const loading = document.createElement("div");
+    loading.className = "empty";
+    loading.innerHTML = `
+    <div style="display:flex; flex-direction:column; align-items:center; gap:12px; padding:32px 0;">
+      <div style="display:flex; gap:6px; align-items:center;">
+        <span class="dot-bounce" style="width:8px; height:8px; border-radius:50%; background:#007aff; display:inline-block; animation: dotBounce 1.2s infinite ease-in-out;"></span>
+        <span class="dot-bounce" style="width:8px; height:8px; border-radius:50%; background:#007aff; display:inline-block; animation: dotBounce 1.2s infinite ease-in-out 0.2s;"></span>
+        <span class="dot-bounce" style="width:8px; height:8px; border-radius:50%; background:#007aff; display:inline-block; animation: dotBounce 1.2s infinite ease-in-out 0.4s;"></span>
+      </div>
+    </div>
+  `;
+    container.appendChild(loading);
+
+    // Inject animation if not already present
+    if (!document.getElementById("dotBounceStyle")) {
+      const style = document.createElement("style");
+      style.id = "dotBounceStyle";
+      style.textContent = `
+      @keyframes dotBounce {
+        0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+        40% { transform: translateY(-8px); opacity: 1; }
+      }
+    `;
+      document.head.appendChild(style);
+    }
+
+    return;
+  }
+
+  // Render each room as a list row
+  rooms.forEach((room) => {
+    const row = document.createElement("div");
+    row.className = "list-row";
+    if (room === activeRoom) row.classList.add("active");
+    row.textContent = room;
+
+    row.onclick = () => {
+      // Highlight active room
+      document
+        .querySelectorAll("#homesView .list-row")
+        .forEach((r) => r.classList.remove("active"));
+      row.classList.add("active");
+
+      uiState.activeRoom = room;
+
+      // Tell display to navigate to this room
+      socket.emit("remote_command", {
+        code: pairedCode,
+        command: "take_me_to",
+        payload: { room },
+      });
+    };
+
+    container.appendChild(row);
+  });
 }
 
 /* =========================
@@ -521,7 +621,9 @@ function sendDirection(limitedX, limitedY) {
       x: parseFloat((limitedX / 35).toFixed(2)),
       y: parseFloat((-limitedY / 35).toFixed(2)),
     };
-    console.log("Joystick map payload:", payload);
+
+    // console.log("Joystick map payload:", payload);
+
     socket.emit("remote_command", {
       code: pairedCode,
       command: "joystick_move",
@@ -530,7 +632,9 @@ function sendDirection(limitedX, limitedY) {
   } else {
     const direction = getDirection(limitedX, limitedY);
     if (!direction) return;
-    console.log("Walk direction:", direction);
+
+    // console.log("Walk direction:", direction);
+
     socket.emit("remote_command", {
       code: pairedCode,
       command: "move",
@@ -632,9 +736,9 @@ function updateRubber(clientY) {
     (Math.abs(rubberOffsetY) / RUBBER_MAX).toFixed(2),
   );
   if (strength < 0.05) return;
-  console.log(
-    `[Zoom] direction: ${rubberOffsetY < 0 ? "in" : "out"}, strength: ${strength}`,
-  );
+
+  // console.log(`[Zoom] direction: ${rubberOffsetY < 0 ? "in" : "out"}, strength: ${strength}`,);
+
   socket.emit("remote_command", {
     code: pairedCode,
     command: "zoom",
