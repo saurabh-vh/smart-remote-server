@@ -311,7 +311,23 @@ function renderBuildings(container) {
   const activeBuildingId =
     getActive("building") || getActive("selectedBuilding");
   if (!buildings.length) {
-    container.innerHTML = `<div class="empty">No buildings found</div>`;
+    container.innerHTML = `
+    <style>
+      @keyframes dotBounce {
+        0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+        40% { transform: translateY(-8px); opacity: 1; }
+      }
+    </style>
+    <div style="display:flex; flex-direction:column; align-items:center; gap:12px; padding:10vh;">
+      <div style="display:flex; gap:6px; align-items:center;">
+        <span style="width:8px; height:8px; border-radius:50%; background:#007aff; display:inline-block; animation: dotBounce 1.2s infinite ease-in-out;"></span>
+        <span style="width:8px; height:8px; border-radius:50%; background:#007aff; display:inline-block; animation: dotBounce 1.2s infinite ease-in-out 0.2s;"></span>
+        <span style="width:8px; height:8px; border-radius:50%; background:#007aff; display:inline-block; animation: dotBounce 1.2s infinite ease-in-out 0.4s;"></span>
+      </div>
+            <div style="font-size:13px; color:#aaa; font-weight:500; letter-spacing:0.5px;">Loading buildings...</div>
+
+    </div>
+  `;
     return;
   }
   buildings.forEach((b) => {
@@ -385,12 +401,23 @@ function renderUnitsWithFilters(container) {
       return (!q || unitNo.includes(q)) && (!t || typeLabel === t);
     });
 
-    listWrap.innerHTML = "";
     if (!filtered.length) {
-      const empty = document.createElement("div");
-      empty.className = "empty";
-      empty.textContent = "No units found";
-      listWrap.appendChild(empty);
+      listWrap.innerHTML = `
+      <style>
+      @keyframes dotBounce {
+        0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+        40% { transform: translateY(-8px); opacity: 1; }
+      }
+    </style>
+    <div style="display:flex; flex-direction:column; align-items:center; gap:12px; padding:10vh;">
+      <div style="display:flex; gap:6px; align-items:center;">
+        <span style="width:8px; height:8px; border-radius:50%; background:#007aff; display:inline-block; animation: dotBounce 1.2s infinite ease-in-out;"></span>
+        <span style="width:8px; height:8px; border-radius:50%; background:#007aff; display:inline-block; animation: dotBounce 1.2s infinite ease-in-out 0.2s;"></span>
+        <span style="width:8px; height:8px; border-radius:50%; background:#007aff; display:inline-block; animation: dotBounce 1.2s infinite ease-in-out 0.4s;"></span>
+      </div>
+            <div style="font-size:13px; color:#aaa; font-weight:500; letter-spacing:0.5px;">Loading units...</div>
+    </div>
+  `;
       return;
     }
 
@@ -498,12 +525,13 @@ function renderTakeMeTo(container) {
     const loading = document.createElement("div");
     loading.className = "empty";
     loading.innerHTML = `
-    <div style="display:flex; flex-direction:column; align-items:center; gap:12px; padding:32px 0;">
+    <div style="display:flex; flex-direction:column; align-items:center; gap:12px; padding:10vh;">
       <div style="display:flex; gap:6px; align-items:center;">
         <span class="dot-bounce" style="width:8px; height:8px; border-radius:50%; background:#007aff; display:inline-block; animation: dotBounce 1.2s infinite ease-in-out;"></span>
         <span class="dot-bounce" style="width:8px; height:8px; border-radius:50%; background:#007aff; display:inline-block; animation: dotBounce 1.2s infinite ease-in-out 0.2s;"></span>
         <span class="dot-bounce" style="width:8px; height:8px; border-radius:50%; background:#007aff; display:inline-block; animation: dotBounce 1.2s infinite ease-in-out 0.4s;"></span>
       </div>
+            <div style="font-size:13px; color:#aaa; font-weight:500; letter-spacing:0.5px;">Entering the unit...</div>
     </div>
   `;
     container.appendChild(loading);
