@@ -72,6 +72,19 @@ let currentMode = "map"; // Current control mode: "map" | "walk"
 // Switch joystick UI based on mode
 function setMode(mode) {
   currentMode = mode;
+
+  // Location tab pe sab hide
+  if (uiState.section === "location") {
+    document.querySelector(".joystick-panel").style.display = "none";
+    document.getElementById("rubberBand").style.display = "none";
+    document.querySelector(".look-joystick").style.display = "none";
+    document.querySelector(".recenter-view-parent").style.display = "none";
+    return;
+  }
+
+  // Joystick panel hamesha show (homes + amenities)
+  document.querySelector(".joystick-panel").style.display = "flex";
+
   if (mode === "map") {
     // Map mode: show rubber band zoom, hide camera pan joystick
     document.getElementById("rubberBand").style.display = "flex";
@@ -254,6 +267,7 @@ function render() {
   content.innerHTML = "";
   if (uiState.section === "homes") renderHomes();
   if (uiState.section === "amenities") renderAmenities();
+  if(uiState.section === "location") renderLocation();
 }
 
 // Get the active item id for a given navigation level
@@ -534,7 +548,21 @@ function renderTakeMeTo(container) {
 /* =========================
      AMENITIES
   ========================= */
-// Render amenity cards grid
+// Gradient array — Each card Diff color
+const AMENITY_GRADIENTS = [
+  "linear-gradient(135deg, #f093fb, #f5576c)",
+  "linear-gradient(135deg, #667eea, #764ba2)",
+  "linear-gradient(135deg, #4facfe, #00f2fe)",
+  "linear-gradient(135deg, #43e97b, #38f9d7)",
+  "linear-gradient(135deg, #fa709a, #fee140)",
+  "linear-gradient(135deg, #a18cd1, #fbc2eb)",
+  "linear-gradient(135deg, #fccb90, #d57eeb)",
+  "linear-gradient(135deg, #ff9a9e, #fecfef)",
+  "linear-gradient(135deg, #a1c4fd, #c2e9fb)",
+  "linear-gradient(135deg, #fd7043, #ff8a65)",
+  "linear-gradient(135deg, #26c6da, #00acc1)",
+  "linear-gradient(135deg, #66bb6a, #43a047)",
+];
 function renderAmenities() {
   const content = document.getElementById("contentArea");
   content.innerHTML = `
@@ -544,23 +572,25 @@ function renderAmenities() {
   const container = document.getElementById("amenitiesView");
   const list = remoteUiState?.amenities || [];
   const activeAmenityId = getActive("amenity");
-  const placeholderImage =
-    "https://images.unsplash.com/photo-1574362848149-11496d93a7c7?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80";
 
   if (!list.length) {
     container.innerHTML = `<div class="empty">No amenities found</div>`;
     return;
   }
 
-  list.forEach((a) => {
+  list.forEach((a, index) => {
     const card = document.createElement("div");
     card.className = "amenity-card";
     if (a.id === activeAmenityId) card.classList.add("active");
+
+    const gradient = AMENITY_GRADIENTS[index % AMENITY_GRADIENTS.length];
+
     card.innerHTML = `
-      <div class="amenity-image" style="background-image: url('${placeholderImage}')"></div>
+      <div class="amenity-image" style="background: ${gradient};"></div>
       <div class="amenity-overlay"></div>
       <div class="amenity-name">${a.amenity_name || ""}</div>
     `;
+
     card.onclick = () => {
       document
         .querySelectorAll(".amenity-card")
@@ -573,8 +603,31 @@ function renderAmenities() {
         payload: { id: a.id },
       });
     };
+
     container.appendChild(card);
   });
+}
+
+/* =========================
+     Location UI
+  ========================= */
+function renderLocation() {
+  const content = document.getElementById("contentArea");
+  content.innerHTML = `
+    <div class="section-card" style="
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 10vh;
+      gap: 12px;
+      color: #888;
+    ">
+      <div style="font-size: 32px;">📍</div>
+      <div style="font-size: 16px; font-weight: 600; color: #333;">Viewing Location</div>
+      <div style="font-size: 13px;">Controls available on screen</div>
+    </div>
+  `;
 }
 
 // ================================================

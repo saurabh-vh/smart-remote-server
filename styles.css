@@ -114,7 +114,7 @@ body {
   border-radius: 14px;
   overflow: hidden;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  /* padding: 3vh; */
+  padding-bottom: 2vh;
 }
 
 .section-title {
@@ -332,8 +332,18 @@ body {
 .amenity-card.active {
   border: 4px solid #007aff !important;
 }
-
 .amenity-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  /* filter: blur(1.5px) brightness(0.9); ← hata do */
+  /* transform: scale(1.1); ← hata do */
+}
+/* .amenity-image {
   position: absolute;
   top: 0;
   left: 0;
@@ -344,7 +354,7 @@ body {
   background-repeat: no-repeat;
   filter: blur(1.5px) brightness(0.9);
   transform: scale(1.1);
-}
+} */
 
 /* Dark overlay for better text readability */
 .amenity-overlay {
@@ -376,13 +386,13 @@ body {
   word-break: break-word;
 }
 
-/* Joystick floating bottom Left */
+/* <!-- joystick Drag Right Side --> */
 .joystick-panel {
   position: fixed;
-  left: 5vw;
-  bottom: 10vh;
-  width: 12vw;
-  height: 12vw;
+  left: 2.5vw;
+  bottom: 11vh;
+  width: 15vw;
+  height: 15vw;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -391,8 +401,8 @@ body {
 
 /* Joystick base */
 .joystick {
-  width: 12vw;
-  height: 12vw;
+  width: 15vw;
+  height: 15vw;
   background: white;
   border-radius: 50%;
   position: relative;
@@ -401,8 +411,8 @@ body {
 
 /* Draggable stick */
 .joystick-inner {
-  width: 6vw;
-  height: 6vw;
+  width: 7vw;
+  height: 7vw;
   background: #cfcfcf;
   border-radius: 50%;
   position: absolute;
@@ -471,7 +481,7 @@ body {
   transform: translateY(-50%);
 }
 
-/* Recenter view  */
+/* <!-- Recenter View --> */
 .recenter-view-parent {
   width: 100vw;
   position: absolute;
@@ -497,14 +507,14 @@ body {
   -webkit-user-select: none;
 }
 
-/* Joystick floating bottom Right */
+/* <!-- Look Joystick Drag Left Side--> */
 .look-joystick {
   position: fixed;
-  right: 5vw;
+  right: 3vw;
   bottom: 10vh;
 
-  width: 12vw;
-  height: 12vw;
+  width: 15vw;
+  height: 15vw;
 
   border-radius: 50%;
   background: rgba(0, 0, 0, 0.35);
@@ -516,8 +526,8 @@ body {
 
 .look-inner {
   position: absolute;
-  width: 6vw;
-  height: 6vw;
+  width: 7vw;
+  height: 7vw;
   border-radius: 50%;
   background: white;
   left: 50%;
@@ -538,13 +548,13 @@ body {
   pointer-events: none;
 }
 
-/* Rubber Band Zoom */
+/* <!--Rubber Band Zoom (right side) --> */
 .rubber-band {
   position: fixed;
   right: 5vw;
-  bottom: 10vh;
+  bottom: 8vh;
   width: 8vw;
-  height: 24vw;
+  height: 22vw;
   border-radius: 6vw;
   background: rgba(0, 0, 0, 0.35);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
@@ -559,8 +569,8 @@ body {
 
 .rubber-inner {
   position: absolute;
-  width: 8vw;
-  height: 8vw;
+  width: 7.5vw;
+  height: 7.5vw;
   border-radius: 50%;
   background: white;
   left: 50%;
@@ -623,19 +633,24 @@ body {
   .content {
     padding: 16px;
   }
-
-  /* Joystick panel */
+  /* Section Card (iPad grouped style) */
+  .section-card {
+    height: auto;
+    max-height: 54.5vh;
+    overflow-y: auto;
+  }
+  /* <!-- joystick Drag Right Side --> */
   .joystick-panel {
-    width: 30vw;
-    height: 30vw;
-    left: 3vw;
-    bottom: 6vh;
+    width: 25vw;
+    height: 25vw;
+    left: 4vw;
+    bottom: 10vh;
   }
 
   /* Joystick base */
   .joystick {
-    width: 30vw;
-    height: 30vw;
+    width: 25vw;
+    height: 25vw;
   }
 
   /* Draggable stick */
@@ -643,8 +658,8 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 15vw;
-    height: 15vw;
+    width: 11vw;
+    height: 11vw;
   }
   /* Drag Text  */
   .drag-text {
@@ -670,18 +685,18 @@ body {
     right: 1vw;
   }
 
-  /* Renceter view button css  */
+  /* <!-- Recenter View --> */
   .recenter-view {
     padding: 1.3vh 1.5vh;
     left: 35vw;
     bottom: 6vh;
   }
 
-  /* Joystick Right  */
+  /* <!-- Look Joystick Drag Left Side--> */
   .look-joystick {
     position: absolute;
     right: 5vw;
-    bottom: 6vh;
+    bottom: 10vh;
 
     width: 28vw;
     height: 28vw;
@@ -717,19 +732,109 @@ body {
     pointer-events: none;
   }
 
+  /* <!--Rubber Band Zoom (right side) --> */
   .rubber-band {
-    width: 28vw;
-    height: 50vw;
+    width: 12vw;
+    height: 35vw;
     border-radius: 14vw;
-    right: 3vw;
+    right: 6vw;
     bottom: 6vh;
   }
   .rubber-inner {
-    width: 18vw;
-    height: 18vw;
+    width: 11vw;
+    height: 11vw;
   }
   .rubber-label {
-    font-size: 1.5vw;
+    font-size: 1.2vw;
     bottom: 3vw;
+  }
+}
+
+/* For Mobile Devices  */
+@media (orientation: portrait) and (max-width: 480px) {
+  /* Section Card (iPad grouped style) */
+  .section-card {
+    height: auto;
+    max-height: 52vh;
+    overflow-y: auto;
+  }
+  /* <!-- joystick Drag Right Side --> */
+  .joystick-panel {
+    width: 35vw;
+    height: 35vw;
+    left: 3vw;
+    bottom: 8vh;
+  }
+
+  /* Joystick base */
+  .joystick {
+    width: 35vw;
+    height: 35vw;
+  }
+
+  /* Draggable stick */
+  .joystick-inner {
+    width: 15vw;
+    height: 15vw;
+  }
+
+  .drag-text {
+    font-size: 2vw;
+  }
+
+  /* Arrows */
+  .up {
+    top: 2vw;
+  }
+  .down {
+    bottom: 2vw;
+  }
+  .left {
+    left: 2vw;
+  }
+  .right {
+    right: 2vw;
+  }
+
+  /* <!-- Recenter View --> */
+  .recenter-view {
+    padding: 2vh 2.5vh;
+    font-size: 10px;
+  }
+
+  /* <!-- Look Joystick Drag Left Side--> */
+  .look-joystick {
+    width: 32vw;
+    height: 32vw;
+    right: 3vw;
+    bottom: 8vh;
+  }
+
+  .look-inner {
+    width: 15vw;
+    height: 15vw;
+  }
+
+  .drag-text-right {
+    font-size: 2vw;
+  }
+
+  /* <!--Rubber Band Zoom (right side) --> */
+  .rubber-band {
+    width: 16vw;
+    height: 45vw;
+    border-radius: 16vw;
+    right: 5vw;
+    bottom: 6vh;
+  }
+
+  .rubber-inner {
+    width: 14vw;
+    height: 14vw;
+  }
+
+  .rubber-label {
+    font-size: 1.8vw;
+    bottom: 4vw;
   }
 }
