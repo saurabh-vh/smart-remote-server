@@ -89,12 +89,12 @@ function setMode(mode) {
     // Map mode: show rubber band zoom, hide camera pan joystick
     document.getElementById("rubberBand").style.display = "flex";
     document.querySelector(".look-joystick").style.display = "none";
-    document.querySelector(".recenter-view-parent").style.display = "none";
+    document.querySelector(".recenter-view-parent").style.display = "flex";
   } else {
     // Walk mode: show camera pan joystick, hide rubber band
     document.getElementById("rubberBand").style.display = "none";
     document.querySelector(".look-joystick").style.display = "block";
-    document.querySelector(".recenter-view-parent").style.display = "flex";
+    document.querySelector(".recenter-view-parent").style.display = "none";
   }
 }
 
@@ -133,6 +133,13 @@ function goBack() {
 
   // Switch to map mode when back on buildings list
   const top = uiState.stack[uiState.stack.length - 1];
+
+  if (current?.level === "unit") {
+    setMode("map");
+    render();
+    return;
+  }
+
   if (!top || top.level === "selectedBuilding") {
     setMode("map");
   }
@@ -267,7 +274,7 @@ function render() {
   content.innerHTML = "";
   if (uiState.section === "homes") renderHomes();
   if (uiState.section === "amenities") renderAmenities();
-  if(uiState.section === "location") renderLocation();
+  if (uiState.section === "location") renderLocation();
 }
 
 // Get the active item id for a given navigation level
