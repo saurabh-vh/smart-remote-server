@@ -189,6 +189,16 @@ document.querySelectorAll(".menu-item").forEach((item) => {
   };
 });
 
+// Recenter View
+document.querySelector(".recenter-view").addEventListener("click", () => {
+  resetSection(uiState.section);
+  // console.log("Ritk");
+  socket.emit("remote_command", {
+    code: pairedCode,
+    command: "recenter_view",
+  });
+});
+
 /* =========================
      SOCKET EVENTS
   ========================= */

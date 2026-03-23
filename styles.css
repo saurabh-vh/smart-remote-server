@@ -797,6 +797,14 @@ body {
   }
 
   /* <!-- Recenter View --> */
+  .recenter-view-parent {
+    width: 100vw;
+    position: absolute;
+    z-index: 555;
+    display: flex;
+    justify-content: center;
+    bottom: 4vh;
+  }
   .recenter-view {
     padding: 2vh 2.5vh;
     font-size: 10px;
