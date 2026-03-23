@@ -82,6 +82,13 @@ function setMode(mode) {
     return;
   }
 
+  // Amenities section hide recenter Button
+  if (uiState.section === "amenities") {
+    document.querySelector(".recenter-view-parent").style.display = "none";
+  } else {
+    document.querySelector(".recenter-view-parent").style.display = "flex";
+  }
+
   // Joystick panel hamesha show (homes + amenities)
   document.querySelector(".joystick-panel").style.display = "flex";
 
@@ -89,7 +96,9 @@ function setMode(mode) {
     // Map mode: show rubber band zoom, hide camera pan joystick
     document.getElementById("rubberBand").style.display = "flex";
     document.querySelector(".look-joystick").style.display = "none";
-    document.querySelector(".recenter-view-parent").style.display = "flex";
+    if (uiState.section !== "amenities") {
+      document.querySelector(".recenter-view-parent").style.display = "flex";
+    }
   } else {
     // Walk mode: show camera pan joystick, hide rubber band
     document.getElementById("rubberBand").style.display = "none";
@@ -191,11 +200,12 @@ document.querySelectorAll(".menu-item").forEach((item) => {
 
 // Recenter View
 document.querySelector(".recenter-view").addEventListener("click", () => {
-  resetSection(uiState.section);
-  // console.log("Ritk");
+  const activeBuildingId =
+    getActive("building") || getActive("selectedBuilding");
   socket.emit("remote_command", {
     code: pairedCode,
     command: "recenter_view",
+    payload: { id: activeBuildingId },
   });
 });
 
