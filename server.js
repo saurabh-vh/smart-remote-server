@@ -24,7 +24,7 @@ setInterval(() => {
     .catch(() => {
       console.log("failed to ping server");
     });
-}, 10000);
+}, 50000);
 io.on("connection", (socket) => {
   console.log("client connected:", socket.id);
 
