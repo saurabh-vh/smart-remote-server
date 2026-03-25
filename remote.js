@@ -328,6 +328,7 @@ function renderHomes() {
 // Render clickable buildings list
 function renderBuildings(container) {
   const buildings = uiState.data.homes.buildings;
+  console.log("Buildings data:", buildings);
   const activeBuildingId =
     getActive("building") || getActive("selectedBuilding");
   if (!buildings.length) {
@@ -351,19 +352,65 @@ function renderBuildings(container) {
     return;
   }
   buildings.forEach((b) => {
-    const row = document.createElement("div");
-    row.className = "list-row";
-    if (b.id === activeBuildingId) row.classList.add("active");
-    row.textContent = b.building_name || `Building ${b.id}`;
-    row.onclick = () => {
-      navigate("building", b.id);
-      socket.emit("remote_command", {
-        code: pairedCode,
-        command: "home_search_filter",
-        payload: { id: b.id },
+    // If building has wings, render a non-clickable building header
+    // and individual clickable wing rows beneath it.
+    if (b.wings && b.wings.length > 0) {
+      const wrapper = document.createElement("div");
+      wrapper.className = "building-with-wings";
+
+      const title = document.createElement("div");
+      title.className = "list-row building-title";
+      title.textContent = b.building_name || `Building ${b.id}`;
+      // title.textContent =  ` b.building_name Building ${b.id}`;
+      wrapper.appendChild(title);
+
+      const wingsWrap = document.createElement("div");
+      wingsWrap.className = "wings-wrap";
+
+      b.wings.forEach((w) => {
+        const wingRow = document.createElement("div");
+        wingRow.className = "list-row wing-row";
+        wingRow.textContent = w.wing_name || `Wing ${w.id}`;
+        // wingRow.textContent = `w.wing_name Wing ${w.id}`;
+
+        wingRow.onclick = () => {
+          // Visually mark selected wing
+          document.querySelectorAll(".wing-row").forEach((r) => r.classList.remove("active"));
+          wingRow.classList.add("active");
+
+          // Navigate to building level and include wing info in the stack
+          navigate("building", b.id, { wingId: w.id, wingName: w.wing_name });
+
+          // Emit wing-level filter to the display. Include both numeric id and wing_id string if available.
+          socket.emit("remote_command", {
+            code: pairedCode,
+            command: "home_search_filter",
+            // payload: { id: w.id },
+            payload: { id: b.id, wing_id: w.id, wing_uuid: w.wing_id },
+          });
+        };
+
+        wingsWrap.appendChild(wingRow);
       });
-    };
-    container.appendChild(row);
+
+      wrapper.appendChild(wingsWrap);
+      container.appendChild(wrapper);
+    } else {
+      // No wings — keep previous behaviour (clickable building row)
+      const row = document.createElement("div");
+      row.className = "list-row";
+      if (b.id === activeBuildingId) row.classList.add("active");
+      row.textContent = b.building_name || `Building ${b.id}`;
+      row.onclick = () => {
+        navigate("building", b.id);
+        socket.emit("remote_command", {
+          code: pairedCode,
+          command: "home_search_filter",
+          payload: { id: b.id },
+        });
+      };
+      container.appendChild(row);
+    }
   });
 }
 
