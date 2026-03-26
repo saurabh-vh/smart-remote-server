@@ -313,7 +313,13 @@ function getUnitTypeLabel(unitType) {
 // Decide whether to show buildings list or units list or takeMeTo
 function renderHomes() {
   const content = document.getElementById("contentArea");
-  content.innerHTML = `<div class="section-card" id="homesView"></div>`;
+
+  const hasWings = uiState.data.homes.buildings.some(
+    (b) => b.wings && b.wings.length > 0,
+  );
+
+  content.innerHTML = `<div class="section-card ${hasWings ? "section-card-wings" : ""}" id="homesView"></div>`;
+
   const view = document.getElementById("homesView");
   const current = uiState.stack[uiState.stack.length - 1];
   if (!current || current.level === "selectedBuilding") {
@@ -328,9 +334,9 @@ function renderHomes() {
 // Render clickable buildings list
 function renderBuildings(container) {
   const buildings = uiState.data.homes.buildings;
-  console.log("Buildings data:", buildings);
   const activeBuildingId =
     getActive("building") || getActive("selectedBuilding");
+
   if (!buildings.length) {
     container.innerHTML = `
     <style>
@@ -375,7 +381,9 @@ function renderBuildings(container) {
 
         wingRow.onclick = () => {
           // Visually mark selected wing
-          document.querySelectorAll(".wing-row").forEach((r) => r.classList.remove("active"));
+          document
+            .querySelectorAll(".wing-row")
+            .forEach((r) => r.classList.remove("active"));
           wingRow.classList.add("active");
 
           // Navigate to building level and include wing info in the stack
