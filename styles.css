@@ -133,6 +133,7 @@ body {
   border-bottom: 1px solid #eee;
   font-size: 16px;
   cursor: pointer;
+  background: #fff;
 }
 
 .list-row:last-child {
