@@ -209,6 +209,26 @@ document.querySelector(".recenter-view").addEventListener("click", () => {
   });
 });
 
+// Disconnect remote
+document.getElementById("closeBtn").addEventListener("click", () => {
+  socket.emit("remote_command", {
+    code: pairedCode,
+    command: "remote_disconnected",
+    payload: {},
+  });
+
+  // Remote UI reset
+  const statusEl = document.getElementById("projectStatus");
+  statusEl.firstChild.textContent = "Not connected";
+  document.getElementById("closeBtn").style.display = "none";
+  document.getElementById("displaySelect").innerHTML = "";
+
+  pairedCode = null;
+  projectName = null;
+  availableDisplays = [];
+  appEl.classList.remove("connected");
+});
+
 /* =========================
      SOCKET EVENTS
   ========================= */
@@ -217,8 +237,13 @@ socket.on("pair_success", ({ code, projectName: projName, displays }) => {
   pairedCode = code;
   projectName = projName;
   availableDisplays = displays;
-  document.getElementById("projectStatus").textContent =
-    "Connected to " + projName;
+
+  const statusEl = document.getElementById("projectStatus");
+  statusEl.firstChild.textContent = "Connected to " + projName;
+
+  const closeBtn = document.getElementById("closeBtn");
+  closeBtn.style.display = "flex";
+
   appEl.classList.add("connected");
   updateDisplaySelector(displays, code);
 });

@@ -32,12 +32,31 @@ body {
   padding: 0 16px;
 }
 
-/* .project-status {
-		  font-size: 14px;
-		  color: #666;
-	  } */
-/* above is before below is testing  project-status  */
+.close-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  padding: 0.8vh;
+  border-radius: 50%;
+  color: #c0392b;
+  background: rgba(192, 57, 43, 0.15);
+  opacity: 0.6;
+  transition:
+    opacity 0.2s,
+    background 0.2s;
+}
+
+.close-btn:hover {
+  opacity: 1;
+  background: rgba(159, 44, 32, 0.1);
+}
+
 .project-status {
+  display: flex;
+  align-items: center;
+  gap: 0.9vw;
   font-size: 14px;
   color: #1f8b4c;
   background: #e8f7ec;
