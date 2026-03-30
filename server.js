@@ -313,6 +313,39 @@ io.on("connection", (socket) => {
     );
   });
 
+  // Remote requests to be unpaired without disconnecting socket
+  socket.on("unpair_remote", ({ code } = {}) => {
+    if (!remoteConnections.has(socket.id)) {
+      // nothing to unpair
+      return;
+    }
+
+    const { code: currentCode, projectName } = remoteConnections.get(socket.id);
+    const unpairCode = code || currentCode;
+
+    // Remove remote mapping
+    remoteConnections.delete(socket.id);
+
+    const projectMap = projectDisplays.get(projectName);
+    if (projectMap && projectMap.has(unpairCode)) {
+      const display = projectMap.get(unpairCode);
+      if (display.remoteSocketId === socket.id) display.remoteSocketId = null;
+
+      // Update display list for THIS PROJECT ONLY
+      const displays = Array.from(projectMap.values()).map((d) => ({
+        code: d.code,
+        displayName: d.displayName,
+        isOccupied: !!d.remoteSocketId,
+        projectName: d.projectName,
+      }));
+      io.to(`project:${projectName}`).emit("display_list_update", { displays });
+
+      console.log(`remote unpaired: ${socket.id} from ${unpairCode} (project: ${projectName})`);
+    } else {
+      console.log(`remote unpaired (no matching display): ${socket.id}`);
+    }
+  });
+
   socket.on("disconnect", () => {
     // Check if this was a display
     for (const [projectName, projectMap] of projectDisplays.entries()) {

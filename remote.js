@@ -209,25 +209,43 @@ document.querySelector(".recenter-view").addEventListener("click", () => {
   });
 });
 
-// Disconnect remote
-document.getElementById("closeBtn").addEventListener("click", () => {
+// Disconnect remote (used by close button and visibility/unload handlers)
+function unpairRemoteClient() {
+  if (!pairedCode) return;
+
   socket.emit("remote_command", {
     code: pairedCode,
     command: "remote_disconnected",
     payload: {},
   });
 
+  // Also tell server to unpair this remote (without removing displays/projects)
+  socket.emit("unpair_remote", { code: pairedCode });
+
   // Remote UI reset
   const statusEl = document.getElementById("projectStatus");
-  statusEl.firstChild.textContent = "Not connected";
-  document.getElementById("closeBtn").style.display = "none";
-  document.getElementById("displaySelect").innerHTML = "";
+  if (statusEl && statusEl.firstChild) statusEl.firstChild.textContent = "Not connected";
+  const closeBtn = document.getElementById("closeBtn");
+  if (closeBtn) closeBtn.style.display = "none";
+  const displaySelect = document.getElementById("displaySelect");
+  if (displaySelect) displaySelect.innerHTML = "";
 
   pairedCode = null;
   projectName = null;
   availableDisplays = [];
   appEl.classList.remove("connected");
+}
+
+document.getElementById("closeBtn").addEventListener("click", unpairRemoteClient);
+
+// Unpair when the page becomes hidden (minimized or backgrounded) — useful for mobile
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) unpairRemoteClient();
 });
+
+// Also attempt unpair on page hide / unload to cover more cases
+window.addEventListener("pagehide", () => unpairRemoteClient());
+window.addEventListener("beforeunload", () => unpairRemoteClient());
 
 /* =========================
      SOCKET EVENTS
