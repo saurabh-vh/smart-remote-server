@@ -712,6 +712,11 @@ body {
     max-height: 54.5vh;
     overflow-y: auto;
   }
+  .amenities-grid {
+    height: auto;
+    max-height: 54.5vh;
+    overflow-y: auto;
+  }
   /* <!-- joystick Drag Right Side --> */
   .joystick-panel {
     width: 25vw;
