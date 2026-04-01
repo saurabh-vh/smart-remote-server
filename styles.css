@@ -75,6 +75,11 @@ body {
   background: #fff;
 }
 
+/* Default — hamesha hidden */
+.mobile-icons {
+  display: none;
+}
+
 /* Layout */
 .main {
   flex: 1;
@@ -92,8 +97,37 @@ body {
 .sidebar-right {
   width: 20vw;
   background: #fff;
-  border-right: 1px solid #ddd;
+  border-left: 1px solid #ddd;
   overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  padding: 16px;
+  align-content: start;
+}
+
+.sidebar-right .icons-group {
+  display: contents;
+}
+
+.sidebar-right i {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  font-size: 1.2rem;
+  cursor: pointer;
+  border: 0.05vh solid #888;
+  border-radius: 1vh;
+  transition:
+    background 0.2s,
+    color 0.2s;
+  color: #444;
+}
+
+.sidebar-right i:hover {
+  background: #f0f0f0;
+  color: #000;
 }
 
 .sidebar-header {
@@ -682,7 +716,9 @@ body {
     border-bottom: 1px solid #ddd;
     display: flex;
   }
-
+  .sidebar-right {
+    display: none;
+  }
   .sidebar-header {
     display: none;
   }
@@ -830,6 +866,33 @@ body {
 
 /* For Mobile Devices  */
 @media (orientation: portrait) and (max-width: 480px) {
+  #projectStatus {
+    max-width: 150px;
+    white-space: nowrap;
+    display: block;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+  .mobile-icons {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 8px 16px;
+    background: #fff;
+    border-bottom: 1px solid #ddd;
+  }
+
+  .mobile-icons i {
+    font-size: 1.1rem;
+    color: #444;
+    cursor: pointer;
+    padding: 1vh;
+  }
+
+  /* Sidebar-right hide */
+  .sidebar-right {
+    display: none;
+  }
   /* Section Card (iPad grouped style) */
   .section-card {
     height: auto;

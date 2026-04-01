@@ -224,7 +224,8 @@ function unpairRemoteClient() {
 
   // Remote UI reset
   const statusEl = document.getElementById("projectStatus");
-  if (statusEl && statusEl.firstChild) statusEl.firstChild.textContent = "Not connected";
+  if (statusEl && statusEl.firstChild)
+    statusEl.firstChild.textContent = "Not connected";
   const closeBtn = document.getElementById("closeBtn");
   if (closeBtn) closeBtn.style.display = "none";
   const displaySelect = document.getElementById("displaySelect");
@@ -236,7 +237,9 @@ function unpairRemoteClient() {
   appEl.classList.remove("connected");
 }
 
-document.getElementById("closeBtn").addEventListener("click", unpairRemoteClient);
+document
+  .getElementById("closeBtn")
+  .addEventListener("click", unpairRemoteClient);
 
 // Unpair when the page becomes hidden (minimized or backgrounded) — useful for mobile
 document.addEventListener("visibilitychange", () => {
@@ -349,6 +352,36 @@ function getActive(level) {
 function getUnitTypeLabel(unitType) {
   return (unitType || "").split("-")[0].trim();
 }
+
+// Clone sidebar icons into mobile container (single source of truth)
+const sidebarIcons = document.querySelectorAll(".sidebar-right i");
+const mobileContainer = document.querySelector(".mobile-icons");
+
+sidebarIcons.forEach((icon) => {
+  mobileContainer.appendChild(icon.cloneNode(true));
+});
+
+// Icons that toggle between two states
+const TOGGLE_ICONS = new Set(["eye", "volume", "maximize"]);
+// Swap icon class between iconA and iconB, return new state
+function toggleIcon(el) {
+  const { iconA, iconB } = el.dataset;
+  const isA = el.classList.contains(iconA);
+  el.classList.replace(isA ? iconA : iconB, isA ? iconB : iconA);
+  return !isA;
+}
+
+// Single delegated listener — handles all [data-action] clicks globally
+document.addEventListener("click", ({ target }) => {
+  const el = target.closest("[data-action]");
+  if (!el) return;
+
+  const { action } = el.dataset;
+  const state = TOGGLE_ICONS.has(action) ? toggleIcon(el) : null;
+
+  console.log(`[${action}]`, state !== null ? `→ ${state}` : "clicked");
+  // socket.emit("remote:action", { action, ...(state !== null && { state }) });
+});
 
 /* =========================
      HOMES
