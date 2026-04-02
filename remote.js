@@ -371,6 +371,22 @@ function toggleIcon(el) {
   return !isA;
 }
 
+// Action config — Every action command and payload mapping
+const ACTION_CONFIG = {
+  eye: {
+    command: "toggle_eye",
+    payload: (state) => ({ visible: state }),
+  },
+  volume: {
+    command: "toggle_volume",
+    payload: (state) => ({ muted: state }),
+  },
+  swimmer: {
+    command: "toggle_swimmer",
+    payload: () => ({}),
+  },
+};
+
 // Single delegated listener — handles all [data-action] clicks globally
 document.addEventListener("click", ({ target }) => {
   const el = target.closest("[data-action]");
@@ -379,8 +395,16 @@ document.addEventListener("click", ({ target }) => {
   const { action } = el.dataset;
   const state = TOGGLE_ICONS.has(action) ? toggleIcon(el) : null;
 
+  const config = ACTION_CONFIG[action];
+  if (!config) return;
+
   console.log(`[${action}]`, state !== null ? `→ ${state}` : "clicked");
-  // socket.emit("remote:action", { action, ...(state !== null && { state }) });
+
+  socket.emit("remote_command", {
+    code: pairedCode,
+    command: config.command,
+    payload: config.payload(state),
+  });
 });
 
 /* =========================
