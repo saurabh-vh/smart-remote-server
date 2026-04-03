@@ -354,15 +354,17 @@ function getUnitTypeLabel(unitType) {
 }
 
 // Clone sidebar icons into mobile container (single source of truth)
-const sidebarIcons = document.querySelectorAll(".sidebar-right i");
+const sidebarRight = document.querySelector(".sidebar-right");
 const mobileContainer = document.querySelector(".mobile-icons");
 
-sidebarIcons.forEach((icon) => {
-  mobileContainer.appendChild(icon.cloneNode(true));
+sidebarRight.childNodes.forEach((node) => {
+  if (node.nodeType === Node.ELEMENT_NODE) {
+    mobileContainer.appendChild(node.cloneNode(true));
+  }
 });
 
 // Icons that toggle between two states
-const TOGGLE_ICONS = new Set(["eye", "volume", "maximize"]);
+const TOGGLE_ICONS = new Set(["eye", "volume", "maximize", "ellipsis"]);
 // Swap icon class between iconA and iconB, return new state
 function toggleIcon(el) {
   const { iconA, iconB } = el.dataset;
@@ -387,14 +389,51 @@ const ACTION_CONFIG = {
   },
 };
 
+const popup = document.getElementById("ellipsisPopup");
+
 // Single delegated listener — handles all [data-action] clicks globally
 document.addEventListener("click", ({ target }) => {
   const el = target.closest("[data-action]");
+
+  // Close all popups if clicked outside any ellipsis-wrapper
+  if (!target.closest(".ellipsis-wrapper")) {
+    document
+      .querySelectorAll(".ellipsis-popup")
+      .forEach((p) => p.classList.remove("open"));
+  }
+
   if (!el) return;
-
   const { action } = el.dataset;
-  const state = TOGGLE_ICONS.has(action) ? toggleIcon(el) : null;
 
+  // Ellipsis toggle — find popup inside THIS wrapper only
+  if (action === "ellipsis") {
+    const thisPopup = el
+      .closest(".ellipsis-wrapper")
+      .querySelector(".ellipsis-popup");
+    document.querySelectorAll(".ellipsis-popup").forEach((p) => {
+      if (p !== thisPopup) p.classList.remove("open"); // close others
+    });
+    thisPopup.classList.toggle("open");
+    return;
+  }
+
+  // Popup items
+  if (
+    [
+      "image-gallery",
+      "presentation-video",
+      "intro-video",
+      "ebrochure",
+    ].includes(action)
+  ) {
+    console.log(`[${action}] clicked`);
+    document
+      .querySelectorAll(".ellipsis-popup")
+      .forEach((p) => p.classList.remove("open"));
+    return;
+  }
+
+  const state = TOGGLE_ICONS.has(action) ? toggleIcon(el) : null;
   const config = ACTION_CONFIG[action];
   if (!config) return;
 

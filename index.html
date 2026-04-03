@@ -71,7 +71,31 @@
         <!-- <i class="fa-solid fa-maximize" data-action="maximize" data-icon-a="fa-maximize" data-icon-b="fa-minimize"
           title="Maximize"></i> -->
         <i class="fa-solid fa-person-swimming" data-action="swimmer" title="Swimmer"></i>
-        <i class="fa-solid fa-ellipsis-vertical" data-action="ellipsis" title="Ellipsis Vertical"></i>
+        <!-- Ellipsis with popup -->
+        <div class="ellipsis-wrapper" data-action="ellipsis">
+          <!-- Icon  -->
+          <i class="fa-solid fa-ellipsis-vertical" title="More Options"></i>
+
+          <!-- popup -->
+          <div class="ellipsis-popup" id="ellipsisPopup">
+            <div class="ellipsis-item" data-action="image-gallery">
+              <i class="fa-solid fa-panorama"></i>
+              <span>Image Gallery</span>
+            </div>
+            <div class="ellipsis-item" data-action="presentation-video">
+              <i class="fa-solid fa-tv"></i>
+              <span>Presentation Video</span>
+            </div>
+            <div class="ellipsis-item" data-action="intro-video">
+              <i class="fa-solid fa-video"></i>
+              <span>Intro Video</span>
+            </div>
+            <div class="ellipsis-item" data-action="ebrochure">
+              <i class="fa-solid fa-file-pdf"></i>
+              <span>E-Brochure</span>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- joystick Drag Right Side-->
