@@ -5,14 +5,16 @@ const appEl = document.getElementById("app");
 let showRightIcons = true;
 
 // Fetch env and, if not PROD, hide only the icon elements (keep containers present).
-fetch('/env')
+fetch("/env")
   .then((r) => r.json())
   .then(({ ENV_SETUP }) => {
-    if (ENV_SETUP !== 'LOCAL') {
+    if (ENV_SETUP !== "LOCAL") {
       showRightIcons = false;
-      document.querySelectorAll('.sidebar-right i, .mobile-icons i').forEach((el) => {
-        el.style.display = 'none';
-      });
+      document
+        .querySelectorAll(".sidebar-right i, .mobile-icons i")
+        .forEach((el) => {
+          el.style.display = "none";
+        });
     }
   })
   .catch(() => {});
@@ -214,8 +216,28 @@ document.querySelectorAll(".menu-item").forEach((item) => {
   };
 });
 
+// Which Text SHow Recenter View / Close
+function resetCloseMode() {
+  recenterBtn.textContent = "RECENTER VIEW";
+  recenterBtn.classList.remove("close-mode");
+}
+function setCloseMode() {
+  recenterBtn.textContent = "CLOSE";
+  recenterBtn.classList.add("close-mode");
+}
 // Recenter View
-document.querySelector(".recenter-view").addEventListener("click", () => {
+recenterBtn.addEventListener("click", () => {
+  if (recenterBtn.textContent.trim() === "CLOSE") {
+    resetCloseMode();
+
+    // To close popup
+    socket.emit("remote_command", {
+      code: pairedCode,
+      command: "closeModal",
+      payload: {},
+    });
+    return;
+  }
   const activeBuildingId =
     getActive("building") || getActive("selectedBuilding");
   socket.emit("remote_command", {
@@ -381,9 +403,11 @@ sidebarRight.childNodes.forEach((node) => {
 
 // If env check already decided to hide icons, ensure clones are hidden too.
 if (!showRightIcons) {
-  document.querySelectorAll('.sidebar-right i, .mobile-icons i').forEach((el) => {
-    el.style.display = 'none';
-  });
+  document
+    .querySelectorAll(".sidebar-right i, .mobile-icons i")
+    .forEach((el) => {
+      el.style.display = "none";
+    });
 }
 
 // Icons that toggle between two states
@@ -410,6 +434,30 @@ const ACTION_CONFIG = {
     command: "toggle_swimmer",
     payload: () => ({}),
   },
+  // ellipsis: {
+  //   command: "toggle_ellipsis",
+  //   payload: () => ({}),
+  // },
+  imageGallery: {
+    command: "imageGallery",
+    payload: () => ({}),
+    onTrigger: () => setCloseMode(),
+  },
+  presentationVideo: {
+    command: "presentationVideo",
+    payload: () => ({}),
+    onTrigger: () => setCloseMode(),
+  },
+  introVideo: {
+    command: "introVideo",
+    payload: () => ({}),
+    onTrigger: () => setCloseMode(),
+  },
+  ebrochure: {
+    command: "ebrochure",
+    payload: () => ({}),
+    onTrigger: () => setCloseMode(),
+  },
 };
 
 const popup = document.getElementById("ellipsisPopup");
@@ -434,39 +482,24 @@ document.addEventListener("click", ({ target }) => {
       .closest(".ellipsis-wrapper")
       .querySelector(".ellipsis-popup");
     document.querySelectorAll(".ellipsis-popup").forEach((p) => {
-      if (p !== thisPopup) p.classList.remove("open"); // close others
+      if (p !== thisPopup) p.classList.remove("open");
     });
     thisPopup.classList.toggle("open");
-    return;
-  }
-
-  // Popup items
-  if (
-    [
-      "image-gallery",
-      "presentation-video",
-      "intro-video",
-      "ebrochure",
-    ].includes(action)
-  ) {
-    console.log(`[${action}] clicked`);
-    document
-      .querySelectorAll(".ellipsis-popup")
-      .forEach((p) => p.classList.remove("open"));
-    return;
   }
 
   const state = TOGGLE_ICONS.has(action) ? toggleIcon(el) : null;
   const config = ACTION_CONFIG[action];
   if (!config) return;
 
-  console.log(`[${action}]`, state !== null ? `→ ${state}` : "clicked");
+  // console.log(`[${action}]`, state !== null ? `→ ${state}` : "clicked");
 
   socket.emit("remote_command", {
     code: pairedCode,
     command: config.command,
     payload: config.payload(state),
   });
+  //To Show Red Button to close popup in website
+  if (config.onTrigger) config.onTrigger();
 });
 
 /* =========================

@@ -154,18 +154,18 @@ body {
 .ellipsis-popup {
   display: none;
   position: absolute;
-  top: 6vh;
+  top: 7vh;
   left: 0;
   background: #fff;
   border: 1.5px solid rgba(255, 255, 255, 0.2);
   border-radius: 14px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0.5vh 2vh rgba(0, 0, 0, 0.2);
   min-width: 17vw;
   z-index: 999;
   overflow: hidden;
-  padding: 10px;
+  padding: 0.8vw;
   flex-direction: column;
-  gap: 8px;
+  gap: 1.5vh;
 }
 
 .ellipsis-popup.open {
@@ -682,7 +682,11 @@ body {
   user-select: none;
   -webkit-user-select: none;
 }
-
+.recenter-view.close-mode {
+  padding: 1.8vw 5vw;
+  background: #e35748;
+  color: white;
+}
 /* <!-- Look Joystick Drag Left Side--> */
 .look-joystick {
   position: fixed;
@@ -931,10 +935,6 @@ body {
     font-size: 1.2vw;
     bottom: 3vw;
   }
-}
-
-/* For Mobile Devices  */
-@media (orientation: portrait) and (max-width: 480px) {
   #projectStatus {
     max-width: 150px;
     white-space: nowrap;
