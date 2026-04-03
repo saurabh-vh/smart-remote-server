@@ -2,11 +2,17 @@ const path = require("path");
 const express = require("express");
 const http = require("http");
 const socketIo = require("socket.io");
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const app = express();
 const server = http.createServer(app);
 
 app.use(express.static(__dirname));
+
+// Minimal endpoint exposing only the single env key needed by the client.
+app.get('/env', (req, res) => {
+  res.json({ ENV_SETUP: process.env.ENV_SETUP || 'PROD' });
+});
 
 const io = socketIo(server, {
   cors: { origin: "*" },

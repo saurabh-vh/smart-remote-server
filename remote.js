@@ -1,6 +1,22 @@
 const socket = io();
 const appEl = document.getElementById("app");
 
+// Minimal flag to track whether right-side icons should be shown.
+let showRightIcons = true;
+
+// Fetch env and, if not PROD, hide only the icon elements (keep containers present).
+fetch('/env')
+  .then((r) => r.json())
+  .then(({ ENV_SETUP }) => {
+    if (ENV_SETUP !== 'LOCAL') {
+      showRightIcons = false;
+      document.querySelectorAll('.sidebar-right i, .mobile-icons i').forEach((el) => {
+        el.style.display = 'none';
+      });
+    }
+  })
+  .catch(() => {});
+
 let pairedCode = null; // Code of currently paired display
 let projectName = null; // Name of connected project
 let remoteUiState = null; // Latest state received from display
@@ -362,6 +378,13 @@ sidebarRight.childNodes.forEach((node) => {
     mobileContainer.appendChild(node.cloneNode(true));
   }
 });
+
+// If env check already decided to hide icons, ensure clones are hidden too.
+if (!showRightIcons) {
+  document.querySelectorAll('.sidebar-right i, .mobile-icons i').forEach((el) => {
+    el.style.display = 'none';
+  });
+}
 
 // Icons that toggle between two states
 const TOGGLE_ICONS = new Set(["eye", "volume", "maximize", "ellipsis"]);
