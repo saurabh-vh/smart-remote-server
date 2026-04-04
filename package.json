@@ -1,16 +1,24 @@
 {
   "name": "smart-remote",
   "version": "1.0.0",
-  "description": "",
+  "description": "Smart Remote converted to Next.js",
   "main": "index.js",
   "scripts": {
+    "dev": "concurrently \"node server.js\" \"next dev\"",
+    "build": "next build",
+    "start": "concurrently \"node server.js\" \"next start\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "concurrently": "^7.6.0",
+    "dotenv": "^16.0.0",
     "express": "^5.2.1",
+    "next": "^13.4.10",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "socket.io": "^2.4.1",
-    "dotenv": "^16.0.0"
+    "socket.io-client": "^4.6.1"
   }
 }
