@@ -1,7 +1,8 @@
 import {
   ACTION_CONFIG,
   buildEllipsisPopup,
-} from "./modules/navbarPopupIcons.js";
+  rightSideNavbar,
+} from "./modules/rightSideNavbar.js";
 import { uiState } from "./modules/state.js";
 
 const socket = io();
@@ -286,6 +287,16 @@ socket.on(
     projectName = projName;
     availableDisplays = displays;
     uiState.data.moreOptions = moreOptions || {};
+
+    rightSideNavbar(sidebarRight);
+
+    // Mobile clone
+    mobileContainer.innerHTML = "";
+    sidebarRight.childNodes.forEach((node) => {
+      if (node.nodeType === Node.ELEMENT_NODE) {
+        mobileContainer.appendChild(node.cloneNode(true));
+      }
+    });
 
     document
       .querySelectorAll(".ellipsis-popup")

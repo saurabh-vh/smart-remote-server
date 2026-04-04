@@ -1,5 +1,57 @@
 import { uiState } from "./state.js";
 
+export function rightSideNavbar(container) {
+  const u = uiState.data.moreOptions;
+
+  const icons = [
+    {
+      action: "eye",
+      iconA: "fa-eye-slash",
+      iconB: "fa-eye",
+      title: "Eye Slash",
+      show: true,
+    },
+    {
+      action: "volume",
+      iconA: "fa-volume-high",
+      iconB: "fa-volume-xmark",
+      title: "Volume",
+      show: u.has_background_music,
+    },
+    {
+      action: "swimmer",
+      icon: "fa-person-swimming",
+      title: "Swimmer",
+      show: true,
+    },
+  ];
+
+  container.innerHTML = "";
+  icons
+    .filter((i) => i.show)
+    .forEach((item) => {
+      const el = document.createElement("i");
+      el.className = `fa-solid ${item.iconA || item.icon}`;
+      el.dataset.action = item.action;
+      el.title = item.title;
+      if (item.iconA) {
+        el.dataset.iconA = item.iconA;
+        el.dataset.iconB = item.iconB;
+      }
+      container.appendChild(el);
+    });
+
+  // Append Ellipsis wrapper and Iocn
+  const wrapper = document.createElement("div");
+  wrapper.className = "ellipsis-wrapper";
+  wrapper.dataset.action = "ellipsis";
+  wrapper.innerHTML = `
+    <i class="fa-solid fa-ellipsis-vertical" title="More Options"></i>
+    <div class="ellipsis-popup"></div>
+  `;
+  container.appendChild(wrapper);
+}
+
 function setCloseMode() {
   recenterBtn.textContent = "CLOSE";
   recenterBtn.classList.add("close-mode");
