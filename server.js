@@ -2,16 +2,15 @@ const path = require("path");
 const express = require("express");
 const http = require("http");
 const socketIo = require("socket.io");
-require('dotenv').config({ path: path.join(__dirname, '.env') });
+require("dotenv").config({ path: path.join(__dirname, ".env") });
 
 const app = express();
 const server = http.createServer(app);
 
 app.use(express.static(__dirname));
 
-// Minimal endpoint exposing only the single env key needed by the client.
-app.get('/env', (req, res) => {
-  res.json({ ENV_SETUP: process.env.ENV_SETUP || 'PROD' });
+app.get("/env", (req, res) => {
+  res.json({ ENV_SETUP: process.env.ENV_SETUP || "PROD" });
 });
 
 const io = socketIo(server, {
@@ -19,22 +18,35 @@ const io = socketIo(server, {
   transports: ["websocket", "polling"],
 });
 
-// Registry: projectName -> { code: { socketId, remoteSocketId, projectName, displayName } }
-const projectDisplays = new Map(); // projectName -> Map(code -> displayData)
-const remoteConnections = new Map(); // remoteSocketId -> { code, projectName }
+const projectDisplays = new Map();
+const remoteConnections = new Map();
+
 setInterval(() => {
   fetch("https://smart-remote-server.onrender.com")
-    .then(() => {
-      console.log("pinged server to prevent sleep");
-    })
-    .catch(() => {
-      console.log("failed to ping server");
-    });
+    .then(() => console.log("pinged server to prevent sleep"))
+    .catch(() => console.log("failed to ping server"));
 }, 50000);
+
+// Helper — build displays array for a project
+function getProjectDisplays(projectMap) {
+  return Array.from(projectMap.values()).map((d) => ({
+    code: d.code,
+    displayName: d.displayName,
+    isOccupied: !!d.remoteSocketId,
+    projectName: d.projectName,
+  }));
+}
+
+// Helper — emit display list update to entire project room
+function emitDisplayList(projectName, projectMap) {
+  const displays = getProjectDisplays(projectMap);
+  io.to(`project:${projectName}`).emit("display_list_update", { displays });
+  return displays;
+}
+
 io.on("connection", (socket) => {
   console.log("client connected:", socket.id);
 
-  // Display registers with code and project name
   socket.on(
     "register_display",
     ({ code, projectName, displayName = `Display ${code}` }) => {
@@ -43,14 +55,12 @@ io.on("connection", (socket) => {
         return;
       }
 
-      // Initialize project map if not exists
       if (!projectDisplays.has(projectName)) {
         projectDisplays.set(projectName, new Map());
       }
 
       const projectMap = projectDisplays.get(projectName);
 
-      // Check if display with this code already exists in this project
       if (projectMap.has(code)) {
         socket.emit("register_error", {
           message: "Display code already exists for this project",
@@ -58,7 +68,6 @@ io.on("connection", (socket) => {
         return;
       }
 
-      // Register display
       projectMap.set(code, {
         socketId: socket.id,
         remoteSocketId: null,
@@ -74,26 +83,16 @@ io.on("connection", (socket) => {
         `registered display: ${displayName} (${code}) for project: ${projectName}`,
       );
 
-      // Send list of all displays for THIS PROJECT ONLY
-      const displays = Array.from(projectMap.values()).map((d) => ({
-        code: d.code,
-        displayName: d.displayName,
-        isOccupied: !!d.remoteSocketId,
-        projectName: d.projectName,
-      }));
-
-      io.to(`project:${projectName}`).emit("display_list_update", { displays });
+      emitDisplayList(projectName, projectMap);
       socket.emit("registered_display", { code, projectName });
     },
   );
-  // Display sends second-level selection update
+
   socket.on("second_level_update", ({ selectedUnits = [] }) => {
     for (const [projectName, projectMap] of projectDisplays.entries()) {
       for (const [code, display] of projectMap.entries()) {
         if (display.socketId === socket.id) {
-          // optional: cache latest second-level payload on display object
           display.secondLevelState = { selectedUnits };
-
           if (display.remoteSocketId) {
             io.to(display.remoteSocketId).emit("second_level_update", {
               selectedUnits,
@@ -108,9 +107,7 @@ io.on("connection", (socket) => {
     }
   });
 
-  // Remote attempts to pair with a code (no project name needed)
   socket.on("pair_remote", ({ code }) => {
-    // Find which project this display code belongs to
     let targetDisplay = null;
     let targetProject = null;
     let targetProjectMap = null;
@@ -129,7 +126,6 @@ io.on("connection", (socket) => {
       return;
     }
 
-    // Check if display is already occupied
     if (targetDisplay.remoteSocketId) {
       socket.emit("pair_error", {
         message: "Display already occupied by another remote",
@@ -137,41 +133,22 @@ io.on("connection", (socket) => {
       return;
     }
 
-    // Check if remote is already paired with another display
     if (remoteConnections.has(socket.id)) {
       const currentPair = remoteConnections.get(socket.id);
       const oldProjectMap = projectDisplays.get(currentPair.projectName);
       if (oldProjectMap && oldProjectMap.has(currentPair.code)) {
         oldProjectMap.get(currentPair.code).remoteSocketId = null;
-
-        // Update display list for OLD PROJECT
-        const oldDisplays = Array.from(oldProjectMap.values()).map((d) => ({
-          code: d.code,
-          displayName: d.displayName,
-          isOccupied: !!d.remoteSocketId,
-          projectName: d.projectName,
-        }));
-        io.to(`project:${currentPair.projectName}`).emit(
-          "display_list_update",
-          { displays: oldDisplays },
-        );
+        emitDisplayList(currentPair.projectName, oldProjectMap);
       }
     }
 
-    // Establish new connection
     targetDisplay.remoteSocketId = socket.id;
     remoteConnections.set(socket.id, { code, projectName: targetProject });
 
     socket.join(`pair:${code}`);
     socket.join(`project:${targetProject}`);
 
-    // Get all displays for THIS PROJECT ONLY
-    const displays = Array.from(targetProjectMap.values()).map((d) => ({
-      code: d.code,
-      displayName: d.displayName,
-      isOccupied: !!d.remoteSocketId,
-      projectName: d.projectName,
-    }));
+    const displays = emitDisplayList(targetProject, targetProjectMap);
 
     socket.emit("pair_success", {
       code,
@@ -182,17 +159,11 @@ io.on("connection", (socket) => {
 
     io.to(`pair:${code}`).emit("paired", { code });
 
-    // Update display list for ALL IN THIS PROJECT
-    io.to(`project:${targetProject}`).emit("display_list_update", { displays });
-
     console.log(
       `remote ${socket.id} paired to: ${code} (${targetDisplay.displayName}) in project: ${targetProject}`,
     );
   });
-  /* =========================
-   Cursor Client (Windows EXE)
-   Attach to existing display
-========================= */
+
   socket.on("register_cursor_client", ({ code }) => {
     let foundProject = null;
 
@@ -212,19 +183,15 @@ io.on("connection", (socket) => {
     console.log(`Cursor client attached to ${code}`);
   });
 
-  // Remote sends command to display
   socket.on("remote_command", ({ code, command, payload }) => {
     io.to(`pair:${code}`).emit("remote_command", { command, payload });
   });
 
-  // Display sends state update
   socket.on("display_state", ({ code, projectName, state }) => {
     const projectMap = projectDisplays.get(projectName);
     if (projectMap && projectMap.has(code)) {
-      projectMap.get(code).state = state;
-
-      // Send state to the connected remote if any
       const display = projectMap.get(code);
+      display.state = state;
       if (display.remoteSocketId) {
         io.to(display.remoteSocketId).emit("display_state", {
           state,
@@ -236,7 +203,6 @@ io.on("connection", (socket) => {
     }
   });
 
-  // Remote switches to another display (within the same project)
   socket.on("switch_display", ({ newCode, projectName }) => {
     const remoteData = remoteConnections.get(socket.id);
     if (!remoteData) {
@@ -244,7 +210,6 @@ io.on("connection", (socket) => {
       return;
     }
 
-    // Get project from remote's current connection
     const currentProjectName = remoteData.projectName;
     const projectMap = projectDisplays.get(currentProjectName);
 
@@ -257,7 +222,6 @@ io.on("connection", (socket) => {
 
     const newDisplay = projectMap.get(newCode);
 
-    // Check if new display is already occupied
     if (newDisplay.remoteSocketId && newDisplay.remoteSocketId !== socket.id) {
       socket.emit("switch_error", {
         message: "Display already occupied by another remote",
@@ -265,41 +229,27 @@ io.on("connection", (socket) => {
       return;
     }
 
-    // Leave old pair room
     socket.leave(`pair:${remoteData.code}`);
 
-    // Remove from old display
     const oldDisplay = projectMap.get(remoteData.code);
-    if (oldDisplay) {
-      oldDisplay.remoteSocketId = null;
-    }
+    if (oldDisplay) oldDisplay.remoteSocketId = null;
 
-    // Join new pair room
     newDisplay.remoteSocketId = socket.id;
     socket.join(`pair:${newCode}`);
 
-    // Update remote connection
     remoteConnections.set(socket.id, {
       code: newCode,
       projectName: currentProjectName,
     });
 
-    // Get updated display list for THIS PROJECT ONLY
-    const displays = Array.from(projectMap.values()).map((d) => ({
-      code: d.code,
-      displayName: d.displayName,
-      isOccupied: !!d.remoteSocketId,
-      projectName: d.projectName,
-    }));
+    const displays = emitDisplayList(currentProjectName, projectMap);
 
-    // Send success to remote
     socket.emit("switch_success", {
       code: newCode,
       displayName: newDisplay.displayName,
       displays,
     });
 
-    // Send state of new display to remote
     if (newDisplay.state) {
       socket.emit("display_state", {
         state: newDisplay.state,
@@ -309,73 +259,42 @@ io.on("connection", (socket) => {
       });
     }
 
-    // Update display list for ALL IN THIS PROJECT
-    io.to(`project:${currentProjectName}`).emit("display_list_update", {
-      displays,
-    });
-
     console.log(
       `remote ${socket.id} switched to: ${newCode} (${newDisplay.displayName}) in project: ${currentProjectName}`,
     );
   });
 
-  // Remote requests to be unpaired without disconnecting socket
   socket.on("unpair_remote", ({ code } = {}) => {
-    if (!remoteConnections.has(socket.id)) {
-      // nothing to unpair
-      return;
-    }
+    if (!remoteConnections.has(socket.id)) return;
 
     const { code: currentCode, projectName } = remoteConnections.get(socket.id);
     const unpairCode = code || currentCode;
 
-    // Remove remote mapping
     remoteConnections.delete(socket.id);
 
     const projectMap = projectDisplays.get(projectName);
     if (projectMap && projectMap.has(unpairCode)) {
       const display = projectMap.get(unpairCode);
       if (display.remoteSocketId === socket.id) display.remoteSocketId = null;
-
-      // Update display list for THIS PROJECT ONLY
-      const displays = Array.from(projectMap.values()).map((d) => ({
-        code: d.code,
-        displayName: d.displayName,
-        isOccupied: !!d.remoteSocketId,
-        projectName: d.projectName,
-      }));
-      io.to(`project:${projectName}`).emit("display_list_update", { displays });
-
-      console.log(`remote unpaired: ${socket.id} from ${unpairCode} (project: ${projectName})`);
+      emitDisplayList(projectName, projectMap);
+      console.log(
+        `remote unpaired: ${socket.id} from ${unpairCode} (project: ${projectName})`,
+      );
     } else {
       console.log(`remote unpaired (no matching display): ${socket.id}`);
     }
   });
 
   socket.on("disconnect", () => {
-    // Check if this was a display
     for (const [projectName, projectMap] of projectDisplays.entries()) {
       for (const [code, display] of projectMap.entries()) {
         if (display.socketId === socket.id) {
-          // Remove display from registry
           projectMap.delete(code);
-
-          // If project has no more displays, remove project
           if (projectMap.size === 0) {
             projectDisplays.delete(projectName);
           } else {
-            // Update display list for THIS PROJECT ONLY
-            const displays = Array.from(projectMap.values()).map((d) => ({
-              code: d.code,
-              displayName: d.displayName,
-              isOccupied: !!d.remoteSocketId,
-              projectName: d.projectName,
-            }));
-            io.to(`project:${projectName}`).emit("display_list_update", {
-              displays,
-            });
+            emitDisplayList(projectName, projectMap);
           }
-
           console.log(
             `display disconnected: ${code} from project: ${projectName}`,
           );
@@ -384,26 +303,14 @@ io.on("connection", (socket) => {
       }
     }
 
-    // Check if this was a remote
     if (remoteConnections.has(socket.id)) {
       const { code, projectName } = remoteConnections.get(socket.id);
       remoteConnections.delete(socket.id);
 
       const projectMap = projectDisplays.get(projectName);
       if (projectMap && projectMap.has(code)) {
-        const display = projectMap.get(code);
-        display.remoteSocketId = null;
-
-        // Update display list for THIS PROJECT ONLY
-        const displays = Array.from(projectMap.values()).map((d) => ({
-          code: d.code,
-          displayName: d.displayName,
-          isOccupied: !!d.remoteSocketId,
-          projectName: d.projectName,
-        }));
-        io.to(`project:${projectName}`).emit("display_list_update", {
-          displays,
-        });
+        projectMap.get(code).remoteSocketId = null;
+        emitDisplayList(projectName, projectMap);
       }
 
       console.log(
