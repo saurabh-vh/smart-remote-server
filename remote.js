@@ -1,3 +1,9 @@
+import {
+  ACTION_CONFIG,
+  buildEllipsisPopup,
+} from "./modules/navbarPopupIcons.js";
+import { uiState } from "./modules/state.js";
+
 const socket = io();
 const appEl = document.getElementById("app");
 
@@ -23,22 +29,6 @@ let pairedCode = null; // Code of currently paired display
 let projectName = null; // Name of connected project
 let remoteUiState = null; // Latest state received from display
 let availableDisplays = []; // List of all available displays
-
-/* =========================
-     SINGLE SOURCE OF TRUTH
-  ========================= */
-const uiState = {
-  section: "homes", // Active tab: homes | amenities | location
-  stack: [], // Navigation history stack
-  searchQuery: "", // Current unit search input
-  typeFilter: "", // Current unit type filter
-  data: {
-    homes: { buildings: [], units: [] }, // Homes data from display
-    takeMeTo: [],
-    amenities: {}, // Amenities data from display
-    location: {}, // Location data from display
-  },
-};
 
 /* =========================
      URL AUTO CONNECT
@@ -221,10 +211,7 @@ function resetCloseMode() {
   recenterBtn.textContent = "RECENTER VIEW";
   recenterBtn.classList.remove("close-mode");
 }
-function setCloseMode() {
-  recenterBtn.textContent = "CLOSE";
-  recenterBtn.classList.add("close-mode");
-}
+
 // Recenter View
 recenterBtn.addEventListener("click", () => {
   if (recenterBtn.textContent.trim() === "CLOSE") {
@@ -292,20 +279,28 @@ window.addEventListener("beforeunload", () => unpairRemoteClient());
      SOCKET EVENTS
   ========================= */
 // Pairing successful — store code and update UI
-socket.on("pair_success", ({ code, projectName: projName, displays }) => {
-  pairedCode = code;
-  projectName = projName;
-  availableDisplays = displays;
+socket.on(
+  "pair_success",
+  ({ code, projectName: projName, displays, moreOptions }) => {
+    pairedCode = code;
+    projectName = projName;
+    availableDisplays = displays;
+    uiState.data.moreOptions = moreOptions || {};
 
-  const statusEl = document.getElementById("projectStatus");
-  statusEl.firstChild.textContent = "Connected to " + projName;
+    document
+      .querySelectorAll(".ellipsis-popup")
+      .forEach((p) => buildEllipsisPopup(p));
 
-  const closeBtn = document.getElementById("closeBtn");
-  closeBtn.style.display = "flex";
+    const statusEl = document.getElementById("projectStatus");
+    statusEl.firstChild.textContent = "Connected to " + projName;
 
-  appEl.classList.add("connected");
-  updateDisplaySelector(displays, code);
-});
+    const closeBtn = document.getElementById("closeBtn");
+    closeBtn.style.display = "flex";
+
+    appEl.classList.add("connected");
+    updateDisplaySelector(displays, code);
+  },
+);
 
 // Display sent its current state — update local data and re-render
 socket.on("display_state", ({ state }) => {
@@ -419,48 +414,6 @@ function toggleIcon(el) {
   el.classList.replace(isA ? iconA : iconB, isA ? iconB : iconA);
   return !isA;
 }
-
-// Action config — Every action command and payload mapping
-const ACTION_CONFIG = {
-  eye: {
-    command: "toggle_eye",
-    payload: (state) => ({ visible: state }),
-  },
-  volume: {
-    command: "toggle_volume",
-    payload: (state) => ({ muted: state }),
-  },
-  swimmer: {
-    command: "toggle_swimmer",
-    payload: () => ({}),
-  },
-  // ellipsis: {
-  //   command: "toggle_ellipsis",
-  //   payload: () => ({}),
-  // },
-  imageGallery: {
-    command: "imageGallery",
-    payload: () => ({}),
-    onTrigger: () => setCloseMode(),
-  },
-  presentationVideo: {
-    command: "presentationVideo",
-    payload: () => ({}),
-    onTrigger: () => setCloseMode(),
-  },
-  introVideo: {
-    command: "introVideo",
-    payload: () => ({}),
-    onTrigger: () => setCloseMode(),
-  },
-  ebrochure: {
-    command: "ebrochure",
-    payload: () => ({}),
-    onTrigger: () => setCloseMode(),
-  },
-};
-
-const popup = document.getElementById("ellipsisPopup");
 
 // Single delegated listener — handles all [data-action] clicks globally
 document.addEventListener("click", ({ target }) => {

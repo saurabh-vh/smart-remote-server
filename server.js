@@ -49,7 +49,12 @@ io.on("connection", (socket) => {
 
   socket.on(
     "register_display",
-    ({ code, projectName, displayName = `Display ${code}` }) => {
+    ({
+      code,
+      projectName,
+      displayName = `Display ${code}`,
+      moreOptions = {},
+    }) => {
       if (!projectName) {
         socket.emit("register_error", { message: "Project name required" });
         return;
@@ -75,6 +80,7 @@ io.on("connection", (socket) => {
         displayName,
         code,
         state: null,
+        moreOptions: moreOptions || {},
       });
 
       socket.join(`pair:${code}`);
@@ -155,6 +161,7 @@ io.on("connection", (socket) => {
       projectName: targetProject,
       displays,
       currentDisplay: targetDisplay.displayName,
+      moreOptions: targetDisplay.moreOptions,
     });
 
     io.to(`pair:${code}`).emit("paired", { code });
