@@ -20,6 +20,58 @@ body {
   flex-direction: column;
 }
 
+/* Entire Screen Overlay  */
+.screen-blur-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 15;
+  align-items: center;
+  justify-content: center;
+}
+
+.screen-blur-overlay.active {
+  display: flex;
+}
+
+.screen-blur-card {
+  /* background: #fff; */
+  border-radius: 2vh;
+  padding: 4vh 6vh;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5.5vh;
+  /* box-shadow: 0 2vh 5vh rgba(0, 0, 0, 0.2); */
+}
+
+.screen-blur-card p {
+  margin: 0;
+  font-size: 5.2vh;
+  font-weight: 600;
+  color: #fff;
+}
+
+.screen-blur-close {
+  background: #e35748;
+  color: #fff;
+  border: none;
+  border-radius: 1vh;
+  padding: 1.4vh 4vh;
+  font-size: 1.8vh;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.screen-blur-close:hover {
+  background: #c0392b;
+}
+
 /* Top bar (iPad style) */
 .topbar {
   height: 54px;
@@ -277,7 +329,15 @@ body {
   font-weight: 700;
   padding: 4px 12px;
 }
-
+.units-building-title {
+  font-weight: 600;
+  font-size: 1.8vh;
+  margin-right: 0.5vw;
+  color: #1c1c1e;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .units-toolbar {
   position: sticky;
   top: 0;
@@ -661,7 +721,7 @@ body {
 .recenter-view-parent {
   width: 100vw;
   position: absolute;
-  z-index: 555;
+  z-index: 5;
   display: flex;
   justify-content: center;
   bottom: 10vh;
@@ -762,7 +822,16 @@ body {
   justify-content: center;
 }
 
-.rubber-label {
+.rubber-max {
+  position: absolute;
+  top: 1.5vw;
+  font-size: 0.6vw;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 600;
+  user-select: none;
+  pointer-events: none;
+}
+.rubber-min {
   position: absolute;
   bottom: 1.5vw;
   font-size: 0.6vw;
@@ -931,7 +1000,11 @@ body {
     width: 11vw;
     height: 11vw;
   }
-  .rubber-label {
+  .rubber-max {
+    font-size: 1.2vw;
+    bottom: 3vw;
+  }
+  .rubber-min {
     font-size: 1.2vw;
     bottom: 3vw;
   }
@@ -1021,7 +1094,7 @@ body {
   .recenter-view-parent {
     width: 100vw;
     position: absolute;
-    z-index: 555;
+    z-index: 5;
     display: flex;
     justify-content: center;
     bottom: 4vh;
@@ -1062,7 +1135,11 @@ body {
     height: 14vw;
   }
 
-  .rubber-label {
+  .rubber-max {
+    font-size: 1.8vw;
+    bottom: 4vw;
+  }
+  .rubber-min {
     font-size: 1.8vw;
     bottom: 4vw;
   }

@@ -53,8 +53,14 @@ export function rightSideNavbar(container) {
 }
 
 function setCloseMode() {
-  recenterBtn.textContent = "CLOSE";
-  recenterBtn.classList.add("close-mode");
+  document.getElementById("screenBlurOverlay").classList.add("active");
+  document
+    .querySelectorAll(".ellipsis-popup")
+    .forEach((p) => p.classList.remove("open"));
+}
+
+export function resetCloseMode() {
+  document.getElementById("screenBlurOverlay").classList.remove("active");
 }
 
 export const ACTION_CONFIG = {

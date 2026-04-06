@@ -13,6 +13,14 @@
 
 <body>
   <div class="app" id="app">
+    <!-- /* Entire Screen Overlay */ -->
+    <div class="screen-blur-overlay" id="screenBlurOverlay">
+      <div class="screen-blur-card">
+        <p>Showing on Screen</p>
+        <button class="screen-blur-close" id="screenBlurClose">Close</button>
+      </div>
+    </div>
+
     <!-- Pair Overlay -->
     <div class="pair-overlay">
       <div class="pair-box">
@@ -95,14 +103,15 @@
       <!-- Look Joystick Drag Left Side-->
       <div class="look-joystick" id="lookJoystick">
         <div class="look-inner" id="lookInner">
-          <div class="drag-text-right">PAN</div>
+          <div class="drag-text-right">LOOK AROUND</div>
         </div>
       </div>
 
       <!--Rubber Band Zoom (right side) -->
       <div class="rubber-band" id="rubberBand">
+        <div class="rubber-max">MAX</div>
         <div class="rubber-inner" id="rubberInner"></div>
-        <div class="rubber-label">ZOOM</div>
+        <div class="rubber-min">MIN</div>
       </div>
     </div>
   </div>

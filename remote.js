@@ -1,6 +1,7 @@
 import {
   ACTION_CONFIG,
   buildEllipsisPopup,
+  resetCloseMode,
   rightSideNavbar,
 } from "./modules/rightSideNavbar.js";
 import { uiState } from "./modules/state.js";
@@ -135,7 +136,7 @@ function goBack() {
   if (current?.level === "building") {
     // Replace "building" with "selectedBuilding" to keep highlight
     uiState.stack.pop();
-    uiState.stack.push({ level: "selectedBuilding", id: current.id });
+    // uiState.stack.push({ level: "selectedBuilding", id: current.id });
   } else {
     uiState.stack.pop();
   }
@@ -160,6 +161,10 @@ function goBack() {
 
   if (!top || top.level === "selectedBuilding") {
     setMode("map");
+    socket.emit("remote_command", {
+      code: pairedCode,
+      command: "request_homes",
+    });
   }
 
   // Unit level se wapas — walk mode rehga
@@ -207,25 +212,18 @@ document.querySelectorAll(".menu-item").forEach((item) => {
   };
 });
 
-// Which Text SHow Recenter View / Close
-function resetCloseMode() {
-  recenterBtn.textContent = "RECENTER VIEW";
-  recenterBtn.classList.remove("close-mode");
-}
+// RightSideNavbar More options popup overlay
+document.getElementById("screenBlurClose").addEventListener("click", () => {
+  resetCloseMode();
+  socket.emit("remote_command", {
+    code: pairedCode,
+    command: "closeModal",
+    payload: {},
+  });
+});
 
 // Recenter View
 recenterBtn.addEventListener("click", () => {
-  if (recenterBtn.textContent.trim() === "CLOSE") {
-    resetCloseMode();
-
-    // To close popup
-    socket.emit("remote_command", {
-      code: pairedCode,
-      command: "closeModal",
-      payload: {},
-    });
-    return;
-  }
   const activeBuildingId =
     getActive("building") || getActive("selectedBuilding");
   socket.emit("remote_command", {
@@ -493,8 +491,7 @@ function renderHomes() {
 // Render clickable buildings list
 function renderBuildings(container) {
   const buildings = uiState.data.homes.buildings;
-  const activeBuildingId =
-    getActive("building") || getActive("selectedBuilding");
+  const activeBuildingId = getActive("building");
 
   if (!buildings.length) {
     container.innerHTML = `
@@ -594,6 +591,18 @@ function renderUnitsWithFilters(container) {
   backBtn.textContent = "\u2190";
   backBtn.onclick = goBack;
 
+  // active building title
+  const buildingTitle = document.createElement("div");
+  buildingTitle.className = "units-building-title";
+  const activeBuilding = uiState.stack.findLast((s) => s.level === "building");
+  const buildingData = uiState.data.homes.buildings.find(
+    (b) => b.id === activeBuilding?.id,
+  );
+  buildingTitle.textContent =
+    activeBuilding?.wingName ||
+    buildingData?.building_name ||
+    `Building ${activeBuilding?.id || ""}`;
+
   const searchInput = document.createElement("input");
   searchInput.className = "units-search";
   searchInput.type = "text";
@@ -619,6 +628,7 @@ function renderUnitsWithFilters(container) {
   });
 
   toolbar.appendChild(backBtn);
+  toolbar.appendChild(buildingTitle);
   toolbar.appendChild(searchInput);
   toolbar.appendChild(typeFilter);
   container.appendChild(toolbar);
