@@ -373,7 +373,7 @@ body {
 
 .units-filter {
   width: 130px;
-  height: 4vh;
+  height: 4.9vh;
   border: 1px solid #d9dee5;
   border-radius: 8px;
   padding: 8px 10px;
@@ -898,6 +898,15 @@ body {
     height: auto;
     max-height: 54.5vh;
     overflow-y: auto;
+  }
+  .units-filter {
+    width: 130px;
+    height: 4vh;
+    border: 1px solid #d9dee5;
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 14px;
+    background: #fff;
   }
   .amenities-grid {
     height: auto;
