@@ -52,15 +52,17 @@ export function rightSideNavbar(container) {
   container.appendChild(wrapper);
 }
 
-function setCloseMode() {
+function showScreenOverlay() {
   document.getElementById("screenBlurOverlay").classList.add("active");
+  document.getElementById("screenBlurCard").classList.add("visible");
   document
     .querySelectorAll(".ellipsis-popup")
     .forEach((p) => p.classList.remove("open"));
 }
 
-export function resetCloseMode() {
+export function hideScreenOverlay() {
   document.getElementById("screenBlurOverlay").classList.remove("active");
+  document.getElementById("screenBlurCard").classList.remove("visible");
 }
 
 export const ACTION_CONFIG = {
@@ -79,42 +81,42 @@ export const ACTION_CONFIG = {
   projectOverview: {
     command: "projectOverview",
     payload: () => ({}),
-    onTrigger: () => setCloseMode(),
+    onTrigger: () => showScreenOverlay(),
   },
   sitePlan: {
     command: "sitePlan",
     payload: () => ({}),
-    onTrigger: () => setCloseMode(),
+    onTrigger: () => showScreenOverlay(),
   },
   imageGallery: {
     command: "imageGallery",
     payload: () => ({}),
-    onTrigger: () => setCloseMode(),
+    onTrigger: () => showScreenOverlay(),
   },
   presentationVideo: {
     command: "presentationVideo",
     payload: () => ({}),
-    onTrigger: () => setCloseMode(),
+    onTrigger: () => showScreenOverlay(),
   },
   introVideo: {
     command: "introVideo",
     payload: () => ({}),
-    onTrigger: () => setCloseMode(),
+    onTrigger: () => showScreenOverlay(),
   },
   ebrochure: {
     command: "ebrochure",
     payload: () => ({}),
-    onTrigger: () => setCloseMode(),
+    onTrigger: () => showScreenOverlay(),
   },
   siteVisit: {
     command: "siteVisit",
     payload: () => ({}),
-    onTrigger: () => setCloseMode(),
+    onTrigger: () => showScreenOverlay(),
   },
   emailInfo: {
     command: "emailInfo",
     payload: () => ({}),
-    onTrigger: () => setCloseMode(),
+    onTrigger: () => showScreenOverlay(),
   },
 };
 

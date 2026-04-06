@@ -38,17 +38,14 @@ body {
 }
 
 .screen-blur-card {
-  /* background: #fff; */
-  border-radius: 2vh;
-  padding: 4vh 6vh;
-  text-align: center;
+  display: none;
+}
+.screen-blur-card.visible {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 5.5vh;
-  /* box-shadow: 0 2vh 5vh rgba(0, 0, 0, 0.2); */
 }
-
 .screen-blur-card p {
   margin: 0;
   font-size: 5.2vh;
@@ -218,6 +215,18 @@ body {
   padding: 0.8vw;
   flex-direction: column;
   gap: 1.5vh;
+}
+.ellipsis-popup.open {
+  display: flex;
+}
+
+.ellipsis-popup.pop-left {
+  left: 0;
+  right: auto;
+}
+.ellipsis-popup.pop-right {
+  right: 0;
+  left: auto;
 }
 
 .ellipsis-popup.open {

@@ -1,7 +1,7 @@
 import {
   ACTION_CONFIG,
   buildEllipsisPopup,
-  resetCloseMode,
+  hideScreenOverlay,
   rightSideNavbar,
 } from "./modules/rightSideNavbar.js";
 import { uiState } from "./modules/state.js";
@@ -214,7 +214,7 @@ document.querySelectorAll(".menu-item").forEach((item) => {
 
 // RightSideNavbar More options popup overlay
 document.getElementById("screenBlurClose").addEventListener("click", () => {
-  resetCloseMode();
+  hideScreenOverlay();
   socket.emit("remote_command", {
     code: pairedCode,
     command: "closeModal",
@@ -433,6 +433,12 @@ document.addEventListener("click", ({ target }) => {
     document
       .querySelectorAll(".ellipsis-popup")
       .forEach((p) => p.classList.remove("open"));
+    const cardVisible = document
+      .getElementById("screenBlurCard")
+      .classList.contains("visible");
+    if (!cardVisible) {
+      document.getElementById("screenBlurOverlay").classList.remove("active");
+    }
   }
 
   if (!el) return;
@@ -443,10 +449,33 @@ document.addEventListener("click", ({ target }) => {
     const thisPopup = el
       .closest(".ellipsis-wrapper")
       .querySelector(".ellipsis-popup");
+
     document.querySelectorAll(".ellipsis-popup").forEach((p) => {
       if (p !== thisPopup) p.classList.remove("open");
     });
+
+    const allItems = Array.from(
+      document.querySelectorAll(
+        ".sidebar-right > i, .sidebar-right .ellipsis-wrapper",
+      ),
+    );
+    const index = allItems.indexOf(el.closest(".ellipsis-wrapper")) + 1;
+
+    thisPopup.classList.remove("pop-left", "pop-right");
+    if (index % 3 === 0) {
+      thisPopup.classList.add("pop-right");
+    } else {
+      thisPopup.classList.add("pop-left");
+    }
+
     thisPopup.classList.toggle("open");
+
+    // Popup open hone par sirf blur overlay, card nahi
+    if (thisPopup.classList.contains("open")) {
+      document.getElementById("screenBlurOverlay").classList.add("active");
+    } else {
+      document.getElementById("screenBlurOverlay").classList.remove("active");
+    }
   }
 
   const state = TOGGLE_ICONS.has(action) ? toggleIcon(el) : null;
