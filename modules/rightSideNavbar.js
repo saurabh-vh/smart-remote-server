@@ -6,8 +6,8 @@ export function rightSideNavbar(container) {
   const icons = [
     {
       action: "eye",
-      iconA: "fa-eye-slash",
-      iconB: "fa-eye",
+      iconA: "fa-eye",
+      iconB: "fa-eye-slash",
       title: "Eye Slash",
       show: true,
     },
@@ -68,7 +68,7 @@ export function hideScreenOverlay() {
 export const ACTION_CONFIG = {
   eye: {
     command: "toggle_eye",
-    payload: (state) => ({ visible: state }),
+    payload: (state) => ({ visible: !state }),
   },
   volume: {
     command: "toggle_volume",

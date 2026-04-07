@@ -648,9 +648,9 @@ body {
 .joystick {
   width: 15vw;
   height: 15vw;
-  background: white;
   border-radius: 50%;
   position: relative;
+  background: rgba(0, 0, 0, 0.35);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
 }
 
@@ -658,7 +658,7 @@ body {
 .joystick-inner {
   width: 7vw;
   height: 7vw;
-  background: #cfcfcf;
+  background: white;
   border-radius: 50%;
   position: absolute;
   top: 50%;
@@ -674,12 +674,13 @@ body {
 }
 
 .drag-text {
-  font-size: 0.6vw;
+  font-size: 1.2vw;
   color: #555;
   font-weight: 600;
   user-select: none;
   -webkit-user-select: none;
   pointer-events: none;
+  text-align: center;
 }
 
 /* arrows */
@@ -693,7 +694,7 @@ body {
 .up {
   border-left: 8px solid transparent;
   border-right: 8px solid transparent;
-  border-bottom: 12px solid #666;
+  border-bottom: 12px solid white;
   top: 15px;
   left: 50%;
   transform: translateX(-50%);
@@ -702,7 +703,7 @@ body {
 .down {
   border-left: 8px solid transparent;
   border-right: 8px solid transparent;
-  border-top: 12px solid #666;
+  border-top: 12px solid white;
   bottom: 15px;
   left: 50%;
   transform: translateX(-50%);
@@ -711,7 +712,7 @@ body {
 .left {
   border-top: 8px solid transparent;
   border-bottom: 8px solid transparent;
-  border-right: 12px solid #666;
+  border-right: 12px solid white;
   left: 15px;
   top: 50%;
   transform: translateY(-50%);
@@ -720,7 +721,7 @@ body {
 .right {
   border-top: 8px solid transparent;
   border-bottom: 8px solid transparent;
-  border-left: 12px solid #666;
+  border-left: 12px solid white;
   right: 15px;
   top: 50%;
   transform: translateY(-50%);
@@ -788,14 +789,6 @@ body {
   align-items: center;
   justify-content: center;
 }
-.drag-text-right {
-  font-size: 0.6vw;
-  color: #555;
-  font-weight: 600;
-  user-select: none;
-  -webkit-user-select: none;
-  pointer-events: none;
-}
 
 /* <!--Rubber Band Zoom (right side) --> */
 .rubber-band {
@@ -834,7 +827,7 @@ body {
 .rubber-max {
   position: absolute;
   top: 1.5vw;
-  font-size: 0.6vw;
+  font-size: 0.8vw;
   color: rgba(255, 255, 255, 0.7);
   font-weight: 600;
   user-select: none;
@@ -843,7 +836,7 @@ body {
 .rubber-min {
   position: absolute;
   bottom: 1.5vw;
-  font-size: 0.6vw;
+  font-size: 0.8vw;
   color: rgba(255, 255, 255, 0.7);
   font-weight: 600;
   user-select: none;
@@ -935,16 +928,6 @@ body {
     width: 11vw;
     height: 11vw;
   }
-  /* Drag Text  */
-  .drag-text {
-    font-size: 1.5vw;
-    color: #555;
-    font-weight: 400;
-    user-select: none;
-    -webkit-user-select: none;
-    pointer-events: none;
-  }
-
   /* Arrows */
   .up {
     top: 1vw;
@@ -997,14 +980,6 @@ body {
     transform: translate(-50%, -50%);
     transition: transform 0.05s linear;
   }
-  .drag-text-right {
-    font-size: 1.5vw;
-    color: #555;
-    font-weight: 400;
-    user-select: none;
-    -webkit-user-select: none;
-    pointer-events: none;
-  }
 
   /* <!--Rubber Band Zoom (right side) --> */
   .rubber-band {
@@ -1019,11 +994,11 @@ body {
     height: 11vw;
   }
   .rubber-max {
-    font-size: 1.2vw;
+    font-size: 1.6vw;
     bottom: 3vw;
   }
   .rubber-min {
-    font-size: 1.2vw;
+    font-size: 1.6vw;
     bottom: 3vw;
   }
   #projectStatus {
@@ -1091,7 +1066,8 @@ body {
   }
 
   .drag-text {
-    font-size: 2vw;
+    font-size: 2.4vw;
+    text-align: center;
   }
 
   /* Arrows */
@@ -1135,10 +1111,6 @@ body {
     height: 15vw;
   }
 
-  .drag-text-right {
-    font-size: 2vw;
-  }
-
   /* <!--Rubber Band Zoom (right side) --> */
   .rubber-band {
     width: 16vw;
@@ -1154,11 +1126,11 @@ body {
   }
 
   .rubber-max {
-    font-size: 1.8vw;
-    bottom: 4vw;
+    font-size: 1.9vw;
+    top: 4vw;
   }
   .rubber-min {
-    font-size: 1.8vw;
+    font-size: 1.9vw;
     bottom: 4vw;
   }
 }
