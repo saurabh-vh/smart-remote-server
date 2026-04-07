@@ -674,7 +674,9 @@ function renderUnitsWithFilters(container) {
       return (!q || unitNo.includes(q)) && (!t || typeLabel === t);
     });
 
-    if (!filtered.length) {
+    listWrap.innerHTML = "";
+
+    if (units.length === 0) {
       listWrap.innerHTML = `
       <style>
       @keyframes dotBounce {
@@ -689,6 +691,14 @@ function renderUnitsWithFilters(container) {
         <span style="width:8px; height:8px; border-radius:50%; background:#007aff; display:inline-block; animation: dotBounce 1.2s infinite ease-in-out 0.4s;"></span>
       </div>
             <div style="font-size:13px; color:#aaa; font-weight:500; letter-spacing:0.5px;">Loading units...</div>
+    </div>
+  `;
+      return;
+    }
+    if (filtered.length === 0) {
+      listWrap.innerHTML = `
+    <div style="display:flex; flex-direction:column; align-items:center; gap:12px; padding:10vh;">
+      <div style="font-size:13px; color:#aaa; font-weight:500; letter-spacing:0.5px;">No results found</div>
     </div>
   `;
       return;
