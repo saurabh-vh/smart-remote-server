@@ -55,6 +55,10 @@ export function rightSideNavbar(container) {
 
 function showImageGalleryInContent() {
   const container = document.getElementById("contentArea");
+  // All left sidebar active menu items deactivate
+  document
+    .querySelectorAll(".menu-item")
+    .forEach((i) => i.classList.remove("active"));
 
   // Screen overlay hide while clicking on Immage Gallery
   document.getElementById("screenBlurOverlay").classList.remove("active");
