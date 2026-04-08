@@ -536,21 +536,7 @@ body {
   height: 100%;
   background-size: cover;
   background-position: center;
-  /* filter: blur(1.5px) brightness(0.9); ← hata do */
-  /* transform: scale(1.1); ← hata do */
 }
-/* .amenity-image {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  filter: blur(1.5px) brightness(0.9);
-  transform: scale(1.1);
-} */
 
 /* Dark overlay for better text readability */
 .amenity-overlay {
@@ -842,6 +828,50 @@ body {
   user-select: none;
   pointer-events: none;
 }
+.image-wrapper {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3vh;
+  width: 100%;
+  box-sizing: border-box;
+}
+.img-box {
+  position: relative;
+  width: 100%;
+  height: 160px;
+  border-radius: 10px;
+  overflow: hidden;
+  /* border: 5px solid red; */
+}
+.img-box.active {
+  border: 4px solid #007aff;
+  border-radius: 10px;
+}
+/* Skeleton */
+.skeleton {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, #d6d6d6 25%, #eaeaea 37%, #d6d6d6 63%);
+  background-size: 400% 100%;
+  animation: shimmer 1.2s infinite;
+}
+/* Image */
+.overlay-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Animation */
+@keyframes shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
 
 /* =========================
    PORTRAIT MODE FIX 
@@ -885,6 +915,13 @@ body {
 
   .content {
     padding: 16px;
+  }
+  .image-wrapper {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: 3vh;
+    width: 100%;
+    box-sizing: border-box;
   }
   /* Section Card (iPad grouped style) */
   .section-card {

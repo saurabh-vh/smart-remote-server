@@ -1,4 +1,5 @@
-import { uiState } from "./state.js";
+import { socket } from "./socket.js";
+import { remoteState, uiState } from "./state.js";
 
 export function rightSideNavbar(container) {
   const u = uiState.data.moreOptions;
@@ -52,6 +53,67 @@ export function rightSideNavbar(container) {
   container.appendChild(wrapper);
 }
 
+function showImageGalleryInContent() {
+  const container = document.getElementById("contentArea");
+
+  // Screen overlay hide while clicking on Immage Gallery
+  document.getElementById("screenBlurOverlay").classList.remove("active");
+
+  const u = uiState.data.moreOptions;
+  const imageData = u.image_gallery || [];
+
+  if (imageData.length > 0) {
+    container.innerHTML = `
+      <div class="image-wrapper">
+        ${imageData
+          .map((img, index) => {
+            const src = img.image_url || img;
+            return `
+              <div class="img-box" data-index="${index}">
+                <div class="skeleton"></div>
+                <img 
+                  src="${src}" 
+                  class="overlay-img"
+                  loading="lazy"
+                  decoding="async"
+                  onload="this.previousElementSibling.style.display='none'"
+                  onerror="this.src='https://picsum.photos/400/300?random=error'; this.previousElementSibling.style.display='none'"
+                />
+              </div>
+            `;
+          })
+          .join("")}
+          
+      </div>
+    `;
+
+    container.querySelectorAll(".img-box").forEach((box) => {
+      box.addEventListener("click", () => {
+        container
+          .querySelectorAll(".img-box")
+          .forEach((b) => b.classList.remove("active"));
+
+        box.classList.add("active");
+
+        socket.emit("remote_command", {
+          code: remoteState.pairedCode,
+          command: "open_image",
+          payload: { index: parseInt(box.dataset.index) },
+        });
+      });
+    });
+  } else {
+    container.innerHTML = `
+      <div class="empty">No images found in gallery</div>
+    `;
+  }
+
+  // popups close
+  document
+    .querySelectorAll(".ellipsis-popup")
+    .forEach((p) => p.classList.remove("open"));
+}
+
 function showScreenOverlay() {
   document.getElementById("screenBlurOverlay").classList.add("active");
   document.getElementById("screenBlurCard").classList.add("visible");
@@ -91,7 +153,7 @@ export const ACTION_CONFIG = {
   imageGallery: {
     command: "imageGallery",
     payload: () => ({}),
-    onTrigger: () => showScreenOverlay(),
+    onTrigger: () => showImageGalleryInContent(),
   },
   presentationVideo: {
     command: "presentationVideo",

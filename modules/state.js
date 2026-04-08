@@ -11,3 +11,7 @@ export const uiState = {
     moreOptions: {},
   },
 };
+
+export const remoteState = {
+  pairedCode: null,
+};

@@ -4,10 +4,11 @@ import {
   hideScreenOverlay,
   rightSideNavbar,
 } from "./modules/rightSideNavbar.js";
-import { uiState } from "./modules/state.js";
+import { socket } from "./modules/socket.js";
+import { remoteState, uiState } from "./modules/state.js";
 import { renderUnitsWithFilters } from "./modules/unitsView.js";
 
-const socket = io();
+// const socket = io();
 const appEl = document.getElementById("app");
 
 // Minimal flag to track whether right-side icons should be shown.
@@ -28,7 +29,6 @@ fetch("/env")
   })
   .catch(() => {});
 
-let pairedCode = null; // Code of currently paired display
 let projectName = null; // Name of connected project
 let remoteUiState = null; // Latest state received from display
 let availableDisplays = []; // List of all available displays
@@ -147,7 +147,7 @@ function goBack() {
   uiState.typeFilter = "";
 
   socket.emit("remote_command", {
-    code: pairedCode,
+    code: remoteState.pairedCode,
     command: "home_search_back",
   });
 
@@ -163,7 +163,7 @@ function goBack() {
   if (!top || top.level === "selectedBuilding") {
     setMode("map");
     socket.emit("remote_command", {
-      code: pairedCode,
+      code: remoteState.pairedCode,
       command: "request_homes",
     });
   }
@@ -200,13 +200,13 @@ document.querySelectorAll(".menu-item").forEach((item) => {
     // Request fresh data from display on tab change
     if (uiState.section === "homes" || uiState.section === "amenities") {
       socket.emit("remote_command", {
-        code: pairedCode,
+        code: remoteState.pairedCode,
         command: "request_homes",
       });
     }
     if (uiState.section === "location") {
       socket.emit("remote_command", {
-        code: pairedCode,
+        code: remoteState.pairedCode,
         command: "request_location",
       });
     }
@@ -217,7 +217,7 @@ document.querySelectorAll(".menu-item").forEach((item) => {
 document.getElementById("screenBlurClose").addEventListener("click", () => {
   hideScreenOverlay();
   socket.emit("remote_command", {
-    code: pairedCode,
+    code: remoteState.pairedCode,
     command: "closeModal",
     payload: {},
   });
@@ -228,7 +228,7 @@ recenterBtn.addEventListener("click", () => {
   const activeBuildingId =
     getActive("building") || getActive("selectedBuilding");
   socket.emit("remote_command", {
-    code: pairedCode,
+    code: remoteState.pairedCode,
     command: "recenter_view",
     payload: { id: activeBuildingId },
   });
@@ -236,16 +236,16 @@ recenterBtn.addEventListener("click", () => {
 
 // Disconnect remote (used by close button and visibility/unload handlers)
 function unpairRemoteClient() {
-  if (!pairedCode) return;
+  if (!remoteState.pairedCode) return;
 
   socket.emit("remote_command", {
-    code: pairedCode,
+    code: remoteState.pairedCode,
     command: "remote_disconnected",
     payload: {},
   });
 
   // Also tell server to unpair this remote (without removing displays/projects)
-  socket.emit("unpair_remote", { code: pairedCode });
+  socket.emit("unpair_remote", { code: remoteState.pairedCode });
 
   // Remote UI reset
   const statusEl = document.getElementById("projectStatus");
@@ -256,7 +256,7 @@ function unpairRemoteClient() {
   const displaySelect = document.getElementById("displaySelect");
   if (displaySelect) displaySelect.innerHTML = "";
 
-  pairedCode = null;
+  remoteState.pairedCode = null;
   projectName = null;
   availableDisplays = [];
   appEl.classList.remove("connected");
@@ -282,7 +282,7 @@ window.addEventListener("beforeunload", () => unpairRemoteClient());
 socket.on(
   "pair_success",
   ({ code, projectName: projName, displays, moreOptions }) => {
-    pairedCode = code;
+    remoteState.pairedCode = code;
     projectName = projName;
     availableDisplays = displays;
     uiState.data.moreOptions = moreOptions || {};
@@ -332,7 +332,7 @@ socket.on("second_level_update", ({ selectedUnits = [] }) => {
 // Available displays list changed
 socket.on("display_list_update", ({ displays }) => {
   availableDisplays = displays;
-  updateDisplaySelector(displays, pairedCode);
+  updateDisplaySelector(displays, remoteState.pairedCode);
 });
 
 // Pairing failed — reset inputs
@@ -361,13 +361,13 @@ function updateDisplaySelector(displays, currentCode) {
 // Switch to a different display screen
 document.getElementById("displaySelect").addEventListener("change", (e) => {
   const newCode = e.target.value;
-  if (!newCode || newCode === pairedCode) return;
+  if (!newCode || newCode === remoteState.pairedCode) return;
   socket.emit("switch_display", { newCode, projectName });
 });
 
 // Display switch confirmed by server
 socket.on("switch_success", ({ code, displayName, displays }) => {
-  pairedCode = code;
+  remoteState.pairedCode = code;
   availableDisplays = displays;
   document.getElementById("projectStatus").textContent =
     "Connected to " + projectName + " - " + displayName;
@@ -486,7 +486,7 @@ document.addEventListener("click", ({ target }) => {
   // console.log(`[${action}]`, state !== null ? `→ ${state}` : "clicked");
 
   socket.emit("remote_command", {
-    code: pairedCode,
+    code: remoteState.pairedCode,
     command: config.command,
     payload: config.payload(state),
   });
@@ -514,7 +514,7 @@ function renderHomes() {
   } else if (current.level === "building") {
     renderUnitsWithFilters(view, {
       socket,
-      pairedCode,
+      pairedCode: remoteState.pairedCode,
       goBack,
       getActive,
       getUnitTypeLabel,
@@ -585,7 +585,7 @@ function renderBuildings(container) {
 
           // Emit wing-level filter to the display. Include both numeric id and wing_id string if available.
           socket.emit("remote_command", {
-            code: pairedCode,
+            code: remoteState.pairedCode,
             command: "home_search_filter",
             // payload: { id: w.id },
             payload: { id: b.id, wing_id: w.id, wing_uuid: w.wing_id },
@@ -606,7 +606,7 @@ function renderBuildings(container) {
       row.onclick = () => {
         navigate("building", b.id);
         socket.emit("remote_command", {
-          code: pairedCode,
+          code: remoteState.pairedCode,
           command: "home_search_filter",
           payload: { id: b.id },
         });
@@ -693,7 +693,7 @@ function renderTakeMeTo(container) {
 
       // Tell display to navigate to this room
       socket.emit("remote_command", {
-        code: pairedCode,
+        code: remoteState.pairedCode,
         command: "take_me_to",
         payload: { room },
       });
@@ -756,7 +756,7 @@ function renderAmenities() {
       card.classList.add("active");
       navigate("amenity", a.id);
       socket.emit("remote_command", {
-        code: pairedCode,
+        code: remoteState.pairedCode,
         command: "amenity_select",
         payload: { id: a.id },
       });
@@ -836,7 +836,7 @@ function sendDirection(limitedX, limitedY) {
     // console.log("Joystick map payload:", payload);
 
     socket.emit("remote_command", {
-      code: pairedCode,
+      code: remoteState.pairedCode,
       command: "joystick_move",
       payload,
     });
@@ -847,7 +847,7 @@ function sendDirection(limitedX, limitedY) {
     // console.log("Walk direction:", direction);
 
     socket.emit("remote_command", {
-      code: pairedCode,
+      code: remoteState.pairedCode,
       command: "move",
       payload: { key: direction },
     });
@@ -874,13 +874,13 @@ function stopJoystick() {
   stick.style.transform = "translate(-50%, -50%)";
   if (currentMode === "map") {
     socket.emit("remote_command", {
-      code: pairedCode,
+      code: remoteState.pairedCode,
       command: "joystick_move",
       payload: { type: "joystick", action: "stop", x: 0, y: 0 },
     });
   } else {
     socket.emit("remote_command", {
-      code: pairedCode,
+      code: remoteState.pairedCode,
       command: "move_stop",
       payload: { key: "stop" },
     });
@@ -951,7 +951,7 @@ function updateRubber(clientY) {
   // console.log(`[Zoom] direction: ${rubberOffsetY < 0 ? "in" : "out"}, strength: ${strength}`,);
 
   socket.emit("remote_command", {
-    code: pairedCode,
+    code: remoteState.pairedCode,
     command: "zoom",
     payload: {
       type: "zoom",
@@ -969,7 +969,7 @@ function resetRubber() {
   rubberOffsetY = 0;
   rubberInner.style.transform = "translate(-50%, -50%)";
   socket.emit("remote_command", {
-    code: pairedCode,
+    code: remoteState.pairedCode,
     command: "zoom",
     payload: { type: "zoom", action: "stop", direction: 0, strength: 0 },
   });
@@ -1036,7 +1036,7 @@ function updateLookJoystick(clientX, clientY) {
   lookLastSend = now;
 
   socket.emit("remote_command", {
-    code: pairedCode,
+    code: remoteState.pairedCode,
     command: "camera_look",
     payload: { x: rsTouchX, y: rsTouchY },
   });
@@ -1051,7 +1051,7 @@ function resetLookJoystick() {
   rsTouchY = 0;
   lookInner.style.transform = "translate(-50%, -50%)";
   socket.emit("remote_command", {
-    code: pairedCode,
+    code: remoteState.pairedCode,
     command: "camera_look",
     payload: { x: 0, y: 0 }, // Stop camera rotation
   });
