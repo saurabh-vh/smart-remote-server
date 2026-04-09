@@ -832,7 +832,7 @@ body {
   display: none;
   position: fixed;
   right: 7vw;
-  bottom: 14vh;
+  bottom: 10vh;
   flex-direction: column;
   align-items: center;
   background: rgba(0, 0, 0, 0.35);
@@ -846,9 +846,9 @@ body {
   background: transparent;
   border: none;
   color: #fff;
-  width: 44px;
-  height: 38px;
-  font-size: 14px;
+  width: 7vw;
+  height: 10vh;
+  font-size: 3.8vw;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -858,7 +858,7 @@ body {
   background: rgba(255, 255, 255, 0.2);
 }
 .zoom-divider {
-  width: 22px;
+  width: 3.5vw;
   height: 1px;
   background: rgba(255, 255, 255, 0.25);
 }
@@ -1072,6 +1072,32 @@ body {
   .rubber-min {
     font-size: 1.6vw;
     bottom: 3vw;
+  }
+  .zoom-control {
+    display: none;
+    position: fixed;
+    right: 10vw;
+    bottom: 10vh;
+    flex-direction: column;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.35);
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(6px);
+    z-index: 5;
+  }
+  .zoom-btn {
+    background: transparent;
+    border: none;
+    color: #fff;
+    width: 10vw;
+    height: 10vh;
+    font-size: 6vw;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   #projectStatus {
     max-width: 150px;

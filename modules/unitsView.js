@@ -107,7 +107,7 @@ export function renderUnitsWithFilters(
       return;
     }
 
-    filtered.forEach((u) => {
+    filtered.reverse().forEach((u) => {
       const row = document.createElement("div");
       row.className = "list-row unit-row";
       if (u.unit_id === activeUnitId) row.classList.add("active");

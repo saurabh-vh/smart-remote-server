@@ -845,7 +845,15 @@ function sendDirection(limitedX, limitedY) {
   const now = Date.now();
   if (now - lastSend < 50) return;
   lastSend = now;
-
+  // For image gallery joystick
+  if (document.querySelector(".image-wrapper")) {
+    socket.emit("remote_command", {
+      code: remoteState.pairedCode,
+      command: "image_drag",
+      payload: { x: limitedX, y: -limitedY },
+    });
+    return;
+  }
   if (currentMode === "map") {
     const payload = {
       type: "joystick",
