@@ -182,7 +182,7 @@ body {
 /* Ellipsis wrapper — grid mein properly fit ho */
 .ellipsis-wrapper {
   position: relative;
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: center;
   aspect-ratio: 1;
