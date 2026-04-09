@@ -828,12 +828,47 @@ body {
   user-select: none;
   pointer-events: none;
 }
+.zoom-control {
+  display: none;
+  position: fixed;
+  right: 7vw;
+  bottom: 14vh;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(6px);
+  z-index: 5;
+}
+.zoom-btn {
+  background: transparent;
+  border: none;
+  color: #fff;
+  width: 44px;
+  height: 38px;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.zoom-btn:active {
+  background: rgba(255, 255, 255, 0.2);
+}
+.zoom-divider {
+  width: 22px;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.25);
+}
 .image-wrapper {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 3vh;
   width: 100%;
   box-sizing: border-box;
+  cursor: pointer;
 }
 .img-box {
   position: relative;

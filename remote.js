@@ -6,6 +6,7 @@ import {
 } from "./modules/rightSideNavbar.js";
 import { socket } from "./modules/socket.js";
 import { remoteState, uiState } from "./modules/state.js";
+import { resetRecenterBtn } from "./modules/uiHelpers.js";
 import { renderUnitsWithFilters } from "./modules/unitsView.js";
 
 // const socket = io();
@@ -88,6 +89,7 @@ function setMode(mode) {
   if (uiState.section === "location") {
     document.querySelector(".joystick-panel").style.display = "none";
     document.getElementById("rubberBand").style.display = "none";
+    document.getElementById("zoomControl").style.display = "none";
     document.querySelector(".look-joystick").style.display = "none";
     document.querySelector(".recenter-view-parent").style.display = "none";
     return;
@@ -106,6 +108,7 @@ function setMode(mode) {
   if (mode === "map") {
     // Map mode: show rubber band zoom, hide camera pan joystick
     document.getElementById("rubberBand").style.display = "flex";
+    document.getElementById("zoomControl").style.display = "none";
     document.querySelector(".look-joystick").style.display = "none";
     if (uiState.section !== "amenities") {
       document.querySelector(".recenter-view-parent").style.display = "flex";
@@ -196,7 +199,8 @@ document.querySelectorAll(".menu-item").forEach((item) => {
       .forEach((i) => i.classList.remove("active"));
     item.classList.add("active");
     resetSection(item.dataset.section);
-
+    // Add recenter button
+    resetRecenterBtn();
     // Request fresh data from display on tab change
     if (uiState.section === "homes" || uiState.section === "amenities") {
       socket.emit("remote_command", {
@@ -223,8 +227,25 @@ document.getElementById("screenBlurClose").addEventListener("click", () => {
   });
 });
 
-// Recenter View
+// Recenter View Button OR Close
 recenterBtn.addEventListener("click", () => {
+  if (recenterBtn.classList.contains("close-mode")) {
+    recenterBtn.style.display = "none";
+    recenterBtn.textContent = "RECENTER VIEW";
+    recenterBtn.classList.remove("close-mode");
+
+    // Active image deselect
+    document
+      .querySelectorAll(".img-box")
+      .forEach((b) => b.classList.remove("active"));
+
+    socket.emit("remote_command", {
+      code: remoteState.pairedCode,
+      command: "closeModal",
+      payload: {},
+    });
+    return;
+  }
   const activeBuildingId =
     getActive("building") || getActive("selectedBuilding");
   socket.emit("remote_command", {

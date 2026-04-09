@@ -1,5 +1,6 @@
 import { socket } from "./socket.js";
 import { remoteState, uiState } from "./state.js";
+import { setRecenterClose } from "./uiHelpers.js";
 
 export function rightSideNavbar(container) {
   const u = uiState.data.moreOptions;
@@ -60,6 +61,11 @@ function showImageGalleryInContent() {
     .querySelectorAll(".menu-item")
     .forEach((i) => i.classList.remove("active"));
 
+  document.getElementById("rubberBand").style.display = "none";
+  document.getElementById("zoomControl").style.display = "flex";
+  document.getElementById("recenterBtn").style.display = "none";
+  document.getElementById("lookJoystick").style.display = "none";
+
   // Screen overlay hide while clicking on Immage Gallery
   document.getElementById("screenBlurOverlay").classList.remove("active");
 
@@ -98,6 +104,13 @@ function showImageGalleryInContent() {
           .forEach((b) => b.classList.remove("active"));
 
         box.classList.add("active");
+        // Recenter button → "Close" mode
+        setRecenterClose();
+        socket.emit("remote_command", {
+          code: remoteState.pairedCode,
+          command: "closeModal",
+          payload: {},
+        });
 
         socket.emit("remote_command", {
           code: remoteState.pairedCode,
@@ -117,7 +130,21 @@ function showImageGalleryInContent() {
     .querySelectorAll(".ellipsis-popup")
     .forEach((p) => p.classList.remove("open"));
 }
+document.getElementById("zoomIn").addEventListener("click", () => {
+  socket.emit("remote_command", {
+    code: remoteState.pairedCode,
+    command: "zoom_in",
+    payload: {},
+  });
+});
 
+document.getElementById("zoomOut").addEventListener("click", () => {
+  socket.emit("remote_command", {
+    code: remoteState.pairedCode,
+    command: "zoom_out",
+    payload: {},
+  });
+});
 function showScreenOverlay() {
   document.getElementById("screenBlurOverlay").classList.add("active");
   document.getElementById("screenBlurCard").classList.add("visible");
