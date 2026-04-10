@@ -12,9 +12,8 @@ import {
 import { initRubberBand } from "./modules/rubberBand.js";
 import { socket } from "./modules/socket.js";
 import { remoteState, uiState } from "./modules/state.js";
-import { resetRecenterBtn } from "./modules/uiHelpers.js";
+import { controlRecenterBtn } from "./modules/uiHelpers.js";
 
-// const socket = io();
 const appEl = document.getElementById("app");
 
 // Minimal flag to track whether right-side icons should be shown.
@@ -98,15 +97,15 @@ function setMode(mode) {
     document.getElementById("rubberBand").style.display = "none";
     document.getElementById("zoomControl").style.display = "none";
     document.querySelector(".look-joystick").style.display = "none";
-    document.querySelector(".recenter-view-parent").style.display = "none";
+    controlRecenterBtn({ visible: false });
     return;
   }
 
   // Amenities section hide recenter Button
   if (uiState.section === "amenities") {
-    document.querySelector(".recenter-view-parent").style.display = "none";
+    controlRecenterBtn({ visible: false });
   } else {
-    document.querySelector(".recenter-view-parent").style.display = "flex";
+    controlRecenterBtn();
   }
 
   // Joystick panel hamesha show (homes + amenities)
@@ -118,13 +117,13 @@ function setMode(mode) {
     document.getElementById("zoomControl").style.display = "none";
     document.querySelector(".look-joystick").style.display = "none";
     if (uiState.section !== "amenities") {
-      document.querySelector(".recenter-view-parent").style.display = "flex";
+      controlRecenterBtn();
     }
   } else {
     // Walk mode: show camera pan joystick, hide rubber band
     document.getElementById("rubberBand").style.display = "none";
     document.querySelector(".look-joystick").style.display = "block";
-    document.querySelector(".recenter-view-parent").style.display = "none";
+    controlRecenterBtn({ visible: false });
   }
 }
 
@@ -137,6 +136,7 @@ function navigate(level, id, extra = {}) {
   if (level === "building") {
     uiState.searchQuery = "";
     uiState.typeFilter = "";
+    uiState.data.homes.units = [];
   }
   render();
 }
@@ -206,8 +206,6 @@ document.querySelectorAll(".menu-item").forEach((item) => {
       .forEach((i) => i.classList.remove("active"));
     item.classList.add("active");
     resetSection(item.dataset.section);
-    // Add recenter button
-    resetRecenterBtn();
     // Request fresh data from display on tab change
     if (uiState.section === "homes" || uiState.section === "amenities") {
       socket.emit("remote_command", {
@@ -237,10 +235,7 @@ document.getElementById("screenBlurClose").addEventListener("click", () => {
 // Recenter View Button OR Close
 recenterBtn.addEventListener("click", () => {
   if (recenterBtn.classList.contains("close-mode")) {
-    recenterBtn.style.display = "none";
-    recenterBtn.textContent = "RECENTER VIEW";
-    recenterBtn.classList.remove("close-mode");
-
+    controlRecenterBtn({ visible: false });
     // Active image deselect
     document
       .querySelectorAll(".img-box")

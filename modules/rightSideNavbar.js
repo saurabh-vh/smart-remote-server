@@ -1,6 +1,6 @@
 import { socket } from "./socket.js";
 import { remoteState, uiState } from "./state.js";
-import { setRecenterClose } from "./uiHelpers.js";
+import { controlRecenterBtn } from "./uiHelpers.js";
 
 export function rightSideNavbar(container) {
   const u = uiState.data.moreOptions;
@@ -63,7 +63,7 @@ function showImageGalleryInContent() {
 
   document.getElementById("rubberBand").style.display = "none";
   document.getElementById("zoomControl").style.display = "flex";
-  document.getElementById("recenterBtn").style.display = "none";
+  controlRecenterBtn({ visible: false });
   document.getElementById("lookJoystick").style.display = "none";
 
   // Screen overlay hide while clicking on Immage Gallery
@@ -105,7 +105,7 @@ function showImageGalleryInContent() {
 
         box.classList.add("active");
         // Recenter button → "Close" mode
-        setRecenterClose();
+        controlRecenterBtn({ isClose: true });
         socket.emit("remote_command", {
           code: remoteState.pairedCode,
           command: "closeModal",

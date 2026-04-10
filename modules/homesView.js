@@ -19,6 +19,10 @@ export function renderHomes({
 
   const view = document.getElementById("homesView");
   const current = uiState.stack[uiState.stack.length - 1];
+  document.querySelectorAll(".ellipsis-wrapper").forEach((el) => {
+    el.style.display = "";
+  });
+
   if (!current || current.level === "selectedBuilding") {
     renderBuildings(view, { getActive, navigate });
   } else if (current.level === "building") {
@@ -32,6 +36,9 @@ export function renderHomes({
       navigate,
     });
   } else if (current.level === "unit") {
+    document.querySelectorAll(".ellipsis-wrapper").forEach((el) => {
+      el.style.display = "none";
+    });
     renderTakeMeTo(view, { getActive, goBack });
   }
 }
