@@ -342,7 +342,8 @@ socket.on("display_state", ({ state }) => {
     state?.firstLevelFilter?.selectedBuildings || [];
 
   uiState.data.takeMeTo = state?.takeMeTo || [];
-  // console.log("uiState.data.takeMeTo", uiState.data.takeMeTo);
+  uiState.data.locationData = state?.locationData || [];
+  // console.log("state", uiState.data.locationData);
   render();
 });
 

@@ -7,7 +7,7 @@ export const uiState = {
     homes: { buildings: [], units: [] },
     takeMeTo: [],
     amenities: {},
-    location: {},
+    locationData: [],
     moreOptions: {},
   },
 };

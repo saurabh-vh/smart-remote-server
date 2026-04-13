@@ -323,7 +323,8 @@ body {
   border-bottom: none;
 }
 
-.list-row.active {
+.list-row.active,
+.location-place-item.active {
   background: #e9f2ff;
   color: #007aff;
   font-weight: 600;
