@@ -82,7 +82,7 @@ io.on("connection", (socket) => {
         remoteSocketId: null,
         projectName,
         displayName,
-        code,
+        code: finalCode,
         state: null,
         moreOptions: moreOptions || {},
       });
