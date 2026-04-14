@@ -55,10 +55,6 @@ io.on("connection", (socket) => {
       displayName = `Display ${code}`,
       moreOptions = {},
     }) => {
-      let finalCode = code;
-      if (process.env.ENV_SETUP === "LOCAL") {
-        finalCode = "9966";
-      }
       if (!projectName) {
         socket.emit("register_error", { message: "Project name required" });
         return;
@@ -69,34 +65,32 @@ io.on("connection", (socket) => {
       }
 
       const projectMap = projectDisplays.get(projectName);
-      if (process.env.ENV_SETUP === "LOCAL") {
-        projectMap.delete(finalCode);
-      }
-      if (projectMap.has(finalCode)) {
+
+      if (projectMap.has(code)) {
         socket.emit("register_error", {
           message: "Display code already exists for this project",
         });
         return;
       }
 
-      projectMap.set(finalCode, {
+      projectMap.set(code, {
         socketId: socket.id,
         remoteSocketId: null,
         projectName,
         displayName,
-        code: finalCode,
+        code,
         state: null,
         moreOptions: moreOptions || {},
       });
 
-      socket.join(`pair:${finalCode}`);
+      socket.join(`pair:${code}`);
       socket.join(`project:${projectName}`);
       console.log(
-        `registered display: ${displayName} (${finalCode}) for project: ${projectName}`,
+        `registered display: ${displayName} (${code}) for project: ${projectName}`,
       );
 
       emitDisplayList(projectName, projectMap);
-      socket.emit("registered_display", { code: finalCode, projectName });
+      socket.emit("registered_display", { code, projectName });
     },
   );
 
