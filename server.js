@@ -94,7 +94,7 @@ io.on("connection", (socket) => {
       );
 
       emitDisplayList(projectName, projectMap);
-      socket.emit("registered_display", { code, projectName });
+      socket.emit("registered_display", { code: finalCode, projectName });
     },
   );
 
