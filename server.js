@@ -69,7 +69,9 @@ io.on("connection", (socket) => {
       }
 
       const projectMap = projectDisplays.get(projectName);
-
+      if (process.env.ENV_SETUP === "LOCAL") {
+        projectMap.delete(finalCode);
+      }
       if (projectMap.has(finalCode)) {
         socket.emit("register_error", {
           message: "Display code already exists for this project",
@@ -87,10 +89,10 @@ io.on("connection", (socket) => {
         moreOptions: moreOptions || {},
       });
 
-      socket.join(`pair:${code}`);
+      socket.join(`pair:${finalCode}`);
       socket.join(`project:${projectName}`);
       console.log(
-        `registered display: ${displayName} (${code}) for project: ${projectName}`,
+        `registered display: ${displayName} (${finalCode}) for project: ${projectName}`,
       );
 
       emitDisplayList(projectName, projectMap);
