@@ -91,10 +91,8 @@ function getCurrentMode() {
 function setMode(mode) {
   currentMode = mode;
 
-  // Location tab pe sab hide
+  // Location tab hide
   if (uiState.section === "location") {
-    document.querySelector(".joystick-panel").style.display = "none";
-    document.getElementById("rubberBand").style.display = "none";
     document.getElementById("zoomControl").style.display = "none";
     document.querySelector(".look-joystick").style.display = "none";
     controlRecenterBtn({ visible: false });
