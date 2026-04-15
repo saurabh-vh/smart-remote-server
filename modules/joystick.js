@@ -11,6 +11,10 @@ export function initJoystick({ getCurrentMode }) {
   let lastSend = 0;
   let leftTouchId = null;
 
+  let currentX = 0;
+  let currentY = 0;
+  let heartbeatInterval = null;
+
   // Calculate WASD direction string from x,y offset
   function getDirection(x, y) {
     const threshold = 10;
@@ -23,12 +27,38 @@ export function initJoystick({ getCurrentMode }) {
     return vertical + horizontal;
   }
 
+  // For Location continously drag
+  function startHeartbeat() {
+    if (heartbeatInterval) return;
+    heartbeatInterval = setInterval(() => {
+      if (joystickDragging && getCurrentMode() === "map") {
+        if (Math.abs(currentX) > 1 || Math.abs(currentY) > 1) {
+          socket.emit("remote_command", {
+            code: remoteState.pairedCode,
+            command: "joystick_move",
+            payload: {
+              type: "joystick",
+              action: "move",
+              x: parseFloat((currentX / 35).toFixed(2)),
+              y: parseFloat((-currentY / 35).toFixed(2)),
+            },
+          });
+        }
+      }
+    }, 50);
+  }
+  function stopHeartbeat() {
+    clearInterval(heartbeatInterval);
+    heartbeatInterval = null;
+  }
+
   // Store joystick center on drag start
   function startJoystick(e) {
     joystickDragging = true;
     const rect = joystick.getBoundingClientRect();
     centerX = rect.width / 2;
     centerY = rect.height / 2;
+    if (getCurrentMode() === "map") startHeartbeat();
   }
 
   // Emit joystick data — map mode sends x,y, walk mode sends WASD
@@ -76,16 +106,27 @@ export function initJoystick({ getCurrentMode }) {
     const x = clientX - rect.left - centerX;
     const y = clientY - rect.top - centerY;
     const max = 35;
+
+    currentX = Math.max(-max, Math.min(max, x));
+    currentY = Math.max(-max, Math.min(max, y));
+
     const limitedX = Math.max(-max, Math.min(max, x));
     const limitedY = Math.max(-max, Math.min(max, y));
     stick.style.transform = `translate(calc(-50% + ${limitedX}px), calc(-50% + ${limitedY}px))`;
-    sendDirection(limitedX, limitedY);
+    if (getCurrentMode() !== "map") {
+      sendDirection(currentX, currentY);
+    }
   }
 
   // Reset stick to center and emit stop
   function stopJoystick() {
     if (!joystickDragging) return;
     joystickDragging = false;
+
+    stopHeartbeat();
+    currentX = 0;
+    currentY = 0;
+
     stick.style.transform = "translate(-50%, -50%)";
     if (getCurrentMode() === "map") {
       socket.emit("remote_command", {
