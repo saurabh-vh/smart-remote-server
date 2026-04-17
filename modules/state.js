@@ -8,6 +8,7 @@ export const uiState = {
     takeMeTo: [],
     amenities: {},
     locationData: [],
+    locationPlacesFind: [],
     moreOptions: {},
   },
 };

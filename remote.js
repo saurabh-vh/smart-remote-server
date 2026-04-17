@@ -341,7 +341,8 @@ socket.on("display_state", ({ state }) => {
 
   uiState.data.takeMeTo = state?.takeMeTo || [];
   uiState.data.locationData = state?.locationData || [];
-  // console.log("state", uiState.data.locationData);
+  uiState.data.locationPlacesFind = state?.locationPlacesFind || [];
+  // console.log("state", uiState.data.locationPlacesFind);
   render();
 });
 

@@ -13,11 +13,13 @@ const STATIC_PLACES = [
   { title: "Fuel", name: "fuel", place: ["gas_station"] },
 ];
 
+let activePlaceName = null;
+
 export function renderLocation() {
   const content = document.getElementById("contentArea");
 
   const locationData = uiState?.data?.locationData || [];
-  // console.log("locationData in renderLocation:", locationData);
+  const locationPlacesFind = uiState?.data?.locationPlacesFind || [];
 
   const dynamicPlaces = locationData.filter(
     (p) => p.visible && p.inside_place?.length > 0,
@@ -25,75 +27,128 @@ export function renderLocation() {
 
   const isPlacesAvailable = dynamicPlaces.length > 0;
   const placesToShow = isPlacesAvailable ? dynamicPlaces : STATIC_PLACES;
-  // console.log("placesToShow:", placesToShow);
 
-  // Click handler
-  const items = placesToShow
-    .map((place) => {
-      const title = place.title || place.name;
-      return `
-      <div 
-    class="location-place-item" 
-    data-name="${place.name}"
-    style="
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 16px;
-      border-bottom: 1px solid #eee;
-      font-size: 16px;
-      cursor: pointer;
-    "
-  >
-    <span>${title}</span>
-    ${
-      place.icon
-        ? `<img src="${place.icon}" width="28" height="28" 
-            style="background:${place.icon_bg_color || "#333"};border-radius:6px;padding:3px;object-fit:contain;" />`
-        : ""
-    }
-  </div>
+  function buildUI() {
+    const listItems = placesToShow
+      .map((place) => {
+        const title = place.title || place.name;
+        const isActive = place.name === activePlaceName;
+
+        const subList =
+          isActive && locationPlacesFind.length > 0
+            ? `
+            <div class="location-sub-list">
+              ${locationPlacesFind
+                .map(
+                  (item, i) => `
+                <div class="location-sub-item ${
+                  i < locationPlacesFind.length - 1 ? "with-border" : ""
+                }">
+                  <div>
+                  <span class="location-sub-dot"></span>
+                  ${item.name}
+                  </div>
+                  <div>
+                    <button 
+                    class="location-direction-btn"
+                    data-placeid="${item.place_id}"
+                    >
+                     GET DIRECTIONS
+                    </button>
+                  </div>
+                </div>
+              `,
+                )
+                .join("")}
+            </div>
+          `
+            : "";
+
+        return `
+          <div class="location-place-wrapper">
+            <div
+              class="location-place-item ${isActive ? "active" : ""}"
+              data-name="${place.name}"
+            >
+              <span>${title}</span>
+
+              ${
+                place.icon
+                  ? `
+                  <img 
+                    src="${place.icon}" 
+                    class="location-place-icon"
+                    style="background:${place.icon_bg_color || "#333"}"
+                  />
+                `
+                  : ""
+              }
+            </div>
+
+            ${subList}
+          </div>
+        `;
+      })
+      .join("");
+
+    content.innerHTML = `
+      <div class="section-card">
+        ${listItems || `<div class="location-empty">No places available</div>`}
+      </div>
     `;
-    })
-    .join("");
 
-  content.innerHTML = `
-  <div class="section-card">
-      ${items || '<div style="padding:16px;opacity:0.5;font-size:13px;">No places available</div>'}
-    </div>
-`;
+    // Get Directions places showing
+    content.querySelectorAll(".location-direction-btn").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
 
-  content.querySelectorAll(".location-place-item").forEach((el) => {
-    el.addEventListener("click", () => {
-      const name = el.dataset.name;
+        const place_id = btn.dataset.placeid;
 
-      content.querySelectorAll(".location-place-item").forEach((e) => {
-        e.classList.remove("active");
-      });
-      el.classList.add("active");
-
-      const place = placesToShow.find((p) => p.name === name);
-      if (!place) return;
-
-      const service =
-        isPlacesAvailable && place.inside_place?.length > 0
-          ? {
-              place: place.inside_place.map((a) => a.value),
-              type: "dynamic",
-              zoom_level: place.zoom_level || 14,
-            }
-          : {
-              place: place.place,
-              zoom_level: 14,
-            };
-
-      // console.log("Emitting location_place_click:", service);
-
-      socket.emit("remote_command", {
-        code: remoteState.pairedCode,
-        command: "location_place_click",
-        payload: { service },
+        socket.emit("remote_command", {
+          code: remoteState.pairedCode,
+          command: "location_place_direction",
+          payload: { place_id },
+        });
       });
     });
-  });
+
+    // Location Title showing
+    content.querySelectorAll(".location-place-item").forEach((el) => {
+      el.addEventListener("click", () => {
+        const name = el.dataset.name;
+
+        if (activePlaceName === name) {
+          activePlaceName = null;
+          buildUI();
+          return;
+        }
+
+        activePlaceName = name;
+        buildUI();
+
+        const place = placesToShow.find((p) => p.name === name);
+        if (!place) return;
+
+        const service =
+          isPlacesAvailable && place.inside_place?.length > 0
+            ? {
+                place: place.inside_place.map((a) => a.value),
+                type: "dynamic",
+                zoom_level: place.zoom_level || 14,
+              }
+            : {
+                place: place.place,
+                zoom_level: 14,
+              };
+
+        socket.emit("remote_command", {
+          code: remoteState.pairedCode,
+          command: "location_place_click",
+          payload: { service },
+        });
+      });
+    });
+  }
+
+  buildUI();
 }
