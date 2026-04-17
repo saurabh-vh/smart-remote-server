@@ -119,7 +119,7 @@ export function renderLocation() {
     content.querySelectorAll(".location-place-item").forEach((el) => {
       el.addEventListener("click", () => {
         const name = el.dataset.name;
-
+        locationPlacesFind.length = 0;
         if (activePlaceName === name) {
           activePlaceName = null;
           buildUI();
