@@ -14,6 +14,7 @@ const STATIC_PLACES = [
 ];
 
 let activePlaceName = null;
+let activeSubPlaceId = null;
 
 export function renderLocation() {
   const content = document.getElementById("contentArea");
@@ -39,14 +40,15 @@ export function renderLocation() {
             ? `
             <div class="location-sub-list">
               ${locationPlacesFind
-                .map(
-                  (item, i) => `
-                <div class="location-sub-item ${
-                  i < locationPlacesFind.length - 1 ? "with-border" : ""
-                }">
+                .map((item, i) => {
+                  const isSubActive = item.place_id === activeSubPlaceId;
+                  return `
+                    <div class="location-sub-item ${
+                      i < locationPlacesFind.length - 1 ? "with-border" : ""
+                    }">
                   <div>
                   <span class="location-sub-dot"></span>
-                  ${item.name}
+                  <span style="${isSubActive ? "color: #e74c3c; font-weight: bold;" : ""}">${item.name}</span>
                   </div>
                   <div>
                     <button 
@@ -56,9 +58,8 @@ export function renderLocation() {
                      GET DIRECTIONS
                     </button>
                   </div>
-                </div>
-              `,
-                )
+                </div>`;
+                })
                 .join("")}
             </div>
           `
@@ -103,6 +104,8 @@ export function renderLocation() {
         e.stopPropagation();
 
         const place_id = btn.dataset.placeid;
+        activeSubPlaceId = place_id;
+        buildUI();
 
         socket.emit("remote_command", {
           code: remoteState.pairedCode,

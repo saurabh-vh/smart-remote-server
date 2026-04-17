@@ -7,7 +7,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 16px;
-  border-bottom: 1px solid #eee;
+  border-top: 1px solid #eee;
   font-size: 16px;
   cursor: pointer;
   background: #fff;
@@ -28,7 +28,7 @@
 .location-sub-list {
   background: #f5f5f5;
   border-top: 1px solid #eee;
-  padding: 4px 16px 8px;
+  padding: 1vh 4vh;
 }
 
 .location-sub-item {
@@ -46,12 +46,29 @@
 }
 
 .location-sub-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: #e74c3c;
+  width: 14px;
+  height: 14px;
+  background: red;
+
+  border-radius: 50% 50% 50% 0;
+
+  transform: rotate(-45deg);
+
   display: inline-block;
   flex-shrink: 0;
+  position: relative;
+}
+
+.location-sub-dot::after {
+  content: "";
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: white;
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .location-empty {
@@ -91,10 +108,9 @@
 }
 @media (orientation: portrait) {
   .location-direction-btn {
-    width: 96px;
-    min-width: 96px;
-    font-size: 1vh;
-    padding: 6px 10px;
+    width: 26vw;
+    font-size: 1.2vh;
+    padding: 1vh;
   }
 
   .location-sub-item {
