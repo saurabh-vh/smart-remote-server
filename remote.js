@@ -1,7 +1,10 @@
 import { renderAmenities } from "./modules/amenitiesView.js";
 import { renderHomes } from "./modules/homesView.js";
 import { initJoystick } from "./modules/joystick.js";
-import { renderLocation } from "./modules/locationView.js";
+import {
+  renderLocation,
+  updateAutocompleteDropdown,
+} from "./modules/locationView.js";
 import { lookJoystick } from "./modules/lookJoystick.js";
 import {
   ACTION_CONFIG,
@@ -342,8 +345,11 @@ socket.on("display_state", ({ state }) => {
   uiState.data.takeMeTo = state?.takeMeTo || [];
   uiState.data.locationData = state?.locationData || [];
   uiState.data.locationPlacesFind = state?.locationPlacesFind || [];
+  uiState.data.autocompletePredictions = state?.autocompletePredictions || [];
   // console.log("state", uiState.data.locationPlacesFind);
+
   render();
+  updateAutocompleteDropdown();
 });
 
 // Units list updated from display

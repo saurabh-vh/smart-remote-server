@@ -43,9 +43,9 @@ export function renderLocation() {
                 .map((item, i) => {
                   const isSubActive = item.place_id === activeSubPlaceId;
                   return `
-                    <div class="location-sub-item ${
-                      i < locationPlacesFind.length - 1 ? "with-border" : ""
-                    }">
+                  <div class="location-sub-item ${
+                    i < locationPlacesFind.length - 1 ? "with-border" : ""
+                  }">
                   <div>
                   <span class="location-sub-dot"></span>
                   <span style="${isSubActive ? "color: #e74c3c; font-weight: bold;" : ""}">${item.name}</span>
@@ -93,12 +93,65 @@ export function renderLocation() {
       .join("");
 
     content.innerHTML = `
-      <div class="section-card">
-        ${listItems || `<div class="location-empty">No places available</div>`}
-      </div>
-    `;
+        <div class="section-card">
+          <div class="input-wrapper">
+            <div style="position: relative; width: 100%;">
+              <input
+                type="text"
+                class="location-search"
+                placeholder="Search Places"
+              />
+              <div class="autocomplete-dropdown" id="autocompleteDropdown" style="display:none;"></div>
+            </div>
+          </div>
+          ${listItems || `<div class="location-empty">No places available</div>`}
+        </div>
+`;
 
-    // Get Directions places showing
+    // =========================
+    // SEARCH INPUT SOCKET EMIT
+    // =========================
+    const searchInput = content.querySelector(".location-search");
+
+    if (searchInput) {
+      let typingTimer;
+      let lastValue = "";
+
+      searchInput.addEventListener("input", () => {
+        clearTimeout(typingTimer);
+
+        typingTimer = setTimeout(() => {
+          const value = searchInput.value.trim();
+          if (!value) return;
+          if (value.length < 3) return;
+          if (value === lastValue) return;
+          lastValue = value;
+
+          socket.emit("remote_command", {
+            code: remoteState.pairedCode,
+            command: "location_search_place",
+            payload: { value },
+          });
+        }, 800);
+      });
+
+      searchInput.addEventListener("blur", () => {
+        clearTimeout(typingTimer);
+        const value = searchInput.value.trim();
+        if (!value || value.length < 3 || value === lastValue) return;
+        lastValue = value;
+
+        socket.emit("remote_command", {
+          code: remoteState.pairedCode,
+          command: "location_search_place",
+          payload: { value },
+        });
+      });
+    }
+
+    // =========================
+    // GET DIRECTIONS
+    // =========================
     content.querySelectorAll(".location-direction-btn").forEach((btn) => {
       btn.addEventListener("click", (e) => {
         e.stopPropagation();
@@ -115,11 +168,20 @@ export function renderLocation() {
       });
     });
 
-    // Location Title showing
+    // =========================
+    // LOCATION CLICK
+    // =========================
     content.querySelectorAll(".location-place-item").forEach((el) => {
       el.addEventListener("click", () => {
         const name = el.dataset.name;
         locationPlacesFind.length = 0;
+
+        dropdownDismissed = true;
+        uiState.data.autocompletePredictions = [];
+        setTimeout(() => {
+          dropdownDismissed = false;
+        }, 1000);
+
         if (activePlaceName === name) {
           activePlaceName = null;
           buildUI();
@@ -154,4 +216,68 @@ export function renderLocation() {
   }
 
   buildUI();
+}
+
+let dropdownDismissed = false;
+
+export function updateAutocompleteDropdown() {
+  const dropdown = document.querySelector("#autocompleteDropdown");
+  if (!dropdown) return;
+
+  if (dropdownDismissed) {
+    dropdown.style.display = "none";
+    return;
+  }
+
+  const predictions = uiState?.data?.autocompletePredictions || [];
+
+  if (predictions.length === 0) {
+    dropdown.style.display = "none";
+    return;
+  }
+
+  const handleOutsideClick = (e) => {
+    if (!dropdown.contains(e.target)) {
+      dropdown.style.display = "none";
+      document.removeEventListener("click", handleOutsideClick);
+    }
+  };
+
+  dropdown.style.display = "block";
+  dropdown.innerHTML = predictions
+    .map(
+      (p) => `
+      <div class="autocomplete-item" data-placeid="${p.place_id}" data-description="${p.description}">
+        <span class="autocomplete-main">${p.main_text || p.description}</span>
+        <span class="autocomplete-secondary">${p.secondary_text || ""}</span>
+      </div>
+    `,
+    )
+    .join("");
+
+  dropdown.querySelectorAll(".autocomplete-item").forEach((item) => {
+    item.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const place_id = item.dataset.placeid;
+
+      dropdownDismissed = true;
+      uiState.data.autocompletePredictions = [];
+      dropdown.style.display = "none";
+      document.removeEventListener("click", handleOutsideClick);
+
+      socket.emit("remote_command", {
+        code: remoteState.pairedCode,
+        command: "location_place_direction",
+        payload: { place_id },
+      });
+
+      setTimeout(() => {
+        dropdownDismissed = false;
+      }, 1000);
+    });
+  });
+
+  // setTimeout(() => {
+  //   document.addEventListener("click", handleOutsideClick);
+  // }, 0);
 }

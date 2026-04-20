@@ -106,6 +106,69 @@
 .location-direction-btn:active {
   transform: scale(0.98);
 }
+.input-wrapper {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  padding: 0.8vh 2vh 2vh;
+}
+.location-search {
+  width: 100%;
+  border: 1px solid #d9dee5;
+  border-radius: 8px;
+  padding: 1.5vh;
+  font-size: 14px;
+  outline: none;
+  margin-top: 1vh;
+}
+
+.location-search:focus {
+  border-color: #9fb6d8;
+}
+.autocomplete-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1px solid #d9dee5;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  z-index: 999;
+  max-height: 220px;
+  overflow-y: auto;
+  margin-top: 4px;
+}
+
+.autocomplete-item {
+  padding: 10px 14px;
+  cursor: pointer;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.autocomplete-item:last-child {
+  border-bottom: none;
+}
+
+.autocomplete-item:hover {
+  background: #f5f8ff;
+}
+
+.autocomplete-main {
+  font-size: 14px;
+  color: #222;
+  font-weight: 500;
+}
+
+.autocomplete-secondary {
+  font-size: 12px;
+  color: #888;
+}
+
+/* Responsive */
 @media (orientation: portrait) {
   .location-direction-btn {
     width: 26vw;

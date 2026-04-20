@@ -9,6 +9,7 @@ export const uiState = {
     amenities: {},
     locationData: [],
     locationPlacesFind: [],
+    autocompletePredictions: [],
     moreOptions: {},
   },
 };
