@@ -1,5 +1,5 @@
 import { socket } from "./socket.js";
-import { remoteState } from "./state.js";
+import { remoteState, uiState } from "./state.js";
 
 export function initRubberBand() {
   const rubberBand = document.getElementById("rubberBand");
@@ -19,13 +19,20 @@ export function initRubberBand() {
     rubberInner.style.transform = `translate(-50%, calc(-50% + ${rubberOffsetY}px))`;
 
     const now = Date.now();
-    if (now - rubberLastSend < 50) return;
-    rubberLastSend = now;
 
-    const strength = parseFloat(
-      (Math.abs(rubberOffsetY) / RUBBER_MAX).toFixed(2),
-    );
-    if (strength < 0.05) return;
+    const isLocation = uiState.section === "location";
+    const THROTTLE_MS = isLocation ? 200 : 50;
+    const MAX_STRENGTH = isLocation ? 0.01 : 1;
+
+    if (now - rubberLastSend < THROTTLE_MS) return;
+    rubberLastSend = now;
+    const raw = Math.abs(rubberOffsetY) / RUBBER_MAX;
+
+    const strength = isLocation
+      ? parseFloat(Math.min(raw * raw * MAX_STRENGTH, MAX_STRENGTH).toFixed(4))
+      : parseFloat((Math.abs(rubberOffsetY) / RUBBER_MAX).toFixed(2));
+    const minThreshold = isLocation ? 0.001 : 0.05;
+    if (strength < minThreshold) return;
 
     // console.log(`[Zoom] direction: ${rubberOffsetY < 0 ? "in" : "out"}, strength: ${strength}`,);
 
