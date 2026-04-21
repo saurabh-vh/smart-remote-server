@@ -290,9 +290,14 @@ document
   .getElementById("closeBtn")
   .addEventListener("click", unpairRemoteClient);
 
-// Unpair when the page becomes hidden (minimized or backgrounded) — useful for mobile
+// Tab hide → disconnect | Tab visible → auto reconnect via URL code
 document.addEventListener("visibilitychange", () => {
-  if (document.hidden) unpairRemoteClient();
+  if (document.hidden) {
+    unpairRemoteClient();
+  } else {
+    const savedCode = new URLSearchParams(window.location.search).get("code");
+    socket.emit("pair_remote", { code: savedCode });
+  }
 });
 
 // Also attempt unpair on page hide / unload to cover more cases
