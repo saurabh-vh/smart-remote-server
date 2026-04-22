@@ -1,4 +1,5 @@
 import { renderAmenities } from "./modules/amenitiesView.js";
+import { applyJoystickLayout } from "./modules/applyJoystickLayout.js";
 import { renderHomes } from "./modules/homesView.js";
 import { initJoystick } from "./modules/joystick.js";
 import {
@@ -108,7 +109,6 @@ function setMode(mode) {
   } else {
     controlRecenterBtn();
   }
-
   // Joystick panel hamesha show (homes + amenities)
   document.querySelector(".joystick-panel").style.display = "flex";
 
@@ -346,13 +346,13 @@ socket.on("display_state", ({ state }) => {
   remoteUiState = state;
   uiState.data.homes.buildings =
     state?.firstLevelFilter?.selectedBuildings || [];
-
   uiState.data.takeMeTo = state?.takeMeTo || [];
   uiState.data.locationData = state?.locationData || [];
   uiState.data.locationPlacesFind = state?.locationPlacesFind || [];
   uiState.data.autocompletePredictions = state?.autocompletePredictions || [];
-  // console.log("state", uiState.data.locationPlacesFind);
+  uiState.data.joystickPosition = state?.joystickPosition;
 
+  applyJoystickLayout(uiState.data.joystickPosition);
   render();
   updateAutocompleteDropdown();
 });

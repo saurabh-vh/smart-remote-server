@@ -11,6 +11,7 @@ export const uiState = {
     locationPlacesFind: [],
     autocompletePredictions: [],
     moreOptions: {},
+    joystickPosition: true,
   },
 };
 
