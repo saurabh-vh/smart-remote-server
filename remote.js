@@ -15,7 +15,7 @@ import {
 } from "./modules/rightSideNavbar.js";
 import { initRubberBand } from "./modules/rubberBand.js";
 import { socket } from "./modules/socket.js";
-import { remoteState, uiState } from "./modules/state.js";
+import { remoteState, resetSectionState, uiState } from "./modules/state.js";
 import { controlRecenterBtn } from "./modules/uiHelpers.js";
 
 const appEl = document.getElementById("app");
@@ -99,12 +99,18 @@ function setMode(mode) {
   if (uiState.section === "location") {
     document.getElementById("zoomControl").style.display = "none";
     document.querySelector(".look-joystick").style.display = "none";
+    document.querySelectorAll(".fa-person-swimming").forEach((el) => {
+      el.style.display = "none";
+    });
     controlRecenterBtn({ visible: false });
     return;
   }
 
-  // Amenities section hide recenter Button
+  // Amenities section hide recenter Button or Hotspot Icon
   if (uiState.section === "amenities") {
+    document.querySelectorAll(".fa-person-swimming").forEach((el) => {
+      el.style.display = "none";
+    });
     controlRecenterBtn({ visible: false });
   } else {
     controlRecenterBtn();
@@ -189,6 +195,7 @@ function goBack() {
 
 // Reset section to root and clear stack
 function resetSection(section) {
+  resetSectionState(uiState.section);
   uiState.section = section;
   uiState.stack = [];
   uiState.searchQuery = "";

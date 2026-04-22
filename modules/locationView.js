@@ -13,8 +13,8 @@ const STATIC_PLACES = [
   { title: "Fuel", name: "fuel", place: ["gas_station"] },
 ];
 
-let activePlaceName = null;
-let activeSubPlaceId = null;
+// const locationState = uiState.ui.location;
+const loc = uiState.ui.location;
 
 export function renderLocation() {
   const content = document.getElementById("contentArea");
@@ -33,7 +33,7 @@ export function renderLocation() {
     const listItems = placesToShow
       .map((place) => {
         const title = place.title || place.name;
-        const isActive = place.name === activePlaceName;
+        const isActive = place.name === loc.activePlaceName;
 
         const subList =
           isActive && locationPlacesFind.length > 0
@@ -41,7 +41,7 @@ export function renderLocation() {
             <div class="location-sub-list">
               ${locationPlacesFind
                 .map((item, i) => {
-                  const isSubActive = item.place_id === activeSubPlaceId;
+                  const isSubActive = item.place_id === loc.activeSubPlaceId;
                   return `
                   <div class="location-sub-item ${
                     i < locationPlacesFind.length - 1 ? "with-border" : ""
@@ -157,7 +157,7 @@ export function renderLocation() {
         e.stopPropagation();
 
         const place_id = btn.dataset.placeid;
-        activeSubPlaceId = place_id;
+        loc.activeSubPlaceId = place_id;
         buildUI();
 
         socket.emit("remote_command", {
@@ -176,19 +176,20 @@ export function renderLocation() {
         const name = el.dataset.name;
         locationPlacesFind.length = 0;
 
-        dropdownDismissed = true;
+        loc.dropdownDismissed = true;
         uiState.data.autocompletePredictions = [];
         setTimeout(() => {
-          dropdownDismissed = false;
+          loc.dropdownDismissed = false;
         }, 1000);
 
-        if (activePlaceName === name) {
-          activePlaceName = null;
+        if (loc.activePlaceName === name) {
+          loc.activePlaceName = null;
+          loc.activeSubPlaceId = null;
           buildUI();
           return;
         }
 
-        activePlaceName = name;
+        loc.activePlaceName = name;
         buildUI();
 
         const place = placesToShow.find((p) => p.name === name);
@@ -218,13 +219,11 @@ export function renderLocation() {
   buildUI();
 }
 
-let dropdownDismissed = false;
-
 export function updateAutocompleteDropdown() {
   const dropdown = document.querySelector("#autocompleteDropdown");
   if (!dropdown) return;
 
-  if (dropdownDismissed) {
+  if (loc.dropdownDismissed) {
     dropdown.style.display = "none";
     return;
   }
@@ -260,7 +259,7 @@ export function updateAutocompleteDropdown() {
       e.stopPropagation();
       const place_id = item.dataset.placeid;
 
-      dropdownDismissed = true;
+      loc.dropdownDismissed = true;
       uiState.data.autocompletePredictions = [];
       dropdown.style.display = "none";
       document.removeEventListener("click", handleOutsideClick);
@@ -272,7 +271,7 @@ export function updateAutocompleteDropdown() {
       });
 
       setTimeout(() => {
-        dropdownDismissed = false;
+        loc.dropdownDismissed = false;
       }, 1000);
     });
   });

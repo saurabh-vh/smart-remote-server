@@ -24,8 +24,14 @@ export function renderHomes({
   });
 
   if (!current || current.level === "selectedBuilding") {
+    document.querySelectorAll(".fa-person-swimming").forEach((el) => {
+      el.style.display = "";
+    });
     renderBuildings(view, { getActive, navigate });
   } else if (current.level === "building") {
+    document.querySelectorAll(".fa-person-swimming").forEach((el) => {
+      el.style.display = "none";
+    });
     renderUnitsWithFilters(view, {
       socket,
       pairedCode: remoteState.pairedCode,
