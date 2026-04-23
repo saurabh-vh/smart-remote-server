@@ -63,5 +63,5 @@ const SECTION_RESETS = {
 // ================================
 export function resetSectionState(leavingSection) {
   SECTION_RESETS[leavingSection]?.();
-  console.log(leavingSection);
+  // console.log(leavingSection);
 }

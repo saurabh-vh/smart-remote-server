@@ -22,7 +22,7 @@ export function renderLocation() {
   const locationData = uiState?.data?.locationData || [];
   const locationPlacesFind = uiState?.data?.locationPlacesFind || [];
   const futureDevelopments = uiState?.data?.futureDevelopments || [];
-  console.log(futureDevelopments);
+  // console.log("futureDevelopments", futureDevelopments);
 
   const dynamicPlaces = locationData.filter(
     (p) => p.visible && p.inside_place?.length > 0,
@@ -142,7 +142,6 @@ export function renderLocation() {
 
       futureCheck.addEventListener("click", (e) => {
         const showFutureDevelopment = e.target.checked;
-        console.log(showFutureDevelopment);
         futureDropdown.style.display = e.target.checked ? "block" : "none";
 
         socket.emit("remote_command", {
