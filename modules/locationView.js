@@ -21,6 +21,8 @@ export function renderLocation() {
 
   const locationData = uiState?.data?.locationData || [];
   const locationPlacesFind = uiState?.data?.locationPlacesFind || [];
+  const futureDevelopments = uiState?.data?.futureDevelopments || [];
+  console.log(futureDevelopments);
 
   const dynamicPlaces = locationData.filter(
     (p) => p.visible && p.inside_place?.length > 0,
@@ -30,6 +32,12 @@ export function renderLocation() {
   const placesToShow = isPlacesAvailable ? dynamicPlaces : STATIC_PLACES;
 
   function buildUI() {
+    const futureOptions = futureDevelopments.map(
+      (item) => `<option value="${item.name}">
+          ${item.title || item.name}
+        </option>`,
+    );
+
     const listItems = placesToShow
       .map((place) => {
         const title = place.title || place.name;
@@ -95,7 +103,7 @@ export function renderLocation() {
     content.innerHTML = `
         <div class="section-card">
           <div class="input-wrapper">
-            <div style="position: relative; width: 100%;">
+            <div class="location-search-input">
               <input
                 type="text"
                 class="location-search"
@@ -103,11 +111,33 @@ export function renderLocation() {
               />
               <div class="autocomplete-dropdown" id="autocompleteDropdown" style="display:none;"></div>
             </div>
+            <div class='future-developments'>
+              <span>Future Delopments</span>
+              <input
+                type="checkbox"
+                class="location-search"
+                id="futureCheck"
+              />
+              <div class="future-dropdown" id="futureDropdown">
+                <select>
+                  ${futureOptions}
+                </select>
+              </div>
+            </div>
           </div>
           ${listItems || `<div class="location-empty">No places available</div>`}
         </div>
 `;
 
+    // =========================
+    // FUTURE DEVELOPMENT CHECKBOX
+    // =========================
+    const futureCheck = document.getElementById("futureCheck");
+    const futureDropdown = document.getElementById("futureDropdown");
+
+    futureCheck.addEventListener("click", (e) => {
+      futureDropdown.style.display = e.target.checked ? "block" : "none";
+    });
     // =========================
     // SEARCH INPUT SOCKET EMIT
     // =========================

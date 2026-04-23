@@ -358,6 +358,7 @@ socket.on("display_state", ({ state }) => {
   uiState.data.locationPlacesFind = state?.locationPlacesFind || [];
   uiState.data.autocompletePredictions = state?.autocompletePredictions || [];
   uiState.data.joystickPosition = state?.joystickPosition;
+  uiState.data.futureDevelopments = state?.futureDevelopments;
 
   applyJoystickLayout(uiState.data.joystickPosition);
   render();

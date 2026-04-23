@@ -24,6 +24,7 @@ export const uiState = {
     autocompletePredictions: [],
     moreOptions: {},
     joystickPosition: true,
+    futureDevelopments: [],
   },
 
   // ================================
