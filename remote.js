@@ -195,6 +195,7 @@ function goBack() {
 
 // Reset section to root and clear stack
 function resetSection(section) {
+  if (uiState.section === section) return;
   resetSectionState(uiState.section);
   uiState.section = section;
   uiState.stack = [];

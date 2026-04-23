@@ -32,11 +32,15 @@ export function renderLocation() {
   const placesToShow = isPlacesAvailable ? dynamicPlaces : STATIC_PLACES;
 
   function buildUI() {
-    const futureOptions = futureDevelopments.map(
-      (item) => `<option value="${item.name}">
-          ${item.name || item.title}
-        </option>`,
-    );
+    const futureOptions = futureDevelopments
+      .map(
+        (item) => `
+      <li class="future-option-item" data-name="${item.name}">
+        ${item.name || item.title}
+      </li>
+    `,
+      )
+      .join("");
 
     const listItems = placesToShow
       .map((place) => {
@@ -121,9 +125,9 @@ export function renderLocation() {
                 id="futureCheck"
               />
               <div class="future-dropdown" id="futureDropdown">
-                <select id="futureSelect">
+                <ul id="futureList">
                   ${futureOptions}
-                </select>
+                </ul>
               </div>
             </div>`
                 : ""
@@ -142,7 +146,8 @@ export function renderLocation() {
 
       futureCheck.addEventListener("click", (e) => {
         const showFutureDevelopment = e.target.checked;
-        futureDropdown.style.display = e.target.checked ? "block" : "none";
+
+        futureDropdown.style.display = showFutureDevelopment ? "block" : "none";
 
         socket.emit("remote_command", {
           code: remoteState.pairedCode,
@@ -150,17 +155,16 @@ export function renderLocation() {
           payload: { showFutureDevelopment },
         });
       });
-      // =========================
-      // FUTURE DROPDOWN SELECT EMIT
-      // =========================
-      const futureSelect = document.getElementById("futureSelect");
-      futureSelect.addEventListener("change", (e) => {
-        const name = e.target.value;
-        if (!name) return;
-        socket.emit("remote_command", {
-          code: remoteState.pairedCode,
-          command: "future_dropdown_select",
-          payload: { name },
+
+      // UL LI click
+      document.querySelectorAll(".future-option-item").forEach((item) => {
+        item.addEventListener("click", () => {
+          const name = item.dataset.name;
+          socket.emit("remote_command", {
+            code: remoteState.pairedCode,
+            command: "future_dropdown_select",
+            payload: { name },
+          });
         });
       });
     }
