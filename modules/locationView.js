@@ -34,7 +34,7 @@ export function renderLocation() {
   function buildUI() {
     const futureOptions = futureDevelopments.map(
       (item) => `<option value="${item.name}">
-          ${item.title || item.name}
+          ${item.name || item.title}
         </option>`,
     );
 
@@ -111,7 +111,9 @@ export function renderLocation() {
               />
               <div class="autocomplete-dropdown" id="autocompleteDropdown" style="display:none;"></div>
             </div>
-            <div class='future-developments'>
+            ${
+              futureOptions.length > 0
+                ? `<div class='future-developments'>
               <span>Future Delopments</span>
               <input
                 type="checkbox"
@@ -119,25 +121,51 @@ export function renderLocation() {
                 id="futureCheck"
               />
               <div class="future-dropdown" id="futureDropdown">
-                <select>
+                <select id="futureSelect">
                   ${futureOptions}
                 </select>
               </div>
-            </div>
+            </div>`
+                : ""
+            }
           </div>
           ${listItems || `<div class="location-empty">No places available</div>`}
         </div>
 `;
 
     // =========================
-    // FUTURE DEVELOPMENT CHECKBOX
+    // FUTURE DEVELOPMENT CHECKBOX CLICK
     // =========================
-    const futureCheck = document.getElementById("futureCheck");
-    const futureDropdown = document.getElementById("futureDropdown");
+    if (futureOptions.length > 0) {
+      const futureCheck = document.getElementById("futureCheck");
+      const futureDropdown = document.getElementById("futureDropdown");
 
-    futureCheck.addEventListener("click", (e) => {
-      futureDropdown.style.display = e.target.checked ? "block" : "none";
-    });
+      futureCheck.addEventListener("click", (e) => {
+        const showFutureDevelopment = e.target.checked;
+        console.log(showFutureDevelopment);
+        futureDropdown.style.display = e.target.checked ? "block" : "none";
+
+        socket.emit("remote_command", {
+          code: remoteState.pairedCode,
+          command: "show_future_development",
+          payload: { showFutureDevelopment },
+        });
+      });
+      // =========================
+      // FUTURE DROPDOWN SELECT EMIT
+      // =========================
+      const futureSelect = document.getElementById("futureSelect");
+      futureSelect.addEventListener("change", (e) => {
+        const name = e.target.value;
+        if (!name) return;
+        socket.emit("remote_command", {
+          code: remoteState.pairedCode,
+          command: "future_dropdown_select",
+          payload: { name },
+        });
+      });
+    }
+
     // =========================
     // SEARCH INPUT SOCKET EMIT
     // =========================
