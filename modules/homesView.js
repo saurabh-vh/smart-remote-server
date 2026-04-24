@@ -154,7 +154,21 @@ function renderTakeMeTo(container, { getActive, goBack }) {
   if (!rooms.length) {
     const loading = document.createElement("div");
     loading.className = "empty";
-    loading.innerHTML = `
+    if (uiState.data.apartmentScreen === "Floor Plan") {
+      loading.innerHTML = `
+      <div style="display:flex; flex-direction:column; align-items:center; gap:12px; padding:10vh;">
+        <h1 style="
+          color:black;
+          border:none;
+          font-size:5.2vh;
+          font-weight:600;
+        ">
+          Showing On Screen
+        </h1>
+      </div>
+    `;
+    } else {
+      loading.innerHTML = `
     <div style="display:flex; flex-direction:column; align-items:center; gap:12px; padding:10vh;">
       <div style="display:flex; gap:6px; align-items:center;">
         <span class="dot-bounce" style="width:8px; height:8px; border-radius:50%; background:#007aff; display:inline-block; animation: dotBounce 1.2s infinite ease-in-out;"></span>
@@ -164,6 +178,7 @@ function renderTakeMeTo(container, { getActive, goBack }) {
             <div style="font-size:13px; color:#aaa; font-weight:500; letter-spacing:0.5px;">Entering the unit...</div>
     </div>
   `;
+    }
     container.appendChild(loading);
 
     // Inject animation if not already present

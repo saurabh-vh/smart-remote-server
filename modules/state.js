@@ -25,6 +25,7 @@ export const uiState = {
     moreOptions: {},
     joystickPosition: true,
     futureDevelopments: [],
+    apartmentScreen: null,
   },
 
   // ================================

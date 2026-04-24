@@ -360,6 +360,8 @@ socket.on("display_state", ({ state }) => {
   uiState.data.autocompletePredictions = state?.autocompletePredictions || [];
   uiState.data.joystickPosition = state?.joystickPosition;
   uiState.data.futureDevelopments = state?.futureDevelopments;
+  uiState.data.apartmentScreen = state?.apartmentScreen;
+  // console.log("display_state", state);
 
   applyJoystickLayout(uiState.data.joystickPosition);
   render();
