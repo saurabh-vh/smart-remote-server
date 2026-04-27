@@ -112,7 +112,9 @@ function renderBuildings(container, { getActive, navigate }) {
       if (b.id === activeBuildingId) row.classList.add("active");
       row.textContent = b.building_name || `Building ${b.id}`;
       row.onclick = () => {
-        navigate("building", b.id);
+        navigate("building", b.id, {
+          buildingName: b.building_name,
+        });
         socket.emit("remote_command", {
           code: remoteState.pairedCode,
           command: "home_search_filter",
@@ -138,17 +140,24 @@ function renderTakeMeTo(container, { getActive, goBack }) {
   backBtn.onclick = goBack;
   toolbar.appendChild(backBtn);
 
-  const title = document.createElement("div");
-  title.style.fontWeight = "600";
-  title.style.fontSize = "16px";
-  title.style.padding = "0 8px";
-  title.textContent = "Take Me To";
-  // ← Selected unit number stack se lo
+  const activeBuilding = uiState.stack.findLast((s) => s.level === "building");
+  const wingName = activeBuilding?.wingName || "";
+  const buildingId = activeBuilding?.id;
+  const buildingData = uiState.data.homes.buildings.find(
+    (b) => b.id === buildingId,
+  );
+  const buildingName = activeBuilding?.buildingName || "";
+
   const activeUnit = uiState.stack.findLast((s) => s.level === "unit");
   const unitNumber = activeUnit?.unitNumber || "Unit";
-  title.textContent = unitNumber;
-  toolbar.appendChild(title);
 
+  const title = document.createElement("div");
+  title.className = "units-toolbar-title";
+  title.textContent = wingName
+    ? `${wingName} · ${unitNumber}`
+    : `${buildingName} · ${unitNumber}`;
+
+  toolbar.appendChild(title);
   container.appendChild(toolbar);
 
   if (!rooms.length) {

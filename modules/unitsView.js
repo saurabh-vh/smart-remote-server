@@ -30,10 +30,12 @@ export function renderUnitsWithFilters(
   const buildingData = uiState.data.homes.buildings.find(
     (b) => b.id === activeBuilding?.id,
   );
-  buildingTitle.textContent =
-    activeBuilding?.wingName ||
-    buildingData?.building_name ||
-    `Building ${activeBuilding?.id || ""}`;
+
+  buildingTitle.textContent = activeBuilding?.wingName
+    ? `${activeBuilding?.wingName}`
+    : activeBuilding?.buildingName ||
+      buildingData?.building_name ||
+      `Building ${activeBuilding?.id || ""}`;
 
   const searchInput = document.createElement("input");
   searchInput.className = "units-search";
@@ -119,7 +121,11 @@ export function renderUnitsWithFilters(
         row.classList.add("active");
         setMode("walk");
 
-        navigate("unit", u.unit_id, { unitNumber: u.unique_unit_number });
+        navigate("unit", u.unit_id, {
+          unitNumber: u.unique_unit_number,
+          buildingName: activeBuilding?.buildingName,
+          wingName: activeBuilding?.wingName,
+        });
 
         socket.emit("remote_command", {
           code: pairedCode,
