@@ -155,6 +155,8 @@ function renderTakeMeTo(container, { getActive, goBack }) {
     const loading = document.createElement("div");
     loading.className = "empty";
     if (uiState.data.apartmentScreen === "Floor Plan") {
+      document.getElementById("zoomControl").style.display = "flex";
+      document.getElementById("lookJoystick").style.display = "none";
       loading.innerHTML = `
       <div style="display:flex; flex-direction:column; align-items:center; gap:12px; padding:10vh;">
         <h1 style="
@@ -165,6 +167,7 @@ function renderTakeMeTo(container, { getActive, goBack }) {
         ">
           Showing On Screen
         </h1>
+        <button class="screen-blur-close" id="screenBlurClose">Close</button>
       </div>
     `;
     } else {
@@ -180,6 +183,18 @@ function renderTakeMeTo(container, { getActive, goBack }) {
   `;
     }
     container.appendChild(loading);
+
+    const closeBtn = loading.querySelector("#screenBlurClose");
+    if (closeBtn) {
+      closeBtn.addEventListener("click", () => {
+        goBack();
+        socket.emit("remote_command", {
+          code: remoteState.pairedCode,
+          command: "floor_plan_close",
+          payload: {},
+        });
+      });
+    }
 
     // Inject animation if not already present
     if (!document.getElementById("dotBounceStyle")) {
