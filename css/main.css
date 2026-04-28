@@ -180,8 +180,38 @@ body {
   background: #f0f0f0;
   color: #000;
 }
+.sidebar-right i.active,
+.mobile-icons i.active {
+  color: #007aff !important;
+  border-color: #007aff !important;
+  background: #e9f2ff;
+}
 
-/* Ellipsis wrapper — grid mein properly fit ho */
+.eye-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  border: 0.05vh solid #888;
+  border-radius: 1vh;
+  cursor: pointer;
+}
+
+.eye-wrapper > i {
+  border: none !important;
+  aspect-ratio: unset !important;
+  border-radius: 0 !important;
+  font-size: 1.2rem;
+  color: #444;
+}
+
+.eye-wrapper .ellipsis-popup {
+  top: 38vh;
+  left: 0;
+  transform: translateY(-100%);
+}
+/* For moreOption wrapper  */
 .ellipsis-wrapper {
   position: relative;
   display: flex;
@@ -220,15 +250,6 @@ body {
 }
 .ellipsis-popup.open {
   display: flex;
-}
-
-.ellipsis-popup.pop-left {
-  left: 0;
-  right: auto;
-}
-.ellipsis-popup.pop-right {
-  right: 0;
-  left: auto;
 }
 
 .ellipsis-popup.open {
@@ -1142,8 +1163,8 @@ body {
   }
 
   .mobile-icons .ellipsis-popup {
-    top: 5vh;
-    left: -50vw;
+    top: 50vh;
+    left: 8vw;
     min-width: 60vw;
   }
   /* <!-- joystick Drag Right Side --> */

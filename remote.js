@@ -470,8 +470,9 @@ const TOGGLE_ICONS = new Set(["eye", "volume", "maximize", "ellipsis"]);
 // Swap icon class between iconA and iconB, return new state
 function toggleIcon(el) {
   const { iconA, iconB } = el.dataset;
-  const isA = el.classList.contains(iconA);
-  el.classList.replace(isA ? iconA : iconB, isA ? iconB : iconA);
+  const iconEl = el.tagName === "I" ? el : el.querySelector("i");
+  const isA = iconEl.classList.contains(iconA);
+  iconEl.classList.replace(isA ? iconA : iconB, isA ? iconB : iconA);
   return !isA;
 }
 
@@ -493,36 +494,21 @@ document.addEventListener("click", ({ target }) => {
   }
 
   if (!el) return;
+  console.log("clicked el:", el.tagName, el.dataset.action);
+  console.log("iconEl:", el.tagName === "I" ? el : el.querySelector("i"));
   const { action } = el.dataset;
 
   // Ellipsis toggle — find popup inside THIS wrapper only
   if (action === "ellipsis") {
-    const thisPopup = el
-      .closest(".ellipsis-wrapper")
-      .querySelector(".ellipsis-popup");
+    const popup = el
+      .closest(".sidebar-right, .mobile-icons")
+      ?.querySelector(".ellipsis-popup");
 
-    document.querySelectorAll(".ellipsis-popup").forEach((p) => {
-      if (p !== thisPopup) p.classList.remove("open");
-    });
+    if (!popup) return;
 
-    const allItems = Array.from(
-      document.querySelectorAll(
-        ".sidebar-right > i, .sidebar-right .ellipsis-wrapper",
-      ),
-    );
-    const index = allItems.indexOf(el.closest(".ellipsis-wrapper")) + 1;
+    popup.classList.toggle("open");
 
-    thisPopup.classList.remove("pop-left", "pop-right");
-    if (index % 3 === 0) {
-      thisPopup.classList.add("pop-right");
-    } else {
-      thisPopup.classList.add("pop-left");
-    }
-
-    thisPopup.classList.toggle("open");
-
-    // Popup open hone par sirf blur overlay, card nahi
-    if (thisPopup.classList.contains("open")) {
+    if (popup.classList.contains("open")) {
       document.getElementById("screenBlurOverlay").classList.add("active");
     } else {
       document.getElementById("screenBlurOverlay").classList.remove("active");
@@ -530,6 +516,9 @@ document.addEventListener("click", ({ target }) => {
   }
 
   const state = TOGGLE_ICONS.has(action) ? toggleIcon(el) : null;
+  if (el.tagName === "I") {
+    el.classList.toggle("active");
+  }
   const config = ACTION_CONFIG[action];
   if (!config) return;
 

@@ -40,10 +40,27 @@ export function rightSideNavbar(container) {
         el.dataset.iconA = item.iconA;
         el.dataset.iconB = item.iconB;
       }
+
+      // create eye wrapper for ellpsispopup
+      if (item.action === "eye") {
+        const eyeWrapper = document.createElement("div");
+        eyeWrapper.className = "eye-wrapper";
+        eyeWrapper.dataset.action = "eye";
+        eyeWrapper.dataset.iconA = item.iconA;
+        eyeWrapper.dataset.iconB = item.iconB;
+        eyeWrapper.appendChild(el);
+
+        const popup = document.createElement("div");
+        popup.className = "ellipsis-popup";
+        eyeWrapper.appendChild(popup);
+
+        container.appendChild(eyeWrapper);
+        return;
+      }
       container.appendChild(el);
     });
 
-  // Append Ellipsis wrapper and Iocn
+  // Append Ellipsis wrapper and Iocn or popup
   const wrapper = document.createElement("div");
   wrapper.className = "ellipsis-wrapper";
   wrapper.dataset.action = "ellipsis";
