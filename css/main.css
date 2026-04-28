@@ -1167,6 +1167,9 @@ body {
     left: 8vw;
     min-width: 60vw;
   }
+  .eye-wrapper {
+    border: none;
+  }
   /* <!-- joystick Drag Right Side --> */
   .joystick-panel {
     width: 35vw;
