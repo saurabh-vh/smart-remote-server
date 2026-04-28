@@ -35,7 +35,7 @@ export function initJoystick({ getCurrentMode }) {
         if (Math.abs(currentX) > 1 || Math.abs(currentY) > 1) {
           socket.emit("remote_command", {
             code: remoteState.pairedCode,
-            command: "image_drag",
+            command: "joystick_move",
             payload: {
               type: "joystick",
               action: "move",
@@ -66,6 +66,16 @@ export function initJoystick({ getCurrentMode }) {
     const now = Date.now();
     if (now - lastSend < 50) return;
     lastSend = now;
+
+    // For image gallery joystick
+    if (document.querySelector(".image-wrapper")) {
+      socket.emit("remote_command", {
+        code: remoteState.pairedCode,
+        command: "image_drag",
+        payload: { x: limitedX, y: -limitedY },
+      });
+      return;
+    }
 
     if (getCurrentMode() === "map") {
       socket.emit("remote_command", {
