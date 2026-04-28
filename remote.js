@@ -494,8 +494,7 @@ document.addEventListener("click", ({ target }) => {
   }
 
   if (!el) return;
-  console.log("clicked el:", el.tagName, el.dataset.action);
-  console.log("iconEl:", el.tagName === "I" ? el : el.querySelector("i"));
+
   const { action } = el.dataset;
 
   // Ellipsis toggle — find popup inside THIS wrapper only
