@@ -1,5 +1,5 @@
 import { socket } from "./socket.js";
-import { remoteState } from "./state.js";
+import { remoteState, uiState } from "./state.js";
 
 const AMENITY_GRADIENTS = [
   "linear-gradient(135deg, #f093fb, #f5576c)",
@@ -15,14 +15,14 @@ const AMENITY_GRADIENTS = [
   "linear-gradient(135deg, #26c6da, #00acc1)",
   "linear-gradient(135deg, #66bb6a, #43a047)",
 ];
-export function renderAmenities({ remoteUiState, getActive }) {
+export function renderAmenities({ getActive }) {
   const content = document.getElementById("contentArea");
   content.innerHTML = `
     <div class="section-title">Amenities</div>
     <div class="amenities-grid" id="amenitiesView"></div>
   `;
   const container = document.getElementById("amenitiesView");
-  const list = remoteUiState?.amenities || [];
+  const list = uiState.data.amenities || [];
   const activeAmenityId = getActive("amenity");
 
   if (!list.length) {

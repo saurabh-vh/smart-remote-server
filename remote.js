@@ -355,6 +355,9 @@ socket.on("display_state", ({ state }) => {
   if (state?.firstLevelFilter?.selectedBuildings?.length) {
     uiState.data.homes.buildings = state.firstLevelFilter.selectedBuildings;
   }
+  if (state?.amenities?.length) {
+    uiState.data.amenities = state.amenities;
+  }
   uiState.data.takeMeTo = state?.takeMeTo || [];
   uiState.data.locationData = state?.locationData || [];
   uiState.data.locationPlacesFind = state?.locationPlacesFind || [];
@@ -429,8 +432,7 @@ function render() {
   content.innerHTML = "";
   if (uiState.section === "homes")
     renderHomes({ goBack, getActive, getUnitTypeLabel, setMode, navigate });
-  if (uiState.section === "amenities")
-    renderAmenities({ remoteUiState, getActive });
+  if (uiState.section === "amenities") renderAmenities({ getActive });
   if (uiState.section === "location") renderLocation();
 }
 
