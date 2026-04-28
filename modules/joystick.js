@@ -33,6 +33,8 @@ export function initJoystick({ getCurrentMode }) {
     heartbeatInterval = setInterval(() => {
       if (joystickDragging && getCurrentMode() === "map") {
         if (Math.abs(currentX) > 1 || Math.abs(currentY) > 1) {
+          if (document.querySelector(".image-wrapper")) return;
+
           socket.emit("remote_command", {
             code: remoteState.pairedCode,
             command: "joystick_move",
@@ -113,6 +115,12 @@ export function initJoystick({ getCurrentMode }) {
     const limitedX = Math.max(-max, Math.min(max, x));
     const limitedY = Math.max(-max, Math.min(max, y));
     stick.style.transform = `translate(calc(-50% + ${limitedX}px), calc(-50% + ${limitedY}px))`;
+
+    if (document.querySelector(".image-wrapper")) {
+      sendDirection(currentX, currentY);
+      return;
+    }
+
     if (getCurrentMode() !== "map") {
       sendDirection(currentX, currentY);
     }
