@@ -352,8 +352,9 @@ socket.on(
 // Display sent its current state — update local data and re-render
 socket.on("display_state", ({ state }) => {
   remoteUiState = state;
-  uiState.data.homes.buildings =
-    state?.firstLevelFilter?.selectedBuildings || [];
+  if (state?.firstLevelFilter?.selectedBuildings?.length) {
+    uiState.data.homes.buildings = state.firstLevelFilter.selectedBuildings;
+  }
   uiState.data.takeMeTo = state?.takeMeTo || [];
   uiState.data.locationData = state?.locationData || [];
   uiState.data.locationPlacesFind = state?.locationPlacesFind || [];
