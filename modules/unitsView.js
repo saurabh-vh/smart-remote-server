@@ -91,11 +91,11 @@ export function renderUnitsWithFilters(
     </style>
     <div style="display:flex; flex-direction:column; align-items:center; gap:12px; padding:10vh;">
       <div style="display:flex; gap:6px; align-items:center;">
-        <span style="width:8px; height:8px; border-radius:50%; background:#007aff; display:inline-block; animation: dotBounce 1.2s infinite ease-in-out;"></span>
-        <span style="width:8px; height:8px; border-radius:50%; background:#007aff; display:inline-block; animation: dotBounce 1.2s infinite ease-in-out 0.2s;"></span>
-        <span style="width:8px; height:8px; border-radius:50%; background:#007aff; display:inline-block; animation: dotBounce 1.2s infinite ease-in-out 0.4s;"></span>
+        <span style="width:8px; height:8px; border-radius:50%; background:var(--accent); display:inline-block; animation: dotBounce 1.2s infinite ease-in-out;"></span>
+        <span style="width:8px; height:8px; border-radius:50%; background:var(--accent); display:inline-block; animation: dotBounce 1.2s infinite ease-in-out 0.2s;"></span>
+        <span style="width:8px; height:8px; border-radius:50%; background:var(--accent); display:inline-block; animation: dotBounce 1.2s infinite ease-in-out 0.4s;"></span>
       </div>
-            <div style="font-size:13px; color:#aaa; font-weight:500; letter-spacing:0.5px;">Loading units...</div>
+            <div style="font-size:13px; color:var(--text-muted); font-weight:500; letter-spacing:0.5px;">Loading units...</div>
     </div>
   `;
       return;
@@ -103,7 +103,7 @@ export function renderUnitsWithFilters(
     if (filtered.length === 0) {
       listWrap.innerHTML = `
     <div style="display:flex; flex-direction:column; align-items:center; gap:12px; padding:10vh;">
-      <div style="font-size:13px; color:#aaa; font-weight:500; letter-spacing:0.5px;">No results found</div>
+      <div style="font-size:13px; color:var(--text-muted); font-weight:500; letter-spacing:0.5px;">No results found</div>
     </div>
   `;
       return;
@@ -152,7 +152,8 @@ export function renderUnitsWithFilters(
       divider.setAttribute("class", "unit-divider");
       divider.setAttribute("viewBox", "0 0 240 10");
       divider.setAttribute("preserveAspectRatio", "none");
-      divider.innerHTML = `<line x1="24" y1="5" x2="216" y2="5" stroke="#d7dbe1" stroke-width="1.5" />`;
+      divider.style.color = "var(--divider-stroke)";
+      divider.innerHTML = `<line x1="24" y1="5" x2="216" y2="5" stroke="currentColor" stroke-width="1.5" />`;
 
       const directionLine = document.createElement("div");
       directionLine.className = "unit-middle-line unit-direction";

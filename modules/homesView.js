@@ -169,7 +169,7 @@ function renderTakeMeTo(container, { getActive, goBack }) {
       loading.innerHTML = `
       <div style="display:flex; flex-direction:column; align-items:center; gap:12px; padding:10vh;">
         <h1 style="
-          color:black;
+          color:var(--text-primary);
           border:none;
           font-size:5.2vh;
           font-weight:600;
@@ -183,11 +183,11 @@ function renderTakeMeTo(container, { getActive, goBack }) {
       loading.innerHTML = `
     <div style="display:flex; flex-direction:column; align-items:center; gap:12px; padding:10vh;">
       <div style="display:flex; gap:6px; align-items:center;">
-        <span class="dot-bounce" style="width:8px; height:8px; border-radius:50%; background:#007aff; display:inline-block; animation: dotBounce 1.2s infinite ease-in-out;"></span>
-        <span class="dot-bounce" style="width:8px; height:8px; border-radius:50%; background:#007aff; display:inline-block; animation: dotBounce 1.2s infinite ease-in-out 0.2s;"></span>
-        <span class="dot-bounce" style="width:8px; height:8px; border-radius:50%; background:#007aff; display:inline-block; animation: dotBounce 1.2s infinite ease-in-out 0.4s;"></span>
+        <span class="dot-bounce" style="width:8px; height:8px; border-radius:50%; background:var(--accent); display:inline-block; animation: dotBounce 1.2s infinite ease-in-out;"></span>
+        <span class="dot-bounce" style="width:8px; height:8px; border-radius:50%; background:var(--accent); display:inline-block; animation: dotBounce 1.2s infinite ease-in-out 0.2s;"></span>
+        <span class="dot-bounce" style="width:8px; height:8px; border-radius:50%; background:var(--accent); display:inline-block; animation: dotBounce 1.2s infinite ease-in-out 0.4s;"></span>
       </div>
-            <div style="font-size:13px; color:#aaa; font-weight:500; letter-spacing:0.5px;">Entering the unit...</div>
+            <div style="font-size:13px; color:var(--text-muted); font-weight:500; letter-spacing:0.5px;">Entering the unit...</div>
     </div>
   `;
     }

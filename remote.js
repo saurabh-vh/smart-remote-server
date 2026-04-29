@@ -16,6 +16,7 @@ import {
 import { initRubberBand } from "./modules/rubberBand.js";
 import { socket } from "./modules/socket.js";
 import { remoteState, resetSectionState, uiState } from "./modules/state.js";
+import { initThemeToggle } from "./modules/themeToggle.js";
 import { controlRecenterBtn } from "./modules/uiHelpers.js";
 
 const appEl = document.getElementById("app");
@@ -540,5 +541,6 @@ document.addEventListener("click", ({ target }) => {
 initJoystick({ getCurrentMode });
 initRubberBand();
 lookJoystick();
+initThemeToggle();
 setMode("map");
 render();
