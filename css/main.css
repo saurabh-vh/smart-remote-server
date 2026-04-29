@@ -20,6 +20,7 @@
   --overlay-bg: rgba(0, 0, 0, 0.45);
   --pair-overlay-bg: rgba(0, 0, 0, 0.4);
   --accent: #007aff;
+  --menu-active: var(--accent);
   --status-text: #1f8b4c;
   --status-bg: #e8f7ec;
   --status-border: #bfe7cc;
@@ -57,18 +58,21 @@
   --icon-color: #d0d8e5;
   --overlay-bg: rgba(0, 0, 0, 0.6);
   --pair-overlay-bg: rgba(0, 0, 0, 0.62);
-  --status-text: #7ee6ab;
-  --status-bg: rgba(31, 139, 76, 0.2);
-  --status-border: rgba(109, 214, 149, 0.45);
-  --danger-soft: rgba(227, 87, 72, 0.24);
-  --danger-soft-hover: rgba(227, 87, 72, 0.34);
+  --menu-active: #53a3fb;
+  --status-text: #edf2fa;
+  --status-bg: rgb(26, 32, 43);
+  --status-border: #445066;
+  --danger: #edf2fa;
+  --danger-hover: #fff;
+  --danger-soft: #6b6b6b;
+  --danger-soft-hover: #6b6b6b;
   --card-shadow: 0 14px 30px rgba(0, 0, 0, 0.3);
   --popup-shadow: 0 16px 30px rgba(0, 0, 0, 0.42);
   --control-overlay: rgba(248, 251, 255, 0.22);
   --control-inner: #f4f7fc;
   --control-text: #2f3a4d;
-  --recenter-bg: #f2f6ff;
-  --recenter-text: #263143;
+  --recenter-bg: rgba(248, 251, 255, 0.22);
+  --recenter-text: #fff;
   --skeleton-a: #3a4558;
   --skeleton-b: #4c5a71;
   --divider-stroke: #59667c;
@@ -402,7 +406,7 @@ body {
 
 .menu-item.active {
   background: #e9f2ff;
-  color: #007aff;
+  color: var(--menu-active);
   font-weight: 600;
 }
 
