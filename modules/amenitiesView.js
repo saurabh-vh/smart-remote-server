@@ -23,6 +23,7 @@ export function renderAmenities({ getActive }) {
   `;
   const container = document.getElementById("amenitiesView");
   const list = uiState.data.amenities || [];
+  const image = uiState.data.amenityThumbnails || [];
   const activeAmenityId = getActive("amenity");
 
   if (!list.length) {
@@ -36,9 +37,13 @@ export function renderAmenities({ getActive }) {
     if (a.id === activeAmenityId) card.classList.add("active");
 
     const gradient = AMENITY_GRADIENTS[index % AMENITY_GRADIENTS.length];
+    const thumbnail = image.find((img) => img.name === a.amenity_name);
+    const bgStyle = thumbnail
+      ? `background-image: url('${thumbnail.imageUrl}');`
+      : `background: ${gradient};`;
 
     card.innerHTML = `
-      <div class="amenity-image" style="background: ${gradient};"></div>
+      <div class="amenity-image" style="${bgStyle};"></div>
       <div class="amenity-overlay"></div>
       <div class="amenity-name">${a.amenity_name || ""}</div>
     `;

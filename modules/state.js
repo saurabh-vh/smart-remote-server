@@ -19,6 +19,7 @@ export const uiState = {
     homes: { buildings: [], units: [] },
     takeMeTo: [],
     amenities: {},
+    amenityThumbnails: [],
     locationData: [],
     locationPlacesFind: [],
     autocompletePredictions: [],

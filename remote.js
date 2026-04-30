@@ -368,6 +368,12 @@ socket.on("display_state", ({ state }) => {
   uiState.data.joystickPosition = state?.joystickPosition;
   uiState.data.futureDevelopments = state?.futureDevelopments;
   uiState.data.apartmentScreen = state?.apartmentScreen;
+  if (state?.amenityThumbnail && uiState.section === "amenities") {
+    uiState.data.amenityThumbnails = state.amenityThumbnail;
+    render();
+    return;
+  }
+
   // console.log("display_state", state);
 
   applyJoystickLayout(uiState.data.joystickPosition);
