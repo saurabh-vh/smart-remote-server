@@ -322,6 +322,15 @@ window.addEventListener("beforeunload", () => unpairRemoteClient());
 socket.on(
   "pair_success",
   ({ code, projectName: projName, displays, moreOptions }) => {
+    // Go to (Home Search) when remote disconnect
+    uiState.section = "homes";
+    document
+      .querySelectorAll(".menu-item")
+      .forEach((i) => i.classList.remove("active"));
+    document
+      .querySelector('.menu-item[data-section="homes"]')
+      ?.classList.add("active");
+
     remoteState.pairedCode = code;
     projectName = projName;
     availableDisplays = displays;
