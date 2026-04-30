@@ -1058,7 +1058,15 @@ body {
     width: 100vw;
     overflow-x: hidden;
   }
-
+  .topbar {
+    padding: 0 8px;
+  }
+  .screen-select {
+    padding: 4px 4px;
+  }
+  .project-status {
+    padding: 6px 8px;
+  }
   .sidebar {
     width: 100vw;
     max-width: 100vw;
