@@ -217,6 +217,10 @@ body {
   line-height: 1.1;
   align-items: end;
 }
+.parent-logo {
+  display: flex;
+  justify-content: center;
+}
 .brand-img {
   width: 30px;
   height: 30px;
@@ -1090,7 +1094,7 @@ body {
     padding-bottom: 0.6vh;
     margin-bottom: 3vh;
     gap: 10px;
-    border-bottom: #ddd .5px solid;
+    border-bottom: #ddd 0.5px solid;
   }
   .project-status {
     order: 2;
