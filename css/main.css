@@ -273,6 +273,7 @@ body {
 
 /* Sidebar - iPad Settings style */
 .sidebar {
+  padding: 24px 0px;
   width: 20vw;
   background: var(--surface-base);
   border-right: 1px solid var(--border-default);
@@ -286,7 +287,7 @@ body {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
-  padding: 16px;
+  padding: 24px;
   align-content: start;
 }
 
@@ -415,12 +416,6 @@ body {
 .ellipsis-item i {
   border: none;
 }
-
-/* .sidebar-header {
-  font-size: 20px;
-  font-weight: 600;
-  padding: 16px;
-} */
 
 .menu-item {
   padding: 14px 18px;
@@ -1125,6 +1120,7 @@ body {
     padding: 6px 8px;
   }
   .sidebar {
+    padding: 0px;
     width: 100vw;
     max-width: 100vw;
     border-right: none;
