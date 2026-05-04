@@ -32,7 +32,7 @@ export function initThemeToggle() {
   const initialTheme =
     savedTheme === DARK_THEME || savedTheme === LIGHT_THEME
       ? savedTheme
-      : LIGHT_THEME;
+      : DARK_THEME;
 
   // Default light unless user previously selected and saved a theme.
   setTheme(initialTheme, { persist: false });

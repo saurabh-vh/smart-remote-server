@@ -62,7 +62,7 @@
   --status-text: #edf2fa;
   --status-bg: rgb(26, 32, 43);
   --status-border: #445066;
-  --danger: #edf2fa;
+  --danger: #e35748;
   --danger-hover: #fff;
   --danger-soft: #6b6b6b;
   --danger-soft-hover: #6b6b6b;
@@ -428,6 +428,9 @@ body {
   font-size: 16px;
   cursor: pointer;
   border-bottom: 1px solid var(--border-soft);
+  display: flex;
+  align-items: center;
+  gap: 0.8vw;
 }
 
 .menu-item.active {

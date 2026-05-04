@@ -1,179 +1,155 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>Smart Remote - VirtualHomes.in</title>
 
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
-    />
-    <!-- Global styles for Smart Remote UI (layout, sidebar, iPad-style components) -->
-    <link rel="stylesheet" href="css/main.css" />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-    />
-  </head>
+<head>
+  <meta charset="utf-8" />
+  <title>Smart Remote - VirtualHomes.in</title>
 
-  <body>
-    <div class="app" id="app">
-      <!-- /* Entire Screen Overlay */ -->
-      <div class="screen-blur-overlay" id="screenBlurOverlay">
-        <div class="screen-blur-card" id="screenBlurCard">
-          <p>Showing on Screen</p>
-          <button class="screen-blur-close" id="screenBlurClose">Close</button>
-        </div>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <!-- Global styles for Smart Remote UI (layout, sidebar, iPad-style components) -->
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+
+<body>
+  <div class="app" id="app">
+    <!-- /* Entire Screen Overlay */ -->
+    <div class="screen-blur-overlay" id="screenBlurOverlay">
+      <div class="screen-blur-card" id="screenBlurCard">
+        <p>Showing on Screen</p>
+        <button class="screen-blur-close" id="screenBlurClose">Close</button>
       </div>
+    </div>
 
-      <!-- Pair Overlay -->
-      <div class="pair-overlay">
-        <div class="pair-box">
-          <div>Enter connection code</div>
-          <div class="remote-code" id="remoteCodeInputs">
-            <input class="code-input" maxlength="1" />
-            <input class="code-input" maxlength="1" />
-            <input class="code-input" maxlength="1" />
-            <input class="code-input" maxlength="1" />
-          </div>
-        </div>
-      </div>
-
-      <!-- Top -->
-      <div class="topbar">
-        <div class="brand">
-          <div class="parent-logo" >
-            <img
-              src="vh_logo.png"
-              class="brand-img dark-logo"
-              loading="lazy"
-              decoding="async"
-            />
-            <img
-              src="vh_logo_dark.png"
-              class="brand-img light-logo"
-              loading="lazy"
-              decoding="async"
-            />
-          </div>
-          <div class="logo-text">
-            Virtual Homes
-            <span class="sub-text">Smart Remote</span>
-          </div>
-        </div>
-        <div class="project-status">
-          <div id="projectStatus">Not connected</div>
-          <button
-            class="close-btn"
-            id="closeBtn"
-            aria-label="Close"
-            style="display: none"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
-          </button>
-        </div>
-
-        <div class="topbar-actions">
-          <select id="displaySelect" class="screen-select"></select>
-          <button
-            class="theme-toggle-btn"
-            id="themeToggleBtn"
-            type="button"
-            aria-pressed="false"
-            aria-label="Switch to dark mode"
-          >
-            <i class="fa-solid fa-moon" aria-hidden="true"></i>
-            <span class="theme-toggle-label">Light</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Mobile icons block — default hidden -->
-      <div class="mobile-icons"></div>
-
-      <!-- Main -->
-      <div class="main">
-        <!-- Sidebar -->
-        <div class="sidebar">
-          <div class="menu-item active" data-section="homes">Homes Search</div>
-          <div class="menu-item" data-section="amenities">Amenities</div>
-          <div class="menu-item" data-section="location">Location</div>
-        </div>
-
-        <!-- Content -->
-        <div class="content">
-          <div id="contentArea"></div>
-        </div>
-
-        <!-- For Right Side Joystick Space -->
-        <div class="sidebar-right">
-          <!-- Ellipsis with popup -->
-          <div class="ellipsis-wrapper" data-action="ellipsis">
-            <!-- popup -->
-            <div class="ellipsis-popup" id="ellipsisPopup"></div>
-          </div>
-        </div>
-
-        <!-- joystick Drag Right Side-->
-        <div class="joystick-panel">
-          <div class="joystick">
-            <div class="joystick-inner">
-              <div class="drag-text">MOVE</div>
-            </div>
-
-            <div class="arrow up"></div>
-            <div class="arrow down"></div>
-            <div class="arrow left"></div>
-            <div class="arrow right"></div>
-          </div>
-        </div>
-
-        <!-- Recenter View -->
-        <div class="recenter-view-parent">
-          <div class="recenter-view" id="recenterBtn">RECENTER VIEW</div>
-        </div>
-
-        <!-- Look Joystick Drag Left Side-->
-        <div class="look-joystick" id="lookJoystick">
-          <div class="look-inner" id="lookInner">
-            <p class="drag-text">LOOK AROUND</p>
-          </div>
-        </div>
-
-        <!--Rubber Band Zoom (right side) -->
-        <div class="rubber-band" id="rubberBand">
-          <div class="rubber-max">MAX</div>
-          <div class="rubber-inner" id="rubberInner"></div>
-          <div class="rubber-min">MIN</div>
-        </div>
-
-        <!-- Zoom Control (Image Gallery mode) -->
-        <div class="zoom-control" id="zoomControl">
-          <button class="zoom-btn" id="zoomIn">
-            <i class="fa fa-plus"></i>
-          </button>
-          <div class="zoom-divider"></div>
-          <button class="zoom-btn" id="zoomOut">
-            <i class="fa fa-minus"></i>
-          </button>
+    <!-- Pair Overlay -->
+    <div class="pair-overlay">
+      <div class="pair-box">
+        <div>Enter connection code</div>
+        <div class="remote-code" id="remoteCodeInputs">
+          <input class="code-input" maxlength="1" />
+          <input class="code-input" maxlength="1" />
+          <input class="code-input" maxlength="1" />
+          <input class="code-input" maxlength="1" />
         </div>
       </div>
     </div>
 
-    <script src="/socket.io/socket.io.js"></script>
-    <script type="module" src="/remote.js"></script>
-  </body>
+    <!-- Top -->
+    <div class="topbar">
+      <div class="brand">
+        <div class="parent-logo">
+          <img src="vh_logo.png" class="brand-img dark-logo" loading="lazy" decoding="async" />
+          <img src="vh_logo_dark.png" class="brand-img light-logo" loading="lazy" decoding="async" />
+        </div>
+        <div class="logo-text">
+          Virtual Homes
+          <span class="sub-text">Smart Remote</span>
+        </div>
+      </div>
+      <div class="project-status">
+        <div id="projectStatus">Not connected</div>
+        <button class="close-btn" id="closeBtn" aria-label="Close" style="display: none">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="topbar-actions">
+        <select id="displaySelect" class="screen-select"></select>
+        <button class="theme-toggle-btn" id="themeToggleBtn" type="button" aria-pressed="false"
+          aria-label="Switch to dark mode">
+          <i class="fa-solid fa-moon" aria-hidden="true"></i>
+          <span class="theme-toggle-label">Light</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile icons block — default hidden -->
+    <div class="mobile-icons"></div>
+
+    <!-- Main -->
+    <div class="main">
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <div class="menu-item active" data-section="homes">
+          <i class="fa-solid fa-house"></i>
+          <span>Home</span>
+        </div>
+        <div class="menu-item" data-section="amenities">
+          <i class="fa-solid fa-list"></i>
+          <span>Amenities</span>
+        </div>
+        <div class="menu-item" data-section="location">
+          <i class="fa-solid fa-location-dot"></i>
+          <span>Location</span>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="content">
+        <div id="contentArea"></div>
+      </div>
+
+      <!-- For Right Side Joystick Space -->
+      <div class="sidebar-right">
+        <!-- Ellipsis with popup -->
+        <div class="ellipsis-wrapper" data-action="ellipsis">
+          <!-- popup -->
+          <div class="ellipsis-popup" id="ellipsisPopup"></div>
+        </div>
+      </div>
+
+      <!-- joystick Drag Right Side-->
+      <div class="joystick-panel">
+        <div class="joystick">
+          <div class="joystick-inner">
+            <div class="drag-text">MOVE</div>
+          </div>
+
+          <div class="arrow up"></div>
+          <div class="arrow down"></div>
+          <div class="arrow left"></div>
+          <div class="arrow right"></div>
+        </div>
+      </div>
+
+      <!-- Recenter View -->
+      <div class="recenter-view-parent">
+        <div class="recenter-view" id="recenterBtn">RECENTER VIEW</div>
+      </div>
+
+      <!-- Look Joystick Drag Left Side-->
+      <div class="look-joystick" id="lookJoystick">
+        <div class="look-inner" id="lookInner">
+          <p class="drag-text">LOOK AROUND</p>
+        </div>
+      </div>
+
+      <!--Rubber Band Zoom (right side) -->
+      <div class="rubber-band" id="rubberBand">
+        <div class="rubber-max">MAX</div>
+        <div class="rubber-inner" id="rubberInner"></div>
+        <div class="rubber-min">MIN</div>
+      </div>
+
+      <!-- Zoom Control (Image Gallery mode) -->
+      <div class="zoom-control" id="zoomControl">
+        <button class="zoom-btn" id="zoomIn">
+          <i class="fa fa-plus"></i>
+        </button>
+        <div class="zoom-divider"></div>
+        <button class="zoom-btn" id="zoomOut">
+          <i class="fa fa-minus"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script type="module" src="/remote.js"></script>
+</body>
+
 </html>
