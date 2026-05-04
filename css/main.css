@@ -207,7 +207,7 @@ body {
   position: relative;
   display: flex;
   align-items: center;
-  gap: 0.9vw;
+  gap: 0.2vw;
   font-size: 18px;
   font-weight: 500;
 }
