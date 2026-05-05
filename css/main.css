@@ -1095,11 +1095,12 @@ body {
     width: 100%;
     font-size: 2.5vh;
     padding-bottom: 0.6vh;
-    margin-bottom: 3vh;
+    margin-bottom: 0.8vh;
     gap: 10px;
-    border-bottom: #ddd 0.5px solid;
+    border-bottom: 0.1px #344053 solid;
   }
   .project-status {
+    width: 10vw;
     order: 2;
     flex: 1;
     font-size: 12px;
