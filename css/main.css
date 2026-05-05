@@ -1150,6 +1150,7 @@ body {
     text-align: center;
     border-bottom: none;
     border-right: 1px solid var(--border-soft);
+    padding: 8px 15px;
   }
 
   .menu-item:last-child {
@@ -1323,7 +1324,7 @@ body {
     display: flex;
     justify-content: space-around;
     align-items: center;
-    padding: 8px 16px;
+    /* padding: 8px 16px; */
     background: var(--surface-base);
     border-bottom: 1px solid var(--border-default);
   }
