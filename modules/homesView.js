@@ -127,6 +127,8 @@ function renderBuildings(container, { getActive, navigate }) {
 }
 
 function renderTakeMeTo(container, { getActive, goBack }) {
+  zoomControl.style.display = "none"; // hide zoomControl
+  lookJoystick.style.display = "flex"; // show lookJoystick
   const rooms = uiState.data.takeMeTo;
   const activeRoom = getActive("room");
 
