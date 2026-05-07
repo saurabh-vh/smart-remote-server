@@ -19,6 +19,7 @@ const loc = uiState.ui.location;
 
 export function renderLocation() {
   const content = document.getElementById("contentArea");
+  document.getElementById("rubberBand").style.display = "flex";
 
   const locationData = uiState?.data?.locationData || [];
   const locationPlacesFind = uiState?.data?.locationPlacesFind || [];
