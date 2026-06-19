@@ -36,9 +36,22 @@ export function initRubberBand() {
 
     // console.log(`[Zoom] direction: ${rubberOffsetY < 0 ? "in" : "out"}, strength: ${strength}`,);
 
+    // This is main rubberband zoom / move logic
     socket.emit("remote_command", {
       code: remoteState.pairedCode,
       command: "zoom",
+      payload: {
+        type: "zoom",
+        action: "start",
+        direction: rubberOffsetY < 0 ? 1 : -1,
+        strength,
+      },
+    });
+
+    // image gallery drag 
+    socket.emit("remote_command", {
+      code: remoteState.pairedCode,
+      command: "images_drag",
       payload: {
         type: "zoom",
         action: "start",
