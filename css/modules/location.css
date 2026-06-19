@@ -106,7 +106,6 @@
 .location-direction-btn:active {
   transform: scale(0.98);
 }
-
 .input-wrapper {
   width: 100%;
   display: flex;
@@ -114,18 +113,11 @@
   justify-content: space-between;
   gap: 1vw;
   padding: 0.8vh 2vh 2vh;
-  position: sticky;
-  top: 0;
-  left: 0;
-  background: var(--surface-base);
-  z-index: 10;
 }
-
 .location-search-input {
   position: relative;
   width: 50%;
 }
-
 .location-search {
   width: 100%;
   border: 1px solid var(--input-border);
@@ -139,7 +131,6 @@
 .location-search:focus {
   border-color: var(--input-focus);
 }
-
 .autocomplete-dropdown {
   position: absolute;
   top: 100%;
@@ -182,7 +173,6 @@
   font-size: 12px;
   color: var(--text-muted);
 }
-
 .future-developments {
   position: relative;
   width: 50%;
@@ -190,7 +180,6 @@
   align-items: center;
   gap: 1vw;
 }
-
 .future-developments span {
   white-space: nowrap;
   font-size: 2vh;
@@ -202,7 +191,6 @@
   height: 3vh;
   cursor: pointer;
 }
-
 .future-dropdown {
   display: none;
   position: absolute;
@@ -239,7 +227,6 @@
 .future-option-item:hover {
   background: var(--surface-soft);
 }
-
 /* Responsive */
 @media (orientation: portrait) {
   .location-direction-btn {

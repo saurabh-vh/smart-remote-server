@@ -77,6 +77,9 @@ function showImageGalleryInContent() {
   document
     .querySelectorAll(".menu-item")
     .forEach((i) => i.classList.remove("active"));
+
+  document.getElementById("rubberBand").style.display = "none";
+  document.getElementById("zoomControl").style.display = "flex";
   controlRecenterBtn({ visible: false });
   document.getElementById("lookJoystick").style.display = "none";
 
@@ -144,7 +147,21 @@ function showImageGalleryInContent() {
     .querySelectorAll(".ellipsis-popup")
     .forEach((p) => p.classList.remove("open"));
 }
+document.getElementById("zoomIn").addEventListener("click", () => {
+  socket.emit("remote_command", {
+    code: remoteState.pairedCode,
+    command: "zoom_in",
+    payload: {},
+  });
+});
 
+document.getElementById("zoomOut").addEventListener("click", () => {
+  socket.emit("remote_command", {
+    code: remoteState.pairedCode,
+    command: "zoom_out",
+    payload: {},
+  });
+});
 function showScreenOverlay() {
   document.getElementById("screenBlurOverlay").classList.add("active");
   document.getElementById("screenBlurCard").classList.add("visible");

@@ -127,6 +127,7 @@ function renderBuildings(container, { getActive, navigate }) {
 }
 
 function renderTakeMeTo(container, { getActive, goBack }) {
+  zoomControl.style.display = "none"; // hide zoomControl
   lookJoystick.style.display = "flex"; // show lookJoystick
   const rooms = uiState.data.takeMeTo;
   const activeRoom = getActive("room");
@@ -165,7 +166,7 @@ function renderTakeMeTo(container, { getActive, goBack }) {
     const loading = document.createElement("div");
     loading.className = "empty";
     if (uiState.data.apartmentScreen === "Floor Plan") {
-      document.getElementById("rubberBand").style.display = "flex";
+      document.getElementById("zoomControl").style.display = "flex";
       document.getElementById("lookJoystick").style.display = "none";
       loading.innerHTML = `
       <div style="display:flex; flex-direction:column; align-items:center; gap:12px; padding:10vh;">

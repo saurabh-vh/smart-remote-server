@@ -98,6 +98,7 @@ function setMode(mode) {
 
   // Location tab hide
   if (uiState.section === "location") {
+    document.getElementById("zoomControl").style.display = "none";
     document.querySelector(".look-joystick").style.display = "none";
     document.querySelectorAll(".fa-person-swimming").forEach((el) => {
       el.style.display = "none";
@@ -121,6 +122,7 @@ function setMode(mode) {
   if (mode === "map") {
     // Map mode: show rubber band zoom, hide camera pan joystick
     document.getElementById("rubberBand").style.display = "flex";
+    document.getElementById("zoomControl").style.display = "none";
     document.querySelector(".look-joystick").style.display = "none";
     if (uiState.section !== "amenities") {
       controlRecenterBtn();
