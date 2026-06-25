@@ -11,7 +11,5 @@ export function applyJoystickLayout(leftSide) {
     lookJoystick.style.left = "3vw";
     rubberBand.style.right = "unset";
     rubberBand.style.left = "5vw";
-    zoomControl.style.right = "unset";
-    zoomControl.style.left = "5vw";
   }
 }
