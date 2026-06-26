@@ -19,8 +19,9 @@ import { remoteState, resetSectionState, uiState } from "./modules/state.js";
 import { initThemeToggle } from "./modules/themeToggle.js";
 import { controlRecenterBtn } from "./modules/uiHelpers.js";
 
+// when to use rubberband and joystick with which socket emit message
+window.sitePlan = false; 
 const appEl = document.getElementById("app");
-
 // Minimal flag to track whether right-side icons should be shown.
 let showRightIcons = true;
 

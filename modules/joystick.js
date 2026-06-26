@@ -35,16 +35,29 @@ export function initJoystick({ getCurrentMode }) {
         if (Math.abs(currentX) > 1 || Math.abs(currentY) > 1) {
           if (document.querySelector(".image-wrapper")) return;
 
-          socket.emit("remote_command", {
-            code: remoteState.pairedCode,
-            command: "joystick_move",
-            payload: {
-              type: "joystick",
-              action: "move",
-              x: parseFloat((currentX / 35).toFixed(2)),
-              y: parseFloat((-currentY / 35).toFixed(2)),
-            },
-          });
+          if (window.sitePlan === false) {
+            socket.emit("remote_command", {
+              code: remoteState.pairedCode,
+              command: "joystick_move",
+              payload: {
+                type: "joystick",
+                action: "move",
+                x: parseFloat((currentX / 35).toFixed(2)),
+                y: parseFloat((-currentY / 35).toFixed(2)),
+              },
+            });
+          } else {
+            socket.emit("remote_command", {
+              code: remoteState.pairedCode,
+              command: "joystick_move_siteplan",
+              payload: {
+                type: "joystick_move_siteplan",
+                action: "move",
+                x: parseFloat((currentX / 35).toFixed(2)),
+                y: parseFloat((-currentY / 35).toFixed(2)),
+              },
+            });
+          }
         }
       }
     }, 50);

@@ -152,6 +152,54 @@ function showScreenOverlay() {
     .querySelectorAll(".ellipsis-popup")
     .forEach((p) => p.classList.remove("open"));
 }
+function showScreenOverlaySitePlan() {
+  window.sitePlan = true;
+  const container = document.getElementById("homesView");
+  const previousContent = container.innerHTML;
+  document.getElementById("rubberBand").style.display = "flex";
+  document.getElementById("lookJoystick").style.display = "none";
+
+  container.innerHTML = `
+    <div style="
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:12px;
+      padding:10vh;
+    ">
+      <h1 style="
+        color:var(--text-primary);
+        border:none;
+        font-size:5.2vh;
+        font-weight:600;
+      ">
+        Showing On Screen
+      </h1>
+
+      <button class="screen-blur-close" id="sitePlanClose">
+        Close
+      </button>
+    </div>
+  `;
+
+  document.getElementById("sitePlanClose").onclick = () => {
+    socket.emit("remote_command", {
+      code: remoteState.pairedCode,
+      command: "closeModal",
+      payload: {},
+    });
+    window.sitePlan = false;
+    container.innerHTML = previousContent;
+
+    document.getElementById("rubberBand").style.display = "flex";
+    document.getElementById("lookJoystick").style.display = "none";
+    render();
+  };
+
+  document
+    .querySelectorAll(".ellipsis-popup")
+    .forEach((p) => p.classList.remove("open"));
+}
 
 export function hideScreenOverlay() {
   document.getElementById("screenBlurOverlay").classList.remove("active");
@@ -179,7 +227,7 @@ export const ACTION_CONFIG = {
   sitePlan: {
     command: "sitePlan",
     payload: () => ({}),
-    onTrigger: () => showScreenOverlay(),
+    onTrigger: () => showScreenOverlaySitePlan(),
   },
   imageGallery: {
     command: "imageGallery",
