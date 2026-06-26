@@ -1,3 +1,4 @@
+import { render } from "../remote.js";
 import { socket } from "./socket.js";
 import { remoteState, uiState } from "./state.js";
 import { controlRecenterBtn } from "./uiHelpers.js";

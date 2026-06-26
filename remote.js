@@ -443,7 +443,7 @@ socket.on("switch_success", ({ code, displayName, displays }) => {
      RENDER CONTROLLER
   ========================= */
 // Main render — decides which section to show
-function render() {
+export function render() {
   const content = document.getElementById("contentArea");
   content.innerHTML = "";
   if (uiState.section === "homes")
